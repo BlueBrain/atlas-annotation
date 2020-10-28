@@ -1,0 +1,7 @@
+[gerrit]
+host=bbpcode.epfl.ch
+port=22
+project=project/proj101/atlas_annotation
+defaultbranch=master
+defaultremote=origin
+
