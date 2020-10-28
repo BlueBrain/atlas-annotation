@@ -1,0 +1,14 @@
+version: "3.5"
+services:
+
+  deal:
+    build:
+      context: .
+      dockerfile: docker/deal.Dockerfile
+      args:
+        - BBP_HTTP_PROXY
+        - BBP_HTTPS_PROXY
+        - BBP_USERS
+    image: deal
+    container_name: deal
+
