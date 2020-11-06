@@ -85,12 +85,14 @@ def transform(image, nii_data, **ants_kwargs):
         Whenever the internal call of `ants.apply_transforms` fails.
     """
     # Reconstruct the transform. The `register` function asserts that the
-    # affine part is diag(-1, -1, 1, 1).
+    # affine part is always diag(-1, -1, 1, 1).
     affine = np.diag([-1., -1., 1., 1.])
     nii = nibabel.Nifti1Image(
         dataobj=nii_data,
         affine=affine,
     )
+    # This specifies that for each voxel the data contains a vector
+    nii.header.set_intent("vector")
 
     image = ants.from_numpy(image)
     with tempfile.TemporaryDirectory() as out_dir:
