@@ -12,9 +12,10 @@ def register(fixed, moving, **ants_kwargs):
     Parameters
     ----------
     fixed : np.ndarray
-        The fixed reference image.
+        The fixed reference image. Should have d-type float32.
     moving : np.ndarray
-        The moving image that will be registered to the fixed image.
+        The moving image that will be registered to the fixed image. Should
+        have d-type float32.
     ants_kwargs :
         Any additional registration parameters as specified in the
         documentation for `ants.registration`.
@@ -32,13 +33,19 @@ def register(fixed, moving, **ants_kwargs):
     Raises
     ------
     ValueError
-        If the shapes of the input images don't match.
+        If the shapes of the input images don't match or the d-type of
+        input images is not float32.
     RuntimeError
         If the resulting transform produced by ANTsPy doesn't have
         the expected form.
     """
     if fixed.shape != moving.shape:
         raise ValueError("Fixed and moving images have different shapes.")
+    if fixed.dtype != np.float32:
+        raise ValueError("D-type of fixed image is not float32")
+    if moving.dtype != np.float32:
+        raise ValueError("D-type of moving image is not float32")
+
     fixed = ants.from_numpy(fixed)
     moving = ants.from_numpy(moving)
     meta = ants.registration(fixed=fixed, moving=moving, **ants_kwargs)
@@ -81,9 +88,14 @@ def transform(image, nii_data, **ants_kwargs):
 
     Raises
     ------
+    ValueError
+        If d-type of the input image is not float32.
     RuntimeError
         Whenever the internal call of `ants.apply_transforms` fails.
     """
+    if image.dtype != np.float32:
+        raise ValueError("D-type of input image is not float32")
+
     # Reconstruct the transform. The `register` function asserts that the
     # affine part is always diag(-1, -1, 1, 1).
     affine = np.diag([-1., -1., 1., 1.])
