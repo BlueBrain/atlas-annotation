@@ -1,3 +1,4 @@
+"""Registration using ANTsPy."""
 import os
 import tempfile
 
@@ -58,7 +59,7 @@ def register(fixed, moving, **ants_kwargs):
             compose=out_prefix,
         )
         nii = nibabel.load(nii_file)
-        if not np.allclose(nii.affine, np.diag([-1., -1., 1, 1])):
+        if not np.allclose(nii.affine, np.diag([-1.0, -1.0, 1.0, 1.0])):
             raise RuntimeError("Unexpected affine part.")
         nii_data = nii.get_fdata()
 
@@ -80,7 +81,12 @@ def transform(image, nii_data, **ants_kwargs):
         any of these parameters:
             - fixed
             - moving
-            -transforms
+            - transforms
+        A useful parameter that can be specified in `ants_kwargs` is
+        `interpolator`. For transforming usual images it can be set
+        to "linear", while for annotation atlases the value "genericLabel"
+        is more appropriate. See the ANTsPy documentation for more details.
+
     Returns
     -------
     warped : np.ndarray
@@ -98,7 +104,7 @@ def transform(image, nii_data, **ants_kwargs):
 
     # Reconstruct the transform. The `register` function asserts that the
     # affine part is always diag(-1, -1, 1, 1).
-    affine = np.diag([-1., -1., 1., 1.])
+    affine = np.diag([-1.0, -1.0, 1.0, 1.0])
     nii = nibabel.Nifti1Image(
         dataobj=nii_data,
         affine=affine,

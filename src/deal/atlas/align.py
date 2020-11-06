@@ -109,8 +109,7 @@ def warp(atlas, df_per_slice):
     warped_atlas : np.ndarray
         The warped atlas.
     """
-    warped_atlas = np.stack([
-        df.warp_annotation(img)
-        for df, img in zip(df_per_slice, atlas)
-    ])
+    warped_atlas = np.stack(
+        [df.warp_annotation(img) for df, img in zip(df_per_slice, atlas)]
+    )
     return warped_atlas

@@ -1,0 +1,5 @@
+dvc[ssh]==1.9.1
+matplotlib==3.3.2
+numpy==1.19.4
+pynrrd==0.4.2
+warpme @ git+https://bbpcode.epfl.ch/code/a/ml/atlas_alignment

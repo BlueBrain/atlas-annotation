@@ -1,6 +1,5 @@
 from setuptools import find_packages, setup
 
-
 setup(
     name="deal",
     use_scm_version={
@@ -25,7 +24,8 @@ setup(
             "isort",
             "pydocstyle",
             "pytest",
-            "pytest-cov"
+            "pytest-cov",
+            "tox",
         ]
-    }
+    },
 )

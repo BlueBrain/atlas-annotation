@@ -6,4 +6,6 @@
 .python-version
 .env*
 !.env*.example
-
+.coverage
+htmlcov/
+__pycache__/
