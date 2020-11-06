@@ -124,3 +124,34 @@ def transform(image, nii_data, **ants_kwargs):
             return warped.numpy()
         else:
             raise RuntimeError("Could not apply the transformation")
+
+
+def stack_2d_transforms(nii_data_array):
+    """Convert a stack of 2D transforms into one 3D transform.
+
+    Instead of transforming moving images slice by slice the 2D
+    transformations can be stacked into a 3D transformation with
+    zero displacement along the z-axis and then applied directly
+    to the 3D volume of slices.
+
+    Parameters
+    ----------
+    nii_data_array : sequence of array_like
+        A sequence of transforms produced by registering a number of
+        2D slices.
+
+    Returns
+    -------
+    nii_data_3d : np.ndarray
+        The combined 3D transform.
+    """
+    # Stack 2d transforms: N x (h, w, 1, 1, 2) => (N, h, w, 1, 2)
+    nii_data_stacked = np.stack(nii_data_array).squeeze(3)
+
+    # Create a zero transform for the z-axis: (N, h, w, 1, 1)
+    nii_z = np.zeros_like(nii_data_stacked[..., :1])
+
+    # (N, h, w, 1, 1) + (N, h, w, 1, 2) = (N, h, w, 1, 3)
+    nii_data_3d = np.concatenate([nii_z, nii_data_stacked], -1)
+
+    return nii_data_3d
