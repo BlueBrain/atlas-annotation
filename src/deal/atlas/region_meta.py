@@ -106,7 +106,7 @@ class RegionMeta:
 
         Returns
         -------
-        meta : object
+        meta : RegionMeta
             The initialized instance of this class
         """
         meta = cls()

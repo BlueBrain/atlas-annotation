@@ -1,6 +1,7 @@
 .DS_Store
 /src/deal/version.py
 /venv/
+/experiments/results/
 *.egg-info/
 /.idea/
 .python-version
