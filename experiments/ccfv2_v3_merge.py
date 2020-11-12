@@ -25,7 +25,7 @@ def main(argv=None):
     """
     # Parse arguments and load the configuration
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config-file", default="config.toml")
+    parser.add_argument("-c", "--config-file", default="experiments/config.toml")
     parser.add_argument(
         "-e",
         "--experiment-name",
