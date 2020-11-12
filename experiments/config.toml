@@ -1,0 +1,8 @@
+# Sections in this files should match the script names
+
+[ccfv2_v3_merge]
+brain_regions = "data/annotation_atlas/brain_regions.json"
+atlas_v2 = "data/annotation_atlas/annotations_ccf_v2.nrrd"
+atlas_v3 = "data/annotation_atlas/annotations_ccf_v3.nrrd"
+atlas_v2_merged = "data/annotation_atlas/annotations_ccf_v2_merged.nrrd"
+atlas_v3_merged = "data/annotation_atlas/annotations_ccf_v3_merged.nrrd"
