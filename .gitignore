@@ -10,3 +10,5 @@
 .coverage
 htmlcov/
 __pycache__/
+.ipynb_checkpoints/
+.tox/

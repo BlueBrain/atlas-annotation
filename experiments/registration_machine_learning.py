@@ -1,4 +1,6 @@
-"""Goal: computing machine learning 2D registration between the reference and
+"""Machine learning registration.
+
+Goal: computing machine learning 2D registration between the reference and
 moving images/volumes.
 
 Assumptions:
@@ -22,25 +24,31 @@ from warpme.ml_utils import load_model, merge_global_local
 logger = logging.getLogger("Registration with Machine Learning")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--img-ref",
-                    default="data/average_template_25.npy",
-                    type=str,
-                    help="The image/volume of reference.")
-parser.add_argument("--img-mov",
-                    default="data/atlasVolume.npy",
-                    type=str,
-                    help="The moving image/volume (=to warp).")
-parser.add_argument("--out-file",
-                    default="experiments/results/registration_machine_learning.npy",
-                    type=str,
-                    help="The name of the file of the resulting warped image.")
+parser.add_argument(
+    "--img-ref",
+    default="data/average_template_25.npy",
+    type=str,
+    help="The image/volume of reference.",
+)
+parser.add_argument(
+    "--img-mov",
+    default="data/atlasVolume.npy",
+    type=str,
+    help="The moving image/volume (=to warp).",
+)
+parser.add_argument(
+    "--out-file",
+    default="experiments/results/registration_machine_learning.npy",
+    type=str,
+    help="The name of the file of the resulting warped image.",
+)
 args = parser.parse_args()
 
 
 def main():
-    """Computes machine learning registration. """
+    """Compute machine learning registration."""
     logger.info("Loading Images...")
-    if pathlib.Path(args.img_ref).suffix == '.nrrd':
+    if pathlib.Path(args.img_ref).suffix == ".nrrd":
         img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
         img_mov, _ = nrrd.read(pathlib.Path(args.img_mov))
     else:
@@ -57,10 +65,14 @@ def main():
         img_mov = np.expand_dims(img_mov, axis=0)
 
     logger.info("Loading ML models...")
-    model_global = load_model('/gpfs/bbp.cscs.ch/project/proj101/'
-                              'pretrained_models/global/calm_camel/calm_camel.h5')
-    model_local = load_model('/gpfs/bbp.cscs.ch/project/proj101/'
-                             'pretrained_models/local/cute_cat/cute_cat.h5')
+    model_global = load_model(
+        "/gpfs/bbp.cscs.ch/project/proj101/"
+        "pretrained_models/global/calm_camel/calm_camel.h5"
+    )
+    model_local = load_model(
+        "/gpfs/bbp.cscs.ch/project/proj101/"
+        "pretrained_models/local/cute_cat/cute_cat.h5"
+    )
     model_merged = merge_global_local(model_global, model_local)
 
     logger.info("Registration...")
@@ -70,7 +82,9 @@ def main():
     img_regs, delta_xys = [], []
     logger.info(f"Shape of the ML input: {ml_input.shape}")
     for dim, x in tqdm(enumerate(ml_input)):
-        img_reg, delta_xy = model_merged.predict(np.expand_dims(x, axis=0), batch_size=1)
+        img_reg, delta_xy = model_merged.predict(
+            np.expand_dims(x, axis=0), batch_size=1
+        )
         img_regs.append(img_reg)
         delta_xys.append(delta_xy)
 

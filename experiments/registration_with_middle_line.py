@@ -23,25 +23,31 @@ from deal.ants import register
 logger = logging.getLogger("Registration with middle line")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--img-ref",
-                    default="data/average_template_25.npy",
-                    type=str,
-                    help="The image/volume of reference.")
-parser.add_argument("--img-mov",
-                    default="data/atlasVolume.npy",
-                    type=str,
-                    help="The moving image/volume (=to warp).")
-parser.add_argument("--out-file",
-                    default="experiments/results/registration_with_middle_line.npy",
-                    type=str,
-                    help="The name of the file of the resulting warped image.")
+parser.add_argument(
+    "--img-ref",
+    default="data/average_template_25.npy",
+    type=str,
+    help="The image/volume of reference.",
+)
+parser.add_argument(
+    "--img-mov",
+    default="data/atlasVolume.npy",
+    type=str,
+    help="The moving image/volume (=to warp).",
+)
+parser.add_argument(
+    "--out-file",
+    default="experiments/results/registration_with_middle_line.npy",
+    type=str,
+    help="The name of the file of the resulting warped image.",
+)
 args = parser.parse_args()
 
 
 def main():
-    """Computing ANTsPY registration after creating a middle line."""
+    """Compute the ANTsPY registration after creating a middle line."""
     logger.info("Loading Images...")
-    if pathlib.Path(args.img_ref).suffix == '.nrrd':
+    if pathlib.Path(args.img_ref).suffix == ".nrrd":
         img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
         img_mov, _ = nrrd.read(pathlib.Path(args.img_mov))
     else:
@@ -61,7 +67,9 @@ def main():
     registered_antspy_middle_bar = np.zeros_like(img_ref, dtype=np.float32)
     dfs = []
     n_img, *_ = img_ref.shape
-    for i, (current_ref, current_mov) in tqdm(enumerate(zip(img_ref, img_mov)), total=n_img):
+    for i, (current_ref, current_mov) in tqdm(
+        enumerate(zip(img_ref, img_mov)), total=n_img
+    ):
         h, w = current_ref.shape
 
         fixed_img_bar = current_ref.copy().astype(np.float32)
@@ -72,8 +80,9 @@ def main():
 
         df = register(fixed_img_bar, moving_img_bar)
         df = np.squeeze(df)
-        registered_antspy_middle_bar[i, :, :] = DisplacementField(df[:, :, 1], df[:, :, 0]).warp(
-            current_mov)
+        registered_antspy_middle_bar[i, :, :] = DisplacementField(
+            df[:, :, 1], df[:, :, 0]
+        ).warp(current_mov)
         dfs.append(df)
 
     out_path = pathlib.Path(args.out_file)

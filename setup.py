@@ -1,3 +1,4 @@
+"""The setup script."""
 from setuptools import find_packages, setup
 
 setup(
@@ -19,6 +20,7 @@ setup(
     ],
     extras_require={
         "dev": [
+            "bandit",
             "black",
             "flake8",
             "isort",
