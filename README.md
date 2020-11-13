@@ -8,13 +8,24 @@ as part of the `warpme`/`atlas_alignment` dependency, it is necessary to use pyt
 
 To install run
 ```shell script
-pip install .
+$ pip install .
+```
+
+If you are working on the BB5 please also run the following command:
+```shell script
+$ pip install /gpfs/bbp.cscs.ch/home/krepl/dev/ANTsPy/old_builds/gcc_6.4_jorge/antspyx-0.2.0-cp36-cp36m-linux_x86_64.whl
 ```
 
 Data
 ----
 The data for this project is managed using the DVC tool. It is automatically
 installed together with this library.
+
+If you are working on the BB5 please run the following commands first:
+```shell script
+$ cd data
+$ dvc remote add --local gpfs /gpfs/bbp.cscs.ch/data/project/proj101/dvc/remotes/atlas_annotation
+```
 
 All data is stored in the `data` directory. DVC is similar to git. To pull all original
 data from the remote run

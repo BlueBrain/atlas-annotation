@@ -16,7 +16,7 @@ setup(
         "matplotlib",
         "numpy",
         "pynrrd",
-        "warpme @ git+https://bbpcode.epfl.ch/code/a/ml/atlas_alignment",
+        "warpme[tf] @ git+https://bbpcode.epfl.ch/code/a/ml/atlas_alignment",
     ],
     extras_require={
         "dev": [
