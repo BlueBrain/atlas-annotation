@@ -223,8 +223,8 @@ def main():
     for i in range(img_ref.shape[0]):
         iou_baseline.append(iou_score(img_ref[i] > threshold, img_mov[i] > threshold))
         iou_results.append(iou_score(img_ref[i] > threshold, warped_img[i] > threshold))
-    all_metrics["IOU"]["moving"] = iou_baseline
-    all_metrics["IOU"][args.experiment_name] = iou_results
+    all_metrics["iou"]["moving"] = iou_baseline
+    all_metrics["iou"][args.experiment_name] = iou_results
     logger.info(f"Baseline IOU mean: {np.mean(all_metrics['iou']['moving'])}.")
     logger.info(
         f"Results IOU mean: {np.mean(all_metrics['iou'][args.experiment_name])}."

@@ -2,6 +2,7 @@
 /src/deal/version.py
 /venv/
 /experiments/results/
+/results/
 *.egg-info/
 /.idea/
 .python-version

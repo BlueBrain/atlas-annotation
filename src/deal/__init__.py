@@ -2,7 +2,7 @@
 import numpy as np
 from warpme.base import DisplacementField
 
-from .version import __version__  # noqa
+from .version import __version__  # noqa: F401
 
 
 def dfs_to_deltas(dfs):
@@ -69,3 +69,26 @@ def load_dfs(file):
     deltas = np.load(file)
     dfs = deltas_to_dfs(deltas)
     return dfs
+
+
+def load_volume(volume_path, normalize=True):
+    """Load a brain volume from disk.
+
+    Parameters
+    ----------
+    volume_path : str or pathlib.Path
+        The brain volume to load.
+    normalize : bool
+        If True then all values are rescaled to have the maximum
+        equal to 1.
+
+    Returns
+    -------
+    volume : np.ndarray
+        The brain volume.
+    """
+    volume = np.load(volume_path).astype(np.float32)
+    if normalize and volume.max() > 1.0:
+        volume /= volume.max()
+
+    return volume

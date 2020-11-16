@@ -27,7 +27,7 @@ logger = logging.getLogger("Displacement Analysis")
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--df",
-    default="experiments/results/df_registration_changing_labels.npy",
+    default="experiments/results/registration_changing_labels_df.npy",
     type=str,
     help="The displacement to analyze.",
 )

@@ -11,7 +11,7 @@ import toml
 
 import deal.atlas.merge as utils
 
-logger = logging.getLogger("v2_v3_merge")
+logger = logging.getLogger("ccf-v2-v3-merge")
 
 
 def main(argv=None):
@@ -46,14 +46,13 @@ def main(argv=None):
         experiment_name = args.experiment_name
 
     with open(config_file) as f:
-        config_all = toml.load(f)
-        config = config_all[experiment_name]
+        config = toml.load(f)
 
-    brain_regions_path = config["brain_regions"]
-    ccf_v2_path = config["atlas_v2"]
-    ccf_v3_path = config["atlas_v3"]
-    ccf_v2_merged_path = config["atlas_v2_merged"]
-    ccf_v3_merged_path = config["atlas_v3_merged"]
+    brain_regions_path = config["data"]["brain_regions"]
+    ccf_v2_path = config["data"]["atlas_v2"]
+    ccf_v3_path = config["data"]["atlas_v3"]
+    ccf_v2_merged_path = config[experiment_name]["ccf_v2_merged"]
+    ccf_v3_merged_path = config[experiment_name]["ccf_v3_merged"]
 
     logger.info(f"Reading brain regions from {brain_regions_path}")
     with open(brain_regions_path, "r") as f:
