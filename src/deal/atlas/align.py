@@ -1,4 +1,6 @@
 """Functions related to atlas alignment."""
+import warnings
+
 import numpy as np
 
 
@@ -91,6 +93,49 @@ def get_misalignment(data_1, data_2, fg_only=False):
     misalignment = np.sum(unequal) / (unequal.size or 1)
 
     return misalignment
+
+
+def specific_label_iou(data_1, data_2, specific_label):
+    """Compute intersection over union for a given label.
+
+    Parameters
+    ----------
+    data_1 : np.ndarray
+        The first annotation data. Can have any shape.
+    data_2 : np.ndarray
+        The second annotation data. Shape should match that of `data_1`.
+    specific_label : int
+        Label for which it is wanted to compute the IOU.
+
+    Returns
+    -------
+    iou : float
+        The IOU for the given label.
+
+    Raises
+    ------
+    ValueError
+        If the shapes of the data don't match.
+    """
+    if data_1.shape != data_2.shape:
+        raise ValueError("Data have to be of the same shape")
+
+    data_1 = data_1 == specific_label
+    data_2 = data_2 == specific_label
+
+    intersection = np.logical_and(data_1, data_2)
+    union = np.logical_or(data_1, data_2)
+
+    if union.sum() == 0:
+        iou = np.nan
+        warnings.warn(
+            f"It seems the specific label "
+            f"{specific_label} does not exist on the input images."
+        )
+    else:
+        iou = intersection.sum() / union.sum()
+
+    return iou
 
 
 def warp(atlas, df_per_slice):

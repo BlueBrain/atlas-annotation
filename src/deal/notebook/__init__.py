@@ -1,7 +1,9 @@
 """Notebook utils."""
 import sys
 
+from matplotlib import patches
 import matplotlib.pyplot as plt
+import numpy as np
 
 from deal.atlas import get_misalignment
 
@@ -82,3 +84,38 @@ def image_grid(image_dict, n_columns=2, plot_width=12, fig_title=None, save_as=N
 
     if save_as is not None:
         fig.savefig(save_as)
+
+
+def create_legend_handles(imgs, region_meta, color_map):
+    """Create the handles of a legend for given images.
+
+    Note that you can plot those handles by doing:
+    fig.legend(handles=handles)
+    Parameters
+    ----------
+    imgs: list of np.ndarray
+        List of all the images containing the labels to legend.
+    region_meta: RegionMeta
+        Region Meta containing all the information concerning the labels.
+    color_map: dict
+        Conversion between region labels and the color in the image.
+
+    Returns
+    -------
+    handles: list of matplotlib.patches.Patch
+        List of patches containing the color of the different labels,
+        the value of the label and the name of the region.
+    """
+    union_set = set()
+    for img in imgs:
+        unique_val = np.unique(img)
+        union_set = set(union_set).union(set(unique_val))
+    union_list = list(union_set)
+    handles = []
+    for label in union_list:
+        patch = patches.Patch(
+            color=(color_map[label] / 255), label=f"{label} - {region_meta.name[label]}"
+        )
+        handles.append(patch)
+
+    return handles
