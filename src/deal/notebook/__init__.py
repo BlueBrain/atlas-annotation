@@ -2,6 +2,7 @@
 import sys
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from deal.atlas import get_misalignment
 
@@ -57,7 +58,11 @@ def image_grid(image_dict, n_columns=2, plot_width=12, fig_title=None, save_as=N
         n_rows += 1
 
     # Compute the size of individual axes
-    max_hw_ratio = max(img.shape[0] / img.shape[1] for img in image_dict.values())
+    max_hw_ratio = max(
+        img.shape[0] / img.shape[1]
+        for img in image_dict.values()
+        if img is not None
+    )
     ax_width = plot_width / n_columns
     ax_height = max_hw_ratio * ax_width
 
@@ -69,11 +74,18 @@ def image_grid(image_dict, n_columns=2, plot_width=12, fig_title=None, save_as=N
         constrained_layout=True,
     )
 
+    # If there's only one plot then axs isn't an ndarray any more.
+    # We need to fix that.
+    if n_columns * n_rows == 1:
+        axs = np.ndarray(axs)
+
     # Don't plot the axes
     for ax in axs.ravel():
         ax.set_axis_off()
 
     for ax, (title, img) in zip(axs.ravel(), image_dict.items()):
+        if img is None:
+            continue
         ax.set_title(title)
         ax.imshow(img)
 
