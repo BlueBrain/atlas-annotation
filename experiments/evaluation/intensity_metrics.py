@@ -1,5 +1,13 @@
-"""Computation of different metrics.
+"""Computation of different metrics."""
+import argparse
+import logging
+import pathlib
+import pickle
+import sys
 
+logger = logging.getLogger("Computation Metrics")
+
+script_info = """
 Goal: Computing different metrics (image similarities and intersection over union).
 
 The metrics are computed:
@@ -12,10 +20,10 @@ Regarding the image similarities metrics:
 - The metrics are computed on the foreground part of the image (mask computed
   thanks the reference images) and saved under `metricname_masked`.
 
-An intersection-over-union is also computed. To that end, a segmentation map
+An intersection-over-union is also computed. To this end, a segmentation map
 foreground/background is constructed based on every input image and IOU is
 computed on those segmentation maps. The results are saved in a dictionary
-with structure:
+with the following structure:
 {
 metric_1: {
     'moving': [],
@@ -43,54 +51,6 @@ Steps:
 - Computing the IOU score for the foreground/background partition (check if
   the borders are aligned).
 """
-import argparse
-import logging
-import pathlib
-import pickle
-
-import numpy as np
-from tqdm import tqdm
-from warpme import metrics
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--img-ref",
-    default="data/average_template_25.npy",
-    type=str,
-    help="The image/volume of reference. It is assuming the format of the "
-    "reference image is .npy",
-)
-parser.add_argument(
-    "--img-mov",
-    default="data/atlasVolume.npy",
-    type=str,
-    help="The moving image/volume (=to warp). It is assuming the format of the "
-    "moving image is .npy",
-)
-parser.add_argument(
-    "--warped-img",
-    default="experiments/results/registration_with_middle_line.npy",
-    type=str,
-    help="The warped image/volume name. It is assuming the format of the "
-    "warped image is .npy.",
-)
-parser.add_argument(
-    "--experiment-name",
-    default="antspy_middle_bar",
-    type=str,
-    help="The name under what the metrics are going to be saved.",
-)
-parser.add_argument(
-    "--out-file",
-    default="experiments/results/metrics.pickle",
-    type=str,
-    help="The name of the file with all the metrics values. The algorithm is "
-    "assuming that the file is lying under results folder "
-    "and has .pickle as extension.",
-)
-args = parser.parse_args()
-
-logger = logging.getLogger("Computation Metrics")
 
 
 def iou_score(mask_true, mask_pred):
@@ -108,6 +68,8 @@ def iou_score(mask_true, mask_pred):
     iou : float
         The IOU.
     """
+    import numpy as np
+
     intersection = np.logical_and(mask_true, mask_pred)
     union = np.logical_or(mask_true, mask_pred)
 
@@ -115,8 +77,66 @@ def iou_score(mask_true, mask_pred):
     return iou
 
 
-def main():
-    """Compute the different metrics."""
+def main(argv=None):
+    """Run the main script.
+
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--img-ref",
+        default="data/average_template_25.npy",
+        type=str,
+        help="The image/volume of reference. It is assuming the format of the "
+        "reference image is .npy",
+    )
+    parser.add_argument(
+        "--img-mov",
+        default="data/atlasVolume.npy",
+        type=str,
+        help=(
+            "The moving image/volume (=to warp). It is assuming the format "
+            "of the moving image is .npy"
+        ),
+    )
+    parser.add_argument(
+        "--warped-img",
+        default="results/registration_with_middle_line.npy",
+        type=str,
+        help=(
+            "The warped image/volume name. It is assuming the format of the "
+            "warped image is .npy."
+        ),
+    )
+    parser.add_argument(
+        "--experiment-name",
+        default="antspy_middle_bar",
+        type=str,
+        help="The name under what the metrics are going to be saved.",
+    )
+    parser.add_argument(
+        "--out-file",
+        default="results/metrics.pickle",
+        type=str,
+        help="The name of the file with all the metrics values. The algorithm is "
+        "assuming that the file is lying under results folder "
+        "and has .pickle as extension.",
+    )
+    args = parser.parse_args(argv)
+
+    logger.info("Loading libraries")
+    import numpy as np
+    from tqdm import tqdm
+    from warpme import metrics
+
     logger.info("Loading Images...")
     logger.info(f"Reference Image: {args.img_ref}")
     logger.info(f"Moving Image: {args.img_mov}")
@@ -245,4 +265,4 @@ if __name__ == "__main__":
         format="%(asctime)s || %(levelname)s || %(name)s || %(message)s",
         datefmt="%H:%M:%S",
     )
-    main()
+    sys.exit(main())

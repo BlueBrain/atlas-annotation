@@ -1,5 +1,12 @@
-"""Machine learning registration.
+"""Machine learning registration."""
+import argparse
+import logging
+import pathlib
+import sys
 
+logger = logging.getLogger("Registration with Machine Learning")
+
+script_info = """
 Goal: computing machine learning 2D registration between the reference and
 moving images/volumes.
 
@@ -12,41 +19,48 @@ Steps:
 - Applying resulting transformations to the original moving image.
 - Saving results.
 """
-import argparse
-import logging
-import pathlib
-
-import nrrd
-import numpy as np
-from tqdm import tqdm
-from warpme.ml_utils import load_model, merge_global_local
-
-logger = logging.getLogger("Registration with Machine Learning")
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--img-ref",
-    default="data/average_template_25.npy",
-    type=str,
-    help="The image/volume of reference.",
-)
-parser.add_argument(
-    "--img-mov",
-    default="data/atlasVolume.npy",
-    type=str,
-    help="The moving image/volume (=to warp).",
-)
-parser.add_argument(
-    "--out-file",
-    default="experiments/results/registration_machine_learning.npy",
-    type=str,
-    help="The name of the file of the resulting warped image.",
-)
-args = parser.parse_args()
 
 
-def main():
-    """Compute machine learning registration."""
+def main(argv=None):
+    """Run the main script.
+
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--img-ref",
+        default="data/average_template_25.npy",
+        type=str,
+        help="The image/volume of reference.",
+    )
+    parser.add_argument(
+        "--img-mov",
+        default="data/atlasVolume.npy",
+        type=str,
+        help="The moving image/volume (=to warp).",
+    )
+    parser.add_argument(
+        "--out-file",
+        default="results/registration_machine_learning.npy",
+        type=str,
+        help="The name of the file of the resulting warped image.",
+    )
+    args = parser.parse_args(argv)
+
+    logger.info("Loading libraries")
+    import nrrd
+    import numpy as np
+    from tqdm import tqdm
+    from warpme.ml_utils import load_model, merge_global_local
+
     logger.info("Loading Images...")
     if pathlib.Path(args.img_ref).suffix == ".nrrd":
         img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
@@ -105,4 +119,4 @@ if __name__ == "__main__":
         format="%(asctime)s || %(levelname)s || %(name)s || %(message)s",
         datefmt="%H:%M:%S",
     )
-    main()
+    sys.exit(main())

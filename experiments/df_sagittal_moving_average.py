@@ -1,13 +1,44 @@
 """Apply moving average to stacks of displacement fields."""
+import argparse
 import logging
 import pathlib
 import sys
 
 logger = logging.getLogger("sagittal-avg")
 
+script_info = """
+Apply a moving average to all registered displacement fields.
 
-def main():
-    """Run the script."""
+This script will load all displacement fields registered in the
+displacement field output folder (usually results/registration)
+and apply the three slightly different strategies of a moving average
+along the sagittal axis:
+- Flat/uniform average
+- Weighted average with Gaussian weights
+- Weighted average with custom weights
+
+The resulting averaged displacement fields are stored in the same location
+as the input displacement fields with the file name extended by the
+averaging method used.
+"""
+
+
+def main(argv=None):
+    """Run the main script.
+
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.parse_args(argv)
+
     logger.info("Loading libraries")
     import numpy as np
     import toml

@@ -1,5 +1,12 @@
-"""Registration with alternative region labels.
+"""Registration with alternative region labels."""
+import argparse
+import logging
+import pathlib
+import sys
 
+logger = logging.getLogger("Registration with changed labels")
+
+script_info = """
 Goal: Computing the registration between two images/volumes after switching
 randomly the labels.
 
@@ -27,46 +34,53 @@ Steps:
 - Computation of baseline misalignement (between inputs) and the results
   misalignment (between input reference and warped moving image).
 """
-import argparse
-import logging
-import pathlib
-
-import nrrd
-import numpy as np
-from tqdm import tqdm
-
-from deal.ants import register, transform
-from deal.atlas import get_misalignment
-
-logger = logging.getLogger("Registration with changed labels")
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--img-ref",
-    default="data/annotation_atlas/annotations_ccf_v3_merged.nrrd",
-    type=str,
-    help="The annotation image/volume of reference.",
-)
-parser.add_argument(
-    "--img-mov",
-    default="data/annotation_atlas/annotations_ccf_v2_merged.nrrd",
-    type=str,
-    help="The annotation image/volume to warp.",
-)
-parser.add_argument(
-    "--seed", default=1234, type=int, help="The seed for the change of labels."
-)
-parser.add_argument(
-    "--out-file",
-    default="experiments/results/registration_changing_labels.npy",
-    type=str,
-    help="The name of the file of the resulting warped image.",
-)
-args = parser.parse_args()
 
 
-def main():
-    """Compute ANTsPY Registration after changing the labels."""
+def main(argv=None):
+    """Run the main script.
+
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--img-ref",
+        default="results/annotation_atlas/ccf_v3_merged.nrrd",
+        type=str,
+        help="The annotation image/volume of reference.",
+    )
+    parser.add_argument(
+        "--img-mov",
+        default="results/annotation_atlas/ccf_v2_merged.nrrd",
+        type=str,
+        help="The annotation image/volume to warp.",
+    )
+    parser.add_argument(
+        "--seed", default=1234, type=int, help="The seed for the change of labels."
+    )
+    parser.add_argument(
+        "--out-file",
+        default="results/registration_changing_labels.npy",
+        type=str,
+        help="The name of the file of the resulting warped image.",
+    )
+    args = parser.parse_args(argv)
+
+    logger.info("Loading libraries")
+    import nrrd
+    import numpy as np
+    from tqdm import tqdm
+
+    from deal.ants import register, transform
+    from deal.atlas import get_misalignment
+
     logger.info("Loading Images...")
     if pathlib.Path(args.img_ref).suffix == ".nrrd":
         img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
@@ -134,4 +148,4 @@ if __name__ == "__main__":
         format="%(asctime)s || %(levelname)s || %(name)s || %(message)s",
         datefmt="%H:%M:%S",
     )
-    main()
+    sys.exit(main())

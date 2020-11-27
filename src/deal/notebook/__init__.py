@@ -59,9 +59,7 @@ def image_grid(image_dict, n_columns=2, plot_width=12, fig_title=None, save_as=N
 
     # Compute the size of individual axes
     max_hw_ratio = max(
-        img.shape[0] / img.shape[1]
-        for img in image_dict.values()
-        if img is not None
+        img.shape[0] / img.shape[1] for img in image_dict.values() if img is not None
     )
     ax_width = plot_width / n_columns
     ax_height = max_hw_ratio * ax_width

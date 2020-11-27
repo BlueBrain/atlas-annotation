@@ -1,10 +1,19 @@
-"""Goal: Smoothing displacement field along the sagittal axis.
+"""Smoothen displacement fields along the sagittal axis."""
+import argparse
+import logging
+import pathlib
+import sys
+
+logger = logging.getLogger("Displacement Smoothing")
+
+script_info = """
+Goal: Smoothing displacement field along the sagittal axis.
 
 Assumptions:
 - Reference and Moving input have to be volumes.
 - The input volumes have the same shape (n_slices, height, width).
 - A displacement field path has to be specified. (from 2d registration).
-It needs to have (n_slices, 2, height, width) as dimension.
+It needs to have (n_slices, 2, height, width) as dimensions.
 
 Steps:
 - Loading input volumes.
@@ -18,36 +27,44 @@ Steps:
   images.
 - Saving the results.
 """
-import argparse
-import logging
-import pathlib
-
-import nrrd
-import numpy as np
-from scipy import ndimage
-
-from deal import deltas_to_dfs, safe_dfs
-
-logger = logging.getLogger("Displacement Smoothing")
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--img-mov",
-    default="data/atlasVolume.npy",
-    type=str,
-    help="The annotation image/volume to warp.",
-)
-parser.add_argument(
-    "--df",
-    default="experiments/results/registration_machine_learning_df.npy",
-    type=str,
-    help="The name of the file with the displacement field.",
-)
-args = parser.parse_args()
 
 
-def main():
-    """Smooths displacement field along sagittal axis."""
+def main(argv=None):
+    """Run the main script.
+
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.parse_args(argv)
+    parser.add_argument(
+        "--img-mov",
+        default="data/atlasVolume.npy",
+        type=str,
+        help="The annotation image/volume to warp.",
+    )
+    parser.add_argument(
+        "--df",
+        default="results/registration_machine_learning_df.npy",
+        type=str,
+        help="The name of the file with the displacement field.",
+    )
+    args = parser.parse_args(argv)
+
+    logger.info("Loading libraries")
+    import nrrd
+    import numpy as np
+    from scipy import ndimage
+
+    from deal import deltas_to_dfs, safe_dfs
+
     logger.info("Loading Images...")
     path_mov = pathlib.Path(args.img_mov)
     if path_mov.suffix == ".nrrd":
@@ -89,7 +106,7 @@ def main():
     img_correlate = np.stack([df.warp(img) for df, img in zip(dfs_correlate, img_mov)])
 
     logger.info("Saving registered images")
-    out_path = pathlib.Path("experiments/results/")
+    out_path = pathlib.Path("results")
     if not out_path.exists():
         pathlib.Path.mkdir(out_path, parents=True)
     np.save(out_path / f"{path_mov.stem}_uniform_smoothing.npy", img_uniform)
@@ -107,4 +124,4 @@ if __name__ == "__main__":
         format="%(asctime)s || %(levelname)s || %(name)s || %(message)s",
         datefmt="%H:%M:%S",
     )
-    main()
+    sys.exit(main())
