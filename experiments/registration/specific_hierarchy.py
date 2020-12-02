@@ -1,4 +1,14 @@
-"""Goal: Computing registration at an intermediate level of hierarchy.
+"""Compute registration at intermediate hierarchy levels."""
+import argparse
+import json
+import logging
+import pathlib
+import sys
+
+logger = logging.getLogger("Registration with specific hierarchy")
+
+script_info = """
+Goal: Computing registration at an intermediate level of hierarchy.
 
 Assumptions:
 - Input images/volumes have to have the same shape.
@@ -22,59 +32,66 @@ Steps:
   images/volumes) and the results misalignment (between input reference and
   warping moving) at every level of the hierarchy.
 """
-import argparse
-import json
-import logging
-import pathlib
-
-import nrrd
-import numpy as np
-
-from deal.ants import register, transform
-from deal.atlas import RegionMeta, unfurl_regions
-from deal.notebook import print_misalignments
-
-logger = logging.getLogger("Registration with specific hierarchy")
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--img-ref",
-    default="data/annotation_atlas/annotations_ccf_v3_merged.nrrd",
-    type=str,
-    help="The annotation image/volume of reference.",
-)
-parser.add_argument(
-    "--img-mov",
-    default="data/annotation_atlas/annotations_ccf_v2_merged.nrrd",
-    type=str,
-    help="The annotation image/volume to warp.",
-)
-parser.add_argument(
-    "--brain-regions",
-    default="data/annotation_atlas/brain_regions.json",
-    type=str,
-    help="Path to file containing brain regions hierarchy.",
-)
-parser.add_argument(
-    "--hierarchy",
-    default=0,
-    type=int,
-    help="Hierarchy at which to apply the registration algorithm. 0 meaning the "
-    "most detailed brain regions decomposition, 10 the distinction "
-    "background/foreground.",
-)
-parser.add_argument(
-    "--out-file",
-    default="experiments/results/registration_specific_hierarchy.npy",
-    type=str,
-    help="The name of the file of the resulting warped image.",
-)
-args = parser.parse_args()
+def main(argv=None):
+    """Run the main script.
 
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--img-ref",
+        default="results/annotation_atlas/ccf_v3_merged.nrrd",
+        type=str,
+        help="The annotation image/volume of reference.",
+    )
+    parser.add_argument(
+        "--img-mov",
+        default="results/annotation_atlas/ccf_v2_merged.nrrd",
+        type=str,
+        help="The annotation image/volume to warp.",
+    )
+    parser.add_argument(
+        "--brain-regions",
+        default="data/annotation_atlas/brain_regions.json",
+        type=str,
+        help="Path to file containing brain regions hierarchy.",
+    )
+    parser.add_argument(
+        "--hierarchy",
+        default=0,
+        type=int,
+        help=(
+            "Hierarchy at which to apply the registration algorithm. "
+            "0 meaning the most detailed brain region decomposition, "
+            "the so-called leaf regions, 10 the distinction background/foreground."
+        ),
+    )
+    parser.add_argument(
+        "--out-file",
+        default="results/registration_specific_hierarchy.npy",
+        type=str,
+        help="The name of the file of the resulting warped image.",
+    )
+    args = parser.parse_args(argv)
 
-def main():
-    """Compute registration at specific hierarchy."""
+    logger.info("Loading libraries")
+    import nrrd
+    import numpy as np
+
+    from deal.ants import register, transform
+    from deal.atlas import RegionMeta, unfurl_regions
+    from deal.notebook import print_misalignments
+
     logger.info("Loading Images...")
     img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
     img_mov, _ = nrrd.read(pathlib.Path(args.img_mov))
@@ -132,4 +149,4 @@ if __name__ == "__main__":
         format="%(asctime)s || %(levelname)s || %(name)s || %(message)s",
         datefmt="%H:%M:%S",
     )
-    main()
+    sys.exit(main())

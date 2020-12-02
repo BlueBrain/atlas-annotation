@@ -5,13 +5,26 @@ import logging
 import pathlib
 import sys
 
-import nrrd
-import numpy as np
-import toml
-
-import deal.atlas.merge as utils
-
 logger = logging.getLogger("ccf-v2-v3-merge")
+
+script_info = """
+This is the original annotation atlas merging script provided by Dimitri.
+
+The original CCFv2 and CCFv3 atlases differ significantly both in the
+region IDs used, as well as in the subdivision into subregions. This
+script tries to solve both issues by creating merged versions of both
+the CCFv2 and CCFv3 atlases.
+
+In the merged atlases region hierarchies are assimilated, and the region
+IDs are matched as well as possible. For example, if a region is missing
+from either atlases, the script will assimilate the corresponding voxels
+into the closest anatomical region. Refer to Dimitri for more details.
+
+This script reads its configuration from the experiments/config.toml file.
+The input atlases and brain region information paths are specified in the
+"data" section, the output paths are specified in the section named by
+the file name of this script.
+"""
 
 
 def main(argv=None):
@@ -23,31 +36,22 @@ def main(argv=None):
         The argument vector. If None then the arguments are parsed from
         the command line directly.
     """
-    # Parse arguments and load the configuration
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config-file", default="experiments/config.toml")
-    parser.add_argument(
-        "-e",
-        "--experiment-name",
-        help=(
-            "The name of the experiment. Usually this should be"
-            "left empty, in which case the name of the script "
-            "file will be used as the experiment name. This "
-            "should normally automatically match the correct "
-            "section in the config.toml file, unless the script "
-            "file and/or the configuration section was renamed."
-        ),
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    args = parser.parse_args(argv)
-    config_file = args.config_file
-    if args.experiment_name is None:
-        experiment_name = pathlib.Path(__file__).stem
-    else:
-        experiment_name = args.experiment_name
+    parser.parse_args(argv)
 
+    logger.info("Load libraries")
+    import nrrd
+    import toml
+
+    logger.info("Loading configuration")
+    config_file = pathlib.Path("experiments/config.toml")
+    experiment_name = pathlib.Path(__file__).stem
     with open(config_file) as f:
         config = toml.load(f)
-
     brain_regions_path = config["data"]["brain_regions"]
     ccf_v2_path = config["data"]["atlas_v2"]
     ccf_v3_path = config["data"]["atlas_v3"]
@@ -71,12 +75,14 @@ def main(argv=None):
     )
 
     logger.info(f"Writing merged v2 atlas to {ccf_v2_merged_path}")
+    ccf_v2_merged_path.parent.mkdir(parents=True, exist_ok=True)
     nrrd.write(
         filename=str(ccf_v2_merged_path),
         data=ccfv2_corrected,
         header=header_v2,
     )
     logger.info(f"Writing merged v3 atlas to {ccf_v3_merged_path}")
+    ccf_v2_merged_path.parent.mkdir(parents=True, exist_ok=True)
     nrrd.write(
         filename=str(ccf_v3_merged_path),
         data=ccfv3_corrected,
@@ -105,6 +111,11 @@ def merge_atlases(brain_regions, atlas_v2, atlas_v3):
     atlas_v3_corrected : np.ndarray
         The merged version of the CCFv3 atlas.
     """
+    logger.info("Loading libraries")
+    import numpy as np
+
+    import deal.atlas.merge as utils
+
     logger.info("search_children")
     utils.search_children(brain_regions)
 

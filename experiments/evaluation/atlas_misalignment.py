@@ -1,13 +1,43 @@
 """Compute misalignment for all registered volumes."""
+import argparse
 import logging
 import pathlib
 import sys
 
 logger = logging.getLogger("compute-misalignment")
 
+script_info = """
+Compute misalignment for all available warped atlases.
 
-def main():
-    """Run the script."""
+First we load the CCFv3 atlas that was produced by the ccf_v2_v3_merge.py
+script. If you haven't run that script before then you need to do it.
+
+Then all warped CCFv2 atlases that are produced by the warp_atlases.py
+are located. The warped atlases are usually found in results/warped_atlas
+but check the warp_atlases.py script for any changes.
+
+For each warped CCFv2 atlas we compute the misalignment against the CCFv3
+atlas at each level of the hierarchy level. The results are stored in text
+files in the results/misalignment directory.
+"""
+
+
+def main(argv=None):
+    """Run the main script.
+
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.parse_args(argv)
+
     logger.info("Loading libraries")
     import json
 
@@ -25,9 +55,9 @@ def main():
     with config_file.open() as f:
         config = toml.load(f)
     brain_regions_path = pathlib.Path(config["data"]["brain_regions"])
-    ccf_v3_merged_path = pathlib.Path(config["ccfv2_v3_merge"]["ccf_v3_merged"])
-    warped_dir = pathlib.Path(config[experiment_name]["warped_dir"])
-    output_dir = pathlib.Path(config[experiment_name]["output_dir"])
+    ccf_v3_merged_path = pathlib.Path(config["ccf_v2_v3_merge"]["ccf_v3_merged"])
+    warped_dir = pathlib.Path(config["evaluation"][experiment_name]["warped_dir"])
+    output_dir = pathlib.Path(config["evaluation"][experiment_name]["output_dir"])
 
     logger.info(f"Reading brain regions from {brain_regions_path}")
     with open(brain_regions_path, "r") as f:

@@ -1,4 +1,13 @@
-"""Goal: Analyze a specific displacement field.
+"""Analyze a specific displacement field."""
+import argparse
+import logging
+import pathlib
+import sys
+
+logger = logging.getLogger("Displacement Analysis")
+
+script_info = """
+Goal: Analyze a specific displacement field.
 
 Assumptions:
 - The only input needed is a displacement field.
@@ -13,35 +22,41 @@ Steps:
   histogram of every axis of the displacement field for the foreground part
   of the moving image/volume.
 """
-import argparse
-import logging
-import pathlib
-
-import matplotlib.pyplot as plt
-import nrrd
-import numpy as np
-
-logger = logging.getLogger("Displacement Analysis")
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--df",
-    default="experiments/results/registration_changing_labels_df.npy",
-    type=str,
-    help="The displacement to analyze.",
-)
-parser.add_argument(
-    "--img-mov",
-    default="data/annotation_atlas/annotations_ccf_v2_merged.nrrd",
-    type=str,
-    help="The annotation image/volume to warp.",
-)
-args = parser.parse_args()
+def main(argv=None):
+    """Run the main script.
 
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--df",
+        default="results/registration_changing_labels_df.npy",
+        type=str,
+        help="The displacement to analyze.",
+    )
+    parser.add_argument(
+        "--img-mov",
+        default="results/annotation_atlas/ccf_v2_merged.nrrd",
+        type=str,
+        help="The annotation image/volume to warp.",
+    )
+    args = parser.parse_args(argv)
 
-def main():
-    """Analysis of a specific displacement field."""
+    logger.info("Loading libraries")
+    import matplotlib.pyplot as plt
+    import nrrd
+    import numpy as np
+
     logger.info("Loading DF...")
     logger.info(f"Displacement field: {args.df}")
     path_df = pathlib.Path(args.df)
@@ -69,7 +84,7 @@ def main():
 
     logger.info("Saving Picture 1...")
     df_name = path_df.stem
-    out_path = pathlib.Path("experiments/results/")
+    out_path = pathlib.Path("results")
     if not out_path.exists():
         pathlib.Path.mkdir(out_path, parents=True)
     fig.savefig(out_path / f"{df_name}_analysis.png")
@@ -97,4 +112,4 @@ if __name__ == "__main__":
         format="%(asctime)s || %(levelname)s || %(name)s || %(message)s",
         datefmt="%H:%M:%S",
     )
-    main()
+    sys.exit(main())

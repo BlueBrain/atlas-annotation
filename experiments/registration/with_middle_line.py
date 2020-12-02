@@ -1,4 +1,13 @@
-"""Goal: Computing ANTsPY registration after creating a middle line on input images.
+"""Run registration after creating a middle line on input images."""
+import argparse
+import logging
+import pathlib
+import sys
+
+logger = logging.getLogger("Registration with middle line")
+
+script_info = """
+Goal: Computing ANTsPY registration after creating a middle line on input images.
 
 Assumptions:
 - The input images/volumes have to have the same shape.
@@ -9,43 +18,50 @@ Steps:
 - Applying resulting transformations to the original moving image.
 - Saving results.
 """
-import argparse
-import logging
-import pathlib
-
-import nrrd
-import numpy as np
-from tqdm import tqdm
-from warpme.base import DisplacementField
-
-from deal.ants import register
-
-logger = logging.getLogger("Registration with middle line")
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--img-ref",
-    default="data/average_template_25.npy",
-    type=str,
-    help="The image/volume of reference.",
-)
-parser.add_argument(
-    "--img-mov",
-    default="data/atlasVolume.npy",
-    type=str,
-    help="The moving image/volume (=to warp).",
-)
-parser.add_argument(
-    "--out-file",
-    default="experiments/results/registration_with_middle_line.npy",
-    type=str,
-    help="The name of the file of the resulting warped image.",
-)
-args = parser.parse_args()
 
 
-def main():
-    """Compute the ANTsPY registration after creating a middle line."""
+def main(argv=None):
+    """Run the main script.
+
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--img-ref",
+        default="data/average_template_25.npy",
+        type=str,
+        help="The image/volume of reference.",
+    )
+    parser.add_argument(
+        "--img-mov",
+        default="data/atlasVolume.npy",
+        type=str,
+        help="The moving image/volume (=to warp).",
+    )
+    parser.add_argument(
+        "--out-file",
+        default="results/registration_with_middle_line.npy",
+        type=str,
+        help="The name of the file of the resulting warped image.",
+    )
+    args = parser.parse_args(argv)
+
+    logger.info("Loading libraries")
+    import nrrd
+    import numpy as np
+    from tqdm import tqdm
+    from warpme.base import DisplacementField
+
+    from deal.ants import register
+
     logger.info("Loading Images...")
     if pathlib.Path(args.img_ref).suffix == ".nrrd":
         img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
@@ -101,4 +117,4 @@ if __name__ == "__main__":
         format="%(asctime)s || %(levelname)s || %(name)s || %(message)s",
         datefmt="%H:%M:%S",
     )
-    main()
+    sys.exit(main())

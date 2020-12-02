@@ -1,13 +1,47 @@
 """Warp the CCFv2 atlas with existing displacement fields."""
+import argparse
 import logging
 import pathlib
 import sys
 
 logger = logging.getLogger("warp-atlases")
 
+script_info = """
+Warp merged CCF v2/v3 atlases with all available displacement fields.
 
-def main():
-    """Run the script."""
+We load the merged CCF v2/v3 atlases that were produced by the
+ccf_v2_v3_merge.py script. If the files are not available then that script
+needs to be run manually first.
+
+Next we search for all displacement fields that were produced by the
+corresponding registration scripts. If you haven't run any registration
+scripts yet, then you need to do it first. The registered displacement
+fields are usually stored in the results/registration folder, but check
+in the config.toml file under the section corresponding to the script's
+name if it is still the correct path.
+
+For each found displacement field the CCFv2 atlas is warped and the resulting
+atlas is saved in the output directory. The output directory path can also be
+found in the config.toml file.
+"""
+
+
+def main(argv=None):
+    """Run the main script.
+
+    Parameters
+    ----------
+    argv : sequence or None
+        The argument vector. If None then the arguments are parsed from
+        the command line directly.
+    """
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description=script_info,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.parse_args(argv)
+
     logger.info("Loading libraries")
     import nrrd
     import numpy as np
@@ -20,7 +54,7 @@ def main():
     experiment_name = pathlib.Path(__file__).stem
     with config_file.open() as f:
         config = toml.load(f)
-    ccf_v2_merged_path = pathlib.Path(config["ccfv2_v3_merge"]["ccf_v2_merged"])
+    ccf_v2_merged_path = pathlib.Path(config["ccf_v2_v3_merge"]["ccf_v2_merged"])
     registration_dir = pathlib.Path(config[experiment_name]["registration_dir"])
     output_dir = pathlib.Path(config[experiment_name]["output_dir"])
 
