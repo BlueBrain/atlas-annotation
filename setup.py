@@ -28,6 +28,10 @@ setup(
             "pytest",
             "pytest-cov",
             "tox",
-        ]
+        ],
+        "notebook": [
+            "ipython",
+            "ipywidgets",
+        ],
     },
 )
