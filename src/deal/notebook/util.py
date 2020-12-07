@@ -51,8 +51,8 @@ def image_grid(image_dict, n_columns=2, plot_width=12, fig_title=None, save_as=N
         Mapping image title => image data.
     n_columns : int
         The number of columns in the plot grid.
-    plot_width : int
-        The width of the plot in inches (same as for the figsize parameter
+    plot_width : float
+        The width of the plot in inches (same as for the `figsize` parameter
         in the matplotlib library).
     fig_title : str or None, optional
         The figure title.
@@ -82,7 +82,7 @@ def image_grid(image_dict, n_columns=2, plot_width=12, fig_title=None, save_as=N
     # If there's only one plot then axs isn't an ndarray any more.
     # We need to fix that.
     if n_columns * n_rows == 1:
-        axs = np.ndarray(axs)
+        axs = np.array(axs)
 
     # Don't plot the axes
     for ax in axs.ravel():

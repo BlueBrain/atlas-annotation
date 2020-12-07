@@ -43,3 +43,18 @@ $ dvc pull <filename>.dvc
 ```
 where `<filename>` should be replaced by one of the filenames found in the `data` directory.
 See the `data/README.md` file for the description of different data files.
+
+Notebooks and Widgets
+---------------------
+The notebook and widget functionality is not activated by default. In order
+to use it you need to install this package with the `notebook` parameter
+as follows:
+```shell script
+$ pip install ".[notebook]"
+```
+
+Furthermore you will need JupyterLab or Jupyter Notebook installed in your virtual
+environment, as well as the corresponding `ipywidgets` plugin. Follow the following
+online instructions in order to do so:
+- How to install JupyterLab/Jupyter Notebook: https://jupyter.org/
+- How to install the `ipywidgets` plugin: https://ipywidgets.readthedocs.io/en/latest/user_install.html
