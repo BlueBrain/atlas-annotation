@@ -63,6 +63,11 @@ def register(fixed, moving, **ants_kwargs):
             raise RuntimeError("Unexpected affine part.")
         nii_data = nii.get_fdata()
 
+    # Remove temporary ANTs files
+    for file in meta["fwdtransforms"] + meta["invtransforms"]:
+        if os.path.exists(file):
+            os.remove(file)
+
     return nii_data
 
 
@@ -121,15 +126,19 @@ def transform(image, nii_data, **ants_kwargs):
         warped = ants.apply_transforms(
             fixed=image,  # shouldn't matter...
             moving=image,
-            transformlist=[str(nii_file)],
+            transformlist=[nii_file],
             **ants_kwargs,
         )
 
-        # This is only true if the transformation was successful
-        if isinstance(warped, ants.ANTsImage):
-            return warped.numpy()
-        else:
-            raise RuntimeError("Could not apply the transformation")
+    # Delete temporary nii file
+    if os.path.exists(nii_file):
+        os.remove(nii_file)
+
+    # This is only true if the transformation was successful
+    if isinstance(warped, ants.ANTsImage):
+        return warped.numpy()
+    else:
+        raise RuntimeError("Could not apply the transformation")
 
 
 def stack_2d_transforms(nii_data_array):
