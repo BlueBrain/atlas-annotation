@@ -19,7 +19,7 @@ install_requires = [
     "dvc[ssh]",
     "matplotlib",
     "numpy",
-    "warpme[tf] @ git+https://bbpcode.epfl.ch/code/a/ml/atlas_alignment@v0.2",
+    "warpme[tf] @ git+ssh://git@bbpgitlab.epfl.ch/ml/atlas_alignment.git@v0.2",
 ]
 
 extras_require = {

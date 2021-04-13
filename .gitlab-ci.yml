@@ -1,0 +1,56 @@
+variables:
+  SOURCES: setup.py src/deal tests experiments
+
+.jobtemplate:
+  tags:
+    - bb5_user
+  variables:
+    bb5_account: proj101
+    bb5_memory: 5G
+    bb5_duration: "15:00"
+    bb5_cpus_per_task: 1
+  script:
+    - echo "Running .jobtemplate"
+    - echo this is job $MY_JOB_ID using bb5_build_dir=${bb5_build_dir}
+    - echo working directory is $PWD and HOME is $HOME
+
+stages:
+  - Static Analysis
+  - Test
+
+before_script:
+  - module load archive/2020-01
+  - module load python/3.6.5
+  - python3 -m venv venv
+  - source venv/bin/activate
+  - pip install -U pip setuptools wheel
+  - pip install -r requirements-dev.txt
+
+lint:
+  extends:
+    - .jobtemplate
+  stage: Static Analysis
+  script:
+    - flake8 $SOURCES
+    - isort --profile black --check $SOURCES
+    - pydocstyle $SOURCES
+    - black -q --check $SOURCES
+    - bandit -qr -x tests -s B301,B403 $SOURCES
+
+pytest:
+  extends:
+    - .jobtemplate
+  stage: Test
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  script:
+    - pip install -r requirements.txt
+    - pip install -r requirements-interactive.txt
+    - pip install ".[dev,interactive]"
+    - pip install /gpfs/bbp.cscs.ch/project/proj101/antspy/antspyx-0.2.0-cp36-cp36m-linux_x86_64.whl
+    - pytest --color=yes --junitxml=report.xml
+  # See here for JUnit test reports
+  # https://docs.gitlab.com/ee/ci/unit_test_reports.html#python-example
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
