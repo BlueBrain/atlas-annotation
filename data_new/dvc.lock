@@ -1,0 +1,104 @@
+schema: '2.0'
+stages:
+  download-nissl:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/ara_nissl/ara_nissl_25.nrrd
+    outs:
+    - path: ara_nissl_25.nrrd
+      md5: f401225e3b161679be88bd702155a394
+      size: 136232577
+  download-avg-brain:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_25.nrrd
+    outs:
+    - path: average_template_25.nrrd
+      md5: 04cfaef1bcd12dfe0c59fddcd3e70aad
+      size: 32998960
+  download-ccfv2:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/mouse_2011/annotation_25.nrrd
+      -O annotation_25_2011.nrrd
+    outs:
+    - path: annotation_25_2011.nrrd
+      md5: a39f687c7be382a96fff4ee7e647d551
+      size: 5019530
+  download-ccfv2-fiber:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/mouse_2011/annotationFiber_25.nrrd
+      -O annotation_25_2011_fiber.nrrd
+    outs:
+    - path: annotation_25_2011_fiber.nrrd
+      md5: 1ad82e26144e6154f3b19972f5a03f81
+      size: 1891712
+  download-ccfv3:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/ccf_2017/annotation_25.nrrd
+      -O annotation_25_2017.nrrd
+    outs:
+    - path: annotation_25_2017.nrrd
+      md5: 5012b7fa0c0fd23dc455462e9b6298f4
+      size: 4035363
+  download-brain-regions:
+    cmd: wget http://api.brain-map.org/api/v2/structure_graph_download/1.json -O brain_regions.json
+    outs:
+    - path: brain_regions.json
+      md5: 2edb440f2c6afd463f6261712ba5bb6f
+      size: 637735
+  combine-ccfv2-fiber:
+    cmd: python combine_fiber.py annotation_25_2011.nrrd annotation_25_2011_fiber.nrrd
+      annotation_25_2011_full.nrrd
+    deps:
+    - path: annotation_25_2011.nrrd
+      md5: a39f687c7be382a96fff4ee7e647d551
+      size: 5019530
+    - path: annotation_25_2011_fiber.nrrd
+      md5: 1ad82e26144e6154f3b19972f5a03f81
+      size: 1891712
+    - path: combine_fiber.py
+      md5: c9d0f1ffb1844dfcad2dfa977f3a3799
+      size: 1221
+    outs:
+    - path: annotation_25_2011_full.nrrd
+      md5: 2b5d0b3961313b320e5867bc3f741c5c
+      size: 5819659
+  atlas-coarse-merge:
+    cmd: python atlas_merge.py coarse annotation_25_2011_full.nrrd annotation_25_2017.nrrd
+      brain_regions.json ccfv2_atlas_coarse.nrrd ccfv3_atlas_coarse.nrrd
+    deps:
+    - path: annotation_25_2011_full.nrrd
+      md5: 2b5d0b3961313b320e5867bc3f741c5c
+      size: 5819659
+    - path: annotation_25_2017.nrrd
+      md5: 5012b7fa0c0fd23dc455462e9b6298f4
+      size: 4035363
+    - path: atlas_merge.py
+      md5: 52a238118f588c8ff5078534a1e7d14b
+      size: 1534
+    - path: brain_regions.json
+      md5: 2edb440f2c6afd463f6261712ba5bb6f
+      size: 637735
+    outs:
+    - path: ccfv2_atlas_coarse.nrrd
+      md5: 45259dfa54f74ff3d214e6fb05c3d96c
+      size: 3539054
+    - path: ccfv3_atlas_coarse.nrrd
+      md5: ac86334458d4d00cce674f1596e40cb3
+      size: 2409824
+  atlas-fine-merge:
+    cmd: python atlas_merge.py fine annotation_25_2011_full.nrrd annotation_25_2017.nrrd
+      brain_regions.json ccfv2_atlas_fine.nrrd ccfv3_atlas_fine.nrrd
+    deps:
+    - path: annotation_25_2011_full.nrrd
+      md5: 2b5d0b3961313b320e5867bc3f741c5c
+      size: 5819659
+    - path: annotation_25_2017.nrrd
+      md5: 5012b7fa0c0fd23dc455462e9b6298f4
+      size: 4035363
+    - path: atlas_merge.py
+      md5: 52a238118f588c8ff5078534a1e7d14b
+      size: 1534
+    - path: brain_regions.json
+      md5: 2edb440f2c6afd463f6261712ba5bb6f
+      size: 637735
+    outs:
+    - path: ccfv2_atlas_fine.nrrd
+      md5: 49ce9ac4b94e97cefd9d3a9d9d074aad
+      size: 4576970
+    - path: ccfv3_atlas_fine.nrrd
+      md5: 45aa15d9c368fcc6591d86990f65f0a5
+      size: 3107266

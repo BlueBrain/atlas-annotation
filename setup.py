@@ -16,7 +16,7 @@ else:
 
 install_requires = [
     antspy,
-    "dvc[ssh]",
+    "dvc[ssh]>=2",
     "matplotlib",
     "numpy",
     "warpme[tf] @ git+ssh://git@bbpgitlab.epfl.ch/ml/atlas_alignment.git@v0.2",

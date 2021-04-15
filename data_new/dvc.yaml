@@ -1,0 +1,59 @@
+stages:
+  download-nissl:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/ara_nissl/ara_nissl_25.nrrd
+    outs:
+    - ara_nissl_25.nrrd
+  download-avg-brain:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_25.nrrd
+    outs:
+    - average_template_25.nrrd
+  download-ccfv2:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/mouse_2011/annotation_25.nrrd
+      -O annotation_25_2011.nrrd
+    outs:
+    - annotation_25_2011.nrrd
+  download-ccfv2-fiber:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/mouse_2011/annotationFiber_25.nrrd
+      -O annotation_25_2011_fiber.nrrd
+    outs:
+    - annotation_25_2011_fiber.nrrd
+  download-ccfv3:
+    cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/ccf_2017/annotation_25.nrrd
+      -O annotation_25_2017.nrrd
+    outs:
+    - annotation_25_2017.nrrd
+  download-brain-regions:
+    cmd: wget http://api.brain-map.org/api/v2/structure_graph_download/1.json -O brain_regions.json
+    outs:
+    - brain_regions.json
+  combine-ccfv2-fiber:
+    cmd: python combine_fiber.py annotation_25_2011.nrrd annotation_25_2011_fiber.nrrd
+      annotation_25_2011_full.nrrd
+    deps:
+    - annotation_25_2011.nrrd
+    - annotation_25_2011_fiber.nrrd
+    - combine_fiber.py
+    outs:
+    - annotation_25_2011_full.nrrd
+  atlas-coarse-merge:
+    cmd: python atlas_merge.py coarse annotation_25_2011_full.nrrd annotation_25_2017.nrrd
+      brain_regions.json ccfv2_atlas_coarse.nrrd ccfv3_atlas_coarse.nrrd
+    deps:
+    - annotation_25_2011_full.nrrd
+    - annotation_25_2017.nrrd
+    - atlas_merge.py
+    - brain_regions.json
+    outs:
+    - ccfv2_atlas_coarse.nrrd
+    - ccfv3_atlas_coarse.nrrd
+  atlas-fine-merge:
+    cmd: python atlas_merge.py fine annotation_25_2011_full.nrrd annotation_25_2017.nrrd
+      brain_regions.json ccfv2_atlas_fine.nrrd ccfv3_atlas_fine.nrrd
+    deps:
+    - annotation_25_2011_full.nrrd
+    - annotation_25_2017.nrrd
+    - atlas_merge.py
+    - brain_regions.json
+    outs:
+    - ccfv2_atlas_fine.nrrd
+    - ccfv3_atlas_fine.nrrd
