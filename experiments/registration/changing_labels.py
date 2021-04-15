@@ -4,7 +4,8 @@ import logging
 import pathlib
 import sys
 
-logger = logging.getLogger("Registration with changed labels")
+name = "Registration with changed labels"
+logger = logging.getLogger(name)
 
 script_info = """
 Goal: Computing the registration between two images/volumes after switching
@@ -74,20 +75,14 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     logger.info("Loading libraries")
-    import nrrd
-    import numpy as np
-    from tqdm import tqdm
-
+    import deal
     from deal.ants import register, transform
     from deal.atlas import get_misalignment
+    from deal.utils import create_description, remap_labels, saving_results
 
     logger.info("Loading Images...")
-    if pathlib.Path(args.img_ref).suffix == ".nrrd":
-        img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
-        img_mov, _ = nrrd.read(pathlib.Path(args.img_mov))
-    else:
-        img_ref = np.load(pathlib.Path(args.img_ref))
-        img_mov = np.load(pathlib.Path(args.img_mov))
+    img_ref = deal.load_volume(pathlib.Path(args.img_ref))
+    img_mov = deal.load_volume(pathlib.Path(args.img_mov))
 
     logger.info(f"Reference image: {args.img_ref}")
     logger.info(f"Moving image: {args.img_mov}")
@@ -95,39 +90,25 @@ def main(argv=None):
     logger.info(f"Shape of the moving image: {img_mov.shape}")
 
     logger.info("Change randomly the labels of the images...")
-    values_ref = np.unique(img_ref)
-    values_mov = np.unique(img_mov)
-    union_list = list(set(values_mov).union(set(values_ref)))
-    logger.info(f"Number of labels: {len(union_list)}")
-    logger.info("Decide the new labels...")
-    np.random.seed(seed=args.seed)
-    new_labels = np.arange(len(union_list))
-    np.random.shuffle(new_labels)
-
-    # Create new numpy containing the new labels
-    img_ref_changed = np.zeros_like(img_ref)
-    img_mov_changed = np.zeros_like(img_mov)
-
-    for new, old in tqdm(zip(new_labels, union_list)):
-        img_mov_changed[img_mov == old] = new
-        img_ref_changed[img_ref == old] = new
-
-    img_mov_changed = img_mov_changed.astype("float32")
-    img_ref_changed = img_ref_changed.astype("float32")
+    imgs_changed = remap_labels([img_ref, img_mov], seed=args.seed)
 
     logger.info("Intensity-based registration with ANTsPY...")
-    df = register(img_ref_changed, img_mov_changed)
+    df = register(imgs_changed[0].astype("float32"), imgs_changed[1].astype("float32"))
     logger.info("Apply transform to the Moving Image ...")
     img_reg = transform(img_mov.astype("float32"), df, interpolator="genericLabel")
     img_reg = img_reg.astype("int")
 
     out_path = pathlib.Path(args.out_file)
-    if not out_path.parent.exists():
-        pathlib.Path.mkdir(out_path.parent, parents=True)
-    df_path = out_path.parent / f"{out_path.stem}_df{out_path.suffix}"
-    logger.info(f"Saving Results at {args.out_file} and {df_path}...")
-    np.save(out_path, img_reg)
-    np.save(df_path, df)
+    logger.info(f"Saving Results at {args.out_file}...")
+    description = create_description(name, args)
+    saving_results(
+        output_dir=out_path,
+        img_ref=img_ref,
+        img_mov=img_mov,
+        img_reg=img_reg,
+        df=df,
+        description=description,
+    )
 
     logger.info("Analysis of the results...")
     base_mis = get_misalignment(img_ref, img_mov) * 100

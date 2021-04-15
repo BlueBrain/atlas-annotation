@@ -23,9 +23,8 @@ def main():
     nissl_path = pathlib.Path(config["data"]["nissl"])
     nii_output = pathlib.Path(config["registration"][experiment_name]["nii_output"])
 
-    logger.info(f"Loading {average_brain_path}")
+    logger.info(f"Loading {average_brain_path} and {nissl_path}")
     average_brain = deal.load_volume(average_brain_path)
-    logger.info(f"Loading {nissl_path}")
     nissl = deal.load_volume(nissl_path)
 
     logger.info("Registering")

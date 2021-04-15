@@ -4,7 +4,8 @@ import logging
 import pathlib
 import sys
 
-logger = logging.getLogger("Registration with middle line")
+name = "Registration with middle line"
+logger = logging.getLogger(name)
 
 script_info = """
 Goal: Computing ANTsPY registration after creating a middle line on input images.
@@ -47,6 +48,12 @@ def main(argv=None):
         help="The moving image/volume (=to warp).",
     )
     parser.add_argument(
+        "--line-thickness",
+        default=2,
+        type=int,
+        help="The middle line thickness.",
+    )
+    parser.add_argument(
         "--out-file",
         default="results/registration_with_middle_line.npy",
         type=str,
@@ -55,20 +62,17 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     logger.info("Loading libraries")
-    import nrrd
     import numpy as np
     from tqdm import tqdm
     from warpme.base import DisplacementField
 
+    import deal
     from deal.ants import register
+    from deal.utils import add_middle_line, create_description, saving_results
 
     logger.info("Loading Images...")
-    if pathlib.Path(args.img_ref).suffix == ".nrrd":
-        img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
-        img_mov, _ = nrrd.read(pathlib.Path(args.img_mov))
-    else:
-        img_ref = np.load(pathlib.Path(args.img_ref))
-        img_mov = np.load(pathlib.Path(args.img_mov))
+    img_ref = deal.load_volume(pathlib.Path(args.img_ref))
+    img_mov = deal.load_volume(pathlib.Path(args.img_mov))
 
     logger.info(f"Reference image: {args.img_ref}")
     logger.info(f"Moving image: {args.img_mov}")
@@ -86,13 +90,8 @@ def main(argv=None):
     for i, (current_ref, current_mov) in tqdm(
         enumerate(zip(img_ref, img_mov)), total=n_img
     ):
-        h, w = current_ref.shape
-
-        fixed_img_bar = current_ref.copy().astype(np.float32)
-        moving_img_bar = current_mov.copy().astype(np.float32)
-
-        fixed_img_bar[..., w // 2] = 1
-        moving_img_bar[..., w // 2] = 1
+        fixed_img_bar = add_middle_line(current_ref, axis=0, thickness=2)
+        moving_img_bar = add_middle_line(current_mov, axis=0, thickness=2)
 
         df = register(fixed_img_bar, moving_img_bar)
         df = np.squeeze(df)
@@ -102,12 +101,14 @@ def main(argv=None):
         dfs.append(df)
 
     out_path = pathlib.Path(args.out_file)
-    if not out_path.parent.exists():
-        pathlib.Path.mkdir(out_path.parent, parents=True)
-    df_path = out_path.parent / f"{out_path.stem}_df{out_path.suffix}"
-    logger.info(f"Saving the results at {out_path} and {df_path}")
-    np.save(out_path, registered_antspy_middle_bar)
-    np.save(df_path, np.stack(dfs))
+    logger.info(f"Saving the results at {out_path}")
+    description = create_description(name, args)
+    saving_results(
+        out_path,
+        img_reg=registered_antspy_middle_bar,
+        df=np.stack(dfs),
+        description=description,
+    )
     logger.info("DONE")
 
 

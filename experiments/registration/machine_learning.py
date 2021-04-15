@@ -4,7 +4,8 @@ import logging
 import pathlib
 import sys
 
-logger = logging.getLogger("Registration with Machine Learning")
+name = "Registration with Machine Learning"
+logger = logging.getLogger(name)
 
 script_info = """
 Goal: computing machine learning 2D registration between the reference and
@@ -56,18 +57,16 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     logger.info("Loading libraries")
-    import nrrd
     import numpy as np
     from tqdm import tqdm
     from warpme.ml_utils import load_model, merge_global_local
 
+    import deal
+    from deal.utils import create_description, saving_results
+
     logger.info("Loading Images...")
-    if pathlib.Path(args.img_ref).suffix == ".nrrd":
-        img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
-        img_mov, _ = nrrd.read(pathlib.Path(args.img_mov))
-    else:
-        img_ref = np.load(pathlib.Path(args.img_ref))
-        img_mov = np.load(pathlib.Path(args.img_mov))
+    img_ref = deal.load_volume(pathlib.Path(args.img_ref))
+    img_mov = deal.load_volume(pathlib.Path(args.img_mov))
 
     logger.info(f"Reference image: {args.img_ref}")
     logger.info(f"Moving image: {args.img_mov}")
@@ -103,13 +102,14 @@ def main(argv=None):
         delta_xys.append(delta_xy)
 
     out_path = pathlib.Path(args.out_file)
-    if not out_path.parent.exists():
-        pathlib.Path.mkdir(out_path.parent, parents=True)
-    df_path = out_path.parent / f"{out_path.stem}_df{out_path.suffix}"
-    logger.info(f"Saving Results at {args.out_file} and {df_path}...")
-    np.save(out_path, np.squeeze(np.stack(img_regs)))
-    np.save(df_path, np.squeeze(np.stack(delta_xys)))
-
+    logger.info(f"Saving Results at {out_path}...")
+    description = create_description(name, args)
+    saving_results(
+        out_path,
+        img_reg=np.squeeze(np.stack(img_regs)),
+        df=np.squeeze(np.stack(delta_xys)),
+        description=description,
+    )
     logger.info("DONE")
 
 

@@ -37,7 +37,6 @@ def main(argv=None):
     parser.parse_args(argv)
 
     logger.info("Loading libraries")
-    import nrrd
     import numpy as np
     import toml
 
@@ -52,10 +51,12 @@ def main(argv=None):
     ccf_v3_merged_path = config["ccf_v2_v3_merge"]["ccf_v3_merged"]
     nii_output = pathlib.Path(config["registration"][experiment_name]["nii_output"])
 
-    logger.info(f"Reading CCFv2 atlas from {ccf_v2_merged_path}")
-    ccf_v2_merged, header_v2 = nrrd.read(ccf_v2_merged_path)
-    logger.info(f"Reading CCFv3 atlas from {ccf_v3_merged_path}")
-    ccf_v3_merged, header_v3 = nrrd.read(ccf_v3_merged_path)
+    logger.info(
+        f"Reading CCFv2 atlas from {ccf_v2_merged_path} "
+        f"and CCFv3 atlas from {ccf_v3_merged_path}"
+    )
+    ccf_v2_merged = deal.load_volume(ccf_v2_merged_path)
+    ccf_v3_merged = deal.load_volume(ccf_v3_merged_path)
 
     logger.info("Registering")
     nii_3d = deal.ants.register(

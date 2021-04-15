@@ -1,11 +1,11 @@
 """Compute registration at intermediate hierarchy levels."""
 import argparse
-import json
 import logging
 import pathlib
 import sys
 
-logger = logging.getLogger("Registration with specific hierarchy")
+name = "Registration with specific hierarchy"
+logger = logging.getLogger(name)
 
 script_info = """
 Goal: Computing registration at an intermediate level of hierarchy.
@@ -85,16 +85,16 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     logger.info("Loading libraries")
-    import nrrd
-    import numpy as np
 
+    import deal
     from deal.ants import register, transform
-    from deal.atlas import RegionMeta, unfurl_regions
+    from deal.atlas import unfurl_regions
     from deal.notebook import print_misalignments
+    from deal.utils import create_description, load_region_meta, saving_results
 
     logger.info("Loading Images...")
-    img_ref, _ = nrrd.read(pathlib.Path(args.img_ref))
-    img_mov, _ = nrrd.read(pathlib.Path(args.img_mov))
+    img_ref = deal.load_volume(pathlib.Path(args.img_ref))
+    img_mov = deal.load_volume(pathlib.Path(args.img_mov))
 
     logger.info(f"Reference image: {args.img_ref}")
     logger.info(f"Moving image: {args.img_mov}")
@@ -102,37 +102,26 @@ def main(argv=None):
     logger.info(f"Shape of the moving image: {img_mov.shape}")
 
     logger.info("Read brain regions...")
-    with open(args.brain_regions, "r") as f:
-        brain_regions = json.load(f)
-    region_meta = RegionMeta.from_root_region(brain_regions["msg"][0])
+    region_meta = load_region_meta(args.brain_regions)
 
     logger.info("Unfurl regions...")
     img_ref_hierarchy = unfurl_regions(img_ref, region_meta)
     img_mov_hierarchy = unfurl_regions(img_mov, region_meta)
 
-    img_ref_hierarchy = img_ref_hierarchy.astype("float32")
-    img_mov_hierarchy = img_mov_hierarchy.astype("float32")
-
     logger.info("ANTsPY registration...")
-    df = register(img_ref_hierarchy[args.hierarchy], img_mov_hierarchy[args.hierarchy])
+    df = register(
+        img_ref_hierarchy[args.hierarchy].astype("float32"),
+        img_mov_hierarchy[args.hierarchy].astype("float32"),
+    )
 
     logger.info("ANTsPY apply transform...")
     img_reg = transform(img_mov.astype("float32"), df, interpolator="genericLabel")
     img_reg = img_reg.astype("int")
 
     out_path = pathlib.Path(args.out_file)
-    if not out_path.parent.exists():
-        pathlib.Path.mkdir(out_path.parent, parents=True)
-    img_path = (
-        out_path.parent / f"{out_path.stem}_hierarchy{args.hierarchy}{out_path.suffix}"
-    )
-    df_path = (
-        out_path.parent
-        / f"{out_path.stem}_hierarchy{args.hierarchy}_df{out_path.suffix}"
-    )
-    logger.info(f"Saving Results at {img_path} and {df_path}...")
-    np.save(img_path, img_reg)
-    np.save(df_path, df)
+    logger.info(f"Saving Results at {out_path}...")
+    description = create_description(name, args)
+    saving_results(out_path, img_reg=img_reg, df=df, description=description)
 
     logger.info("Analysis of the results...")
     logger.info("Baseline misalignment....")

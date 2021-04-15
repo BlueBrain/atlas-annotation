@@ -1,6 +1,10 @@
 """The DEep AtLas module (DEAL)."""
+import pathlib
+
 import numpy as np
 from warpme.base import DisplacementField
+
+from deal.utils import load_nrrd
 
 from .version import __version__  # noqa: F401
 
@@ -72,23 +76,32 @@ def load_dfs(file):
 
 
 def load_volume(volume_path, normalize=True):
-    """Load a brain volume from disk.
+    """Load volume from the given path.
 
     Parameters
     ----------
     volume_path : str or pathlib.Path
-        The brain volume to load.
+        Path of file to load
+
     normalize : bool
-        If True then all values are rescaled to have the maximum
-        equal to 1.
+        If True, the numpy is normalized between 0 and 1.
 
     Returns
     -------
-    volume : np.ndarray
-        The brain volume.
+    img : np.ndarray or None
+        Loaded path
     """
-    volume = np.load(volume_path).astype(np.float32)
-    if normalize and volume.max() > 1.0:
-        volume /= volume.max()
-
-    return volume
+    volume_path = pathlib.Path(volume_path)
+    if volume_path.exists():
+        if volume_path.suffix == ".nrrd":
+            img = load_nrrd(str(volume_path), norm=normalize)
+        elif volume_path.suffix == ".npy":
+            img = np.load(volume_path)
+            if volume_path:
+                img = img.astype(np.float32)
+                img = (img - img.min()) / (img.max() - img.min())
+        else:
+            raise ValueError(f"The extension {volume_path.suffix} is not supported")
+    else:
+        img = None
+    return img
