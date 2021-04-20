@@ -1,4 +1,0 @@
-[core]
-    remote = gpfs_proj101
-['remote "gpfs_proj101"']
-    url = ssh://bbpv1.bbp.epfl.ch/gpfs/bbp.cscs.ch/data/project/proj101/dvc_remotes/atlas_annotation

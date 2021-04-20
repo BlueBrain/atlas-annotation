@@ -1,3 +1,4 @@
+"""Dimitri's coarse and fine atlas merging."""
 import argparse
 import json
 import sys
@@ -28,7 +29,7 @@ def parse_args():
 
 
 def main():
-    """Run fine atlas merging."""
+    """Run atlas merging."""
     args = parse_args()
 
     # Read data
