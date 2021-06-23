@@ -146,7 +146,7 @@ def warp(atlas, df_per_slice):
     atlas : iterable of np.ndarray
         An annotation atlas. Can be an `np.ndarray` of shape
         `(n_slices, ...)` or any iterable over atlas slices.
-    df_per_slice : iterable of warpme.base.DisplacementField
+    df_per_slice : iterable of atlalign.base.DisplacementField
         The displacement fields for each brain slice.
 
     Returns

@@ -2,7 +2,7 @@
 import pathlib
 
 import numpy as np
-from warpme.base import DisplacementField
+from atlalign.base import DisplacementField
 
 from deal.utils import load_nrrd
 

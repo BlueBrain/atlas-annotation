@@ -1,4 +1,5 @@
+antspyx==0.2.4
 dvc[ssh]==2.0.17
 matplotlib==3.3.4
 numpy==1.18.5
-warpme @ git+ssh://git@bbpgitlab.epfl.ch/ml/atlas_alignment.git@v0.2
+atlalign==0.5.1

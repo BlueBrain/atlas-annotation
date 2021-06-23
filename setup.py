@@ -1,25 +1,12 @@
 """The setup script."""
-import sys
-
 from setuptools import find_packages, setup
 
-# Note that python 3.6 is enforced in the setup(...) call
-antspy_url = "https://github.com/ANTsX/ANTsPy/releases/download"
-if sys.platform == "darwin":
-    antspy_wheel = "antspy-0.1.6-cp36-cp36m-macosx_10_13_x86_64.whl"
-    antspy = f"antspy @ {antspy_url}/v0.1.6/{antspy_wheel}#egg=antspy-0.1.6"
-elif sys.platform == "linux":
-    antspy_wheel = "antspy-0.1.7-cp36-cp36m-linux_x86_64.whl"
-    antspy = f"antspy @ {antspy_url}/v0.1.8/{antspy_wheel}#egg=antspy-0.1.7"
-else:
-    raise NotImplementedError("Only Linux and MacOS are supported at the moment.")
-
 install_requires = [
-    antspy,
+    "antspyx==0.2.4",
+    "atlalign==0.5.1",
     "dvc[ssh]>=2",
     "matplotlib",
     "numpy",
-    "warpme[tf] @ git+ssh://git@bbpgitlab.epfl.ch/ml/atlas_alignment.git@v0.2",
 ]
 
 extras_require = {
@@ -53,7 +40,7 @@ setup(
     },
     package_dir={"": "src"},
     packages=find_packages("src"),
-    python_requires="~=3.6.0",
+    python_requires="~=3.7.0",
     install_requires=install_requires,
     extras_require=extras_require,
 )
