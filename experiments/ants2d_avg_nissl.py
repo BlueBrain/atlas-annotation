@@ -6,8 +6,8 @@ import sys
 import numpy as np
 import utils
 
-from deal import load_volume
-from deal.ants import register, stack_2d_transforms, transform
+from atlannot import load_volume
+from atlannot.ants import register, stack_2d_transforms, transform
 
 # Parameters
 description = """\

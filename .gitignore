@@ -11,4 +11,4 @@ htmlcov/
 .env*
 !.env*.example
 .python-version
-/src/deal/version.py
+/src/atlannot/version.py

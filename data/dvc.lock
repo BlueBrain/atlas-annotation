@@ -67,8 +67,8 @@ stages:
       md5: 5012b7fa0c0fd23dc455462e9b6298f4
       size: 4035363
     - path: atlas_merge.py
-      md5: 47b63da5de37cb8e162f935d5f883617
-      size: 1576
+      md5: 87188de8334f6d6e641a13b62a1bcd99
+      size: 1580
     - path: brain_regions.json
       md5: 2edb440f2c6afd463f6261712ba5bb6f
       size: 637735
@@ -90,8 +90,8 @@ stages:
       md5: 5012b7fa0c0fd23dc455462e9b6298f4
       size: 4035363
     - path: atlas_merge.py
-      md5: 47b63da5de37cb8e162f935d5f883617
-      size: 1576
+      md5: 87188de8334f6d6e641a13b62a1bcd99
+      size: 1580
     - path: brain_regions.json
       md5: 2edb440f2c6afd463f6261712ba5bb6f
       size: 637735

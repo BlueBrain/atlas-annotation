@@ -7,9 +7,9 @@ import numpy as np
 import utils
 from tqdm import tqdm
 
-import deal.utils
-from deal import load_volume
-from deal.ants import register, stack_2d_transforms, transform
+import atlannot.utils
+from atlannot import load_volume
+from atlannot.ants import register, stack_2d_transforms, transform
 
 # Parameters
 description = """\
@@ -101,7 +101,7 @@ def preprocess_atlases(*atlases):
     new_atlases : Iterable of np.ndarray
         Preprocessed atlases
     """
-    atlases = deal.utils.remap_labels(atlases)
+    atlases = atlannot.utils.remap_labels(atlases)
     return [atlas.astype(np.float32) for atlas in atlases]
 
 

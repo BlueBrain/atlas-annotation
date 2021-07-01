@@ -24,7 +24,7 @@ def unfurl_regions(atlas, meta, progress_bar=None):
     ----------
     atlas : np.ndarray
         An annotation atlas volume with shape `(n_slices, height, width)`.
-    meta : deal.atlas.RegionMeta
+    meta : atlannot.atlas.RegionMeta
         The region metadata. Holds the information about the region
         hierarchy in the atlas.
     progress_bar : callable, optional

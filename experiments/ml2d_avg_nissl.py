@@ -7,8 +7,8 @@ import numpy as np
 import utils
 from warpme.ml_utils import load_model, merge_global_local
 
-from deal import load_volume
-from deal.ants import stack_2d_transforms, transform
+from atlannot import load_volume
+from atlannot.ants import stack_2d_transforms, transform
 
 # Parameters
 description = """\

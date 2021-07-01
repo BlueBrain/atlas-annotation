@@ -32,9 +32,9 @@ extras_require = {
 }
 
 setup(
-    name="deal",
+    name="atlannot",
     use_scm_version={
-        "write_to": "src/deal/version.py",
+        "write_to": "src/atlannot/version.py",
         "write_to_template": '"""The package version."""\n__version__ = "{version}"\n',
         "local_scheme": "no-local-version",
     },

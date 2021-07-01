@@ -1,4 +1,4 @@
-"""Currently DEAL utils. (Refactoring in the near future)."""
+"""Various utilities. (Refactoring in the near future)."""
 import json
 import math
 import os
@@ -13,7 +13,7 @@ import numpy as np
 from scipy import ndimage
 from skimage.metrics import structural_similarity as ssim
 
-from deal.atlas import RegionMeta, get_misalignment
+from atlannot.atlas import RegionMeta, get_misalignment
 
 
 # LOADING PART
@@ -28,7 +28,7 @@ def load_region_meta(filename="data/annotation_atlas/brain_regions.json"):
 
     Returns
     -------
-    region_meta : deal.atlas.RegionMeta
+    region_meta : atlannot.atlas.RegionMeta
         Object holding the hierarchical region metadata
     """
     with open(filename) as f:

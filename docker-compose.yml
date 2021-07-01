@@ -1,14 +1,13 @@
 version: "3.5"
 services:
 
-  deal:
+  atlannot:
     build:
       context: .
-      dockerfile: docker/deal.Dockerfile
+      dockerfile: docker/atlannot.Dockerfile
       args:
         - BBP_HTTP_PROXY
         - BBP_HTTPS_PROXY
         - BBP_USERS
-    image: deal
-    container_name: deal
-
+    image: atlannot
+    container_name: atlannot

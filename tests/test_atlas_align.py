@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 from tqdm import tqdm
 
-from deal.atlas.align import get_misalignment, specific_label_iou, unfurl_regions
-from deal.atlas.region_meta import RegionMeta
+from atlannot.atlas.align import get_misalignment, specific_label_iou, unfurl_regions
+from atlannot.atlas.region_meta import RegionMeta
 
 
 class TestAlign:

@@ -3,8 +3,8 @@ import matplotlib.patches as patches
 import numpy as np
 import pytest
 
-from deal.atlas import RegionMeta
-from deal.notebook import create_legend_handles
+from atlannot.atlas import RegionMeta
+from atlannot.notebook import create_legend_handles
 
 
 class TestNotebook:

@@ -6,10 +6,10 @@ import sys
 import numpy as np
 import utils
 
-from deal import load_volume
-from deal.ants import register, stack_2d_transforms, transform
-from deal.atlas import unfurl_regions
-from deal.utils import load_region_meta
+from atlannot import load_volume
+from atlannot.ants import register, stack_2d_transforms, transform
+from atlannot.atlas import unfurl_regions
+from atlannot.utils import load_region_meta
 
 # Parameters
 description = """\
@@ -119,7 +119,7 @@ def preprocess_atlases(*atlases, region_meta=None, hierarchy_level=10):
     ----------
     atlases : Iterable of np.ndarray
         All atlases to preprocess.
-    region_meta : deal.RegionMeta
+    region_meta : atlannot.RegionMeta
         Object containing brain regions hierarchy.
     hierarchy_level: int
         Hierarchy level to keep for the registration

@@ -6,9 +6,9 @@ import sys
 import numpy as np
 import utils
 
-import deal.utils
-from deal import load_volume
-from deal.ants import register, transform
+import atlannot.utils
+from atlannot import load_volume
+from atlannot.ants import register, transform
 
 # Parameters
 description = """\
@@ -99,8 +99,8 @@ def augment_volume(volume, atlas):
     """
     augmented_slices = []
     for volume_slice, atlas_slice in zip(volume, atlas):
-        edge = deal.utils.edge_laplacian_thin(atlas_slice)
-        augmented_slice = deal.utils.merge(volume_slice, edge)
+        edge = atlannot.utils.edge_laplacian_thin(atlas_slice)
+        augmented_slice = atlannot.utils.merge(volume_slice, edge)
         augmented_slices.append(augmented_slice)
     enhanced_volume = np.stack(augmented_slices)
 

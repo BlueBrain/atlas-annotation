@@ -1,19 +1,11 @@
-DEAL - DEep AtLas
-=================
+Atlas Annotation [`AtlAnnot`]
+=============================
 
 Installation
 ------------
-Because of the limitations of the ANTsPy library, which is used internally and is installed
-as part of the `warpme`/`atlas_alignment` dependency, it is necessary to use python version 3.6.
-
 To install run
 ```shell
 $ pip install .
-```
-
-If you are working on the BB5 please also run the following command:
-```shell
-$ pip install /gpfs/bbp.cscs.ch/home/krepl/dev/ANTsPy/old_builds/gcc_6.4_jorge/antspyx-0.2.0-cp36-cp36m-linux_x86_64.whl
 ```
 
 Data

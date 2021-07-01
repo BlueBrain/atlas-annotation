@@ -5,7 +5,7 @@ import sys
 
 import nrrd
 
-from deal.atlas_merge import coarse_merge, fine_merge
+from atlannot.atlas_merge import coarse_merge, fine_merge
 
 
 def parse_args():

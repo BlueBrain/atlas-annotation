@@ -1,10 +1,10 @@
-"""The DEep AtLas module (DEAL)."""
+"""The Atlas Annotation (atlannot) package."""
 import pathlib
 
 import numpy as np
 from atlalign.base import DisplacementField
 
-from deal.utils import load_nrrd
+from atlannot.utils import load_nrrd
 
 from .version import __version__  # noqa: F401
 

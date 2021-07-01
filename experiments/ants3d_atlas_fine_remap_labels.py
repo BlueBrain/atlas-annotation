@@ -6,9 +6,9 @@ import sys
 import numpy as np
 import utils
 
-from deal import load_volume
-from deal.ants import register, transform
-from deal.utils import remap_labels
+from atlannot import load_volume
+from atlannot.ants import register, transform
+from atlannot.utils import remap_labels
 
 # Parameters
 description = """\

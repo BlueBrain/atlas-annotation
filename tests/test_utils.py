@@ -1,13 +1,12 @@
-"""Test deal utils module."""
 import pathlib
 
 import nrrd
 import numpy as np
 import pytest
 
-import deal.utils
-from deal import load_volume
-from deal.utils import (
+import atlannot.utils
+from atlannot import load_volume
+from atlannot.utils import (
     add_middle_line,
     atlas_symmetry_score,
     compose,
@@ -186,7 +185,7 @@ def test_image_convolution(binary):
 )
 def test_kernels(binary, kernel):
     """Test different convolutions of images."""
-    conv = getattr(deal.utils, kernel)
+    conv = getattr(atlannot.utils, kernel)
     img = np.zeros((10, 10))
     img[4:6, :] = 1
     result = conv(img, binary=binary)
