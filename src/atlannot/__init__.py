@@ -2,7 +2,7 @@
 import pathlib
 
 import numpy as np
-from atlalign.base import DisplacementField
+from atldld.base import DisplacementField
 
 from atlannot.utils import load_nrrd
 

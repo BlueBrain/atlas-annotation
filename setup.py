@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 install_requires = [
     "antspyx==0.2.4",
-    "atlalign==0.5.1",
+    "atldld==0.2.2",
     "dvc[ssh]>=2",
     "matplotlib",
     "numpy",
