@@ -89,18 +89,20 @@ def test_remap_labels(n_atls, seed):
     atl = np.arange(0, 100)
     inp_atl = atl * 5
     inp = [inp_atl for _ in range(n_atls)]
-    result_atls = remap_labels(inp, seed=seed)
+    result_atls, mapping = remap_labels(inp, seed=seed)
     assert len(result_atls) == n_atls
     for result in result_atls:
         assert np.all(np.unique(result) == atl)
         assert result.shape == atl.shape
+    assert isinstance(mapping, dict)
 
     atl = np.arange(0, 100)
     atl2 = np.arange(0, 200)
-    result_atls = remap_labels([atl, atl2], seed=seed)
+    result_atls, mapping = remap_labels([atl, atl2], seed=seed)
     assert len(result_atls) == 2
     assert result_atls[0].shape == atl.shape
     assert result_atls[1].shape == atl2.shape
+    assert isinstance(mapping, dict)
 
 
 @pytest.mark.parametrize("shape", [(10, 10), (22, 11, 1, 2)])

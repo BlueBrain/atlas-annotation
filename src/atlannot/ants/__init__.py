@@ -6,6 +6,8 @@ import ants
 import nibabel
 import numpy as np
 
+from atlannot.utils import remap_labels
+
 
 def register(fixed, moving, **ants_kwargs):
     """Perform an intensity-based registration.
@@ -117,6 +119,12 @@ def transform(image, nii_data, **ants_kwargs):
     # This specifies that for each voxel the data contains a vector
     nii.header.set_intent("vector")
 
+    # This step is necessary when the transform is performed on atlases.
+    # If label values are too big, can be wrongly changed during transform.
+    is_atlas = ants_kwargs.get("interpolator") == "genericLabel"
+    if is_atlas:
+        image, labels_mapping = remap_labels(image)
+
     image = ants.from_numpy(image)
     with tempfile.TemporaryDirectory() as out_dir:
         # ants.apply_transforms needs a file on disk
@@ -133,6 +141,12 @@ def transform(image, nii_data, **ants_kwargs):
     # Delete temporary nii file
     if os.path.exists(nii_file):
         os.remove(nii_file)
+
+    if is_atlas:
+        warped_temp = np.zeros_like(warped)
+        for before, after in labels_mapping.items():
+            warped_temp[warped == after] = before
+        warped = warped_temp
 
     # This is only true if the transformation was successful
     if isinstance(warped, ants.ANTsImage):

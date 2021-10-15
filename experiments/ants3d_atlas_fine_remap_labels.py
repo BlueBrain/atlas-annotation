@@ -122,7 +122,7 @@ def preprocess_atlases(*atlases, seed=None):
     new_atlases : Iterable of np.ndarray
         Preprocessed atlases
     """
-    atlases_pre = remap_labels(atlases, seed=seed)
+    atlases_pre, _ = remap_labels(atlases, seed=seed)
     return [atlas.astype(np.float32) for atlas in atlases_pre]
 
 

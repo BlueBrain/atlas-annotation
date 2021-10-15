@@ -334,6 +334,9 @@ def remap_labels(atlases, seed=None):
     -------
     new_atlases : list of np.ndarray
         List of remapped atlases.
+
+    mapping : dict of int
+        Dictionary containing the mapping between previous and new labels.
     """
     new_atlases = [atl.copy() for atl in atlases]
     unique_labels = np.unique(np.concatenate([np.unique(atl) for atl in atlases]))
@@ -348,7 +351,7 @@ def remap_labels(atlases, seed=None):
     for atl, new_atl in zip(atlases, new_atlases):
         for value_from, value_to in mapping.items():
             new_atl[atl == value_from] = value_to
-    return new_atlases
+    return new_atlases, mapping
 
 
 # TRANSFORMATION COMPOSITION

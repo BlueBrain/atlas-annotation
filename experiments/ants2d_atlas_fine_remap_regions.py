@@ -101,7 +101,7 @@ def preprocess_atlases(*atlases):
     new_atlases : Iterable of np.ndarray
         Preprocessed atlases
     """
-    atlases = atlannot.utils.remap_labels(atlases)
+    atlases, _ = atlannot.utils.remap_labels(atlases)
     return [atlas.astype(np.float32) for atlas in atlases]
 
 
