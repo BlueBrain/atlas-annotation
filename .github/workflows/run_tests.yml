@@ -9,6 +9,9 @@ jobs:
     steps:
       - name: checkout latest commit
         uses: actions/checkout@v2
+      - uses: "actions/setup-python@v2"
+        with:
+          python-version: "3.7"
       - name: install python dependencies
         run: |
           apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
@@ -22,4 +25,5 @@ jobs:
           apt-get update && apt-get install -y libgl1-mesa-dev # Fix cv2 error: https://stackoverflow.com/q/63977422/2804645
           pip install ".[interactive]"
           pip install -U pytest pytest-cov
+          pip freeze
           pytest --color=yes --junitxml=report.xml
