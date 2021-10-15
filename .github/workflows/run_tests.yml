@@ -1,0 +1,27 @@
+name: CI
+on:
+  push:
+    branches: main
+  pull_request:
+jobs:
+  run_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout latest commit
+        uses: actions/checkout@v2
+      - name: install python dependencies
+        run: |
+          apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
+          python -m pip install --upgrade pip
+          pip install -U pip setuptools wheel
+          pip install tox
+      - name: Static Analysis
+        run: tox -vv -e lint
+      - name: Test
+        run: |
+          apt-get update && apt-get install -y libgl1-mesa-dev # Fix cv2 error: https://stackoverflow.com/q/63977422/2804645
+          pip install -r requirements.txt
+          pip install -r requirements-interactive.txt
+          pip install ".[interactive]"
+          pip install -U pytest pytest-cov
+          pytest --color=yes --junitxml=report.xml
