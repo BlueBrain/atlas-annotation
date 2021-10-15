@@ -24,6 +24,7 @@ jobs:
         run: |
           apt-get update && apt-get install -y libgl1-mesa-dev # Fix cv2 error: https://stackoverflow.com/q/63977422/2804645
           pip install ".[interactive]"
+          pip install -r requirements.txt
+          pip install -r requirements-interactive.txt
           pip install -U pytest pytest-cov
-          pip freeze
           pytest --color=yes --junitxml=report.xml
