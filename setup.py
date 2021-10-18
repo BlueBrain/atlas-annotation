@@ -20,6 +20,10 @@ extras_require = {
         "pytest-cov",
         "tox",
     ],
+    "docs": [
+        "sphinx>=1.3",
+        "sphinx-bluebrain-theme",
+    ],
     "interactive": [
         "ipython",
         "ipywidgets",
