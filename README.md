@@ -16,13 +16,13 @@
 If you want to try the latest version, you can install from source.
 
 ```shell
-$ pip install git+https://github.com/BlueBrain/atlas-annotation
+pip install git+https://github.com/BlueBrain/atlas-annotation
 ```
 
 ### Installation for development
 If you want a dev install, you should install the latest version from source with all the extra requirements for running test.
 
-```
+```shell
 git clone https://github.com/BlueBrain/atlas-annotation
 cd atlas-annotation
 pip install -e '.[data, dev, interactive]'
@@ -46,23 +46,23 @@ installed together with this library.
 
 If you are working on the BB5 please run the following commands first:
 ```shell
-$ cd data
-$ dvc remote add --local gpfs /gpfs/bbp.cscs.ch/data/project/proj101/dvc/remotes/atlas_annotation
+cd data
+dvc remote add --local gpfs /gpfs/bbp.cscs.ch/data/project/proj101/dvc/remotes/atlas_annotation
 ```
 
 All data is stored in the `data` directory. DVC is similar to git. To pull all original
 data from the remote run
 ```shell
-$ cd data
-$ dvc pull
+cd data
+dvc pull
 ```
 Note that you need to have permissions for project 101, as the data is stored
 in the corresponding GPFS space.
 
 It is also possible to selectively pull data with
 ```shell
-$ cd data
-$ dvc pull <filename>.dvc
+cd data
+dvc pull <filename>.dvc
 ```
 where `<filename>` should be replaced by one of the filenames found in the `data` directory.
 See the `data/README.md` file for the description of different data files.
@@ -74,7 +74,7 @@ scripts is not activated by default. In order to use it you need to specify
 an additional `interactive` option upon installing this package. This can
 be done as follows:
 ```shell
-$ pip install ".[interactive]"
+pip install ".[interactive]"
 ```
 
 Furthermore, you will need JupyterLab or Jupyter Notebook installed in your virtual
