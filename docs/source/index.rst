@@ -15,7 +15,7 @@ Welcome to Atlas Annotation's documentation!
    :maxdepth: 2
    :caption: API Reference
 
-   source/api/atlannot
+   api/atlannot
 
 
 Indices and tables
