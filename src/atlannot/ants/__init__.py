@@ -19,7 +19,7 @@ def register(fixed, moving, **ants_kwargs):
     moving : np.ndarray
         The moving image that will be registered to the fixed image. Should
         have d-type float32.
-    ants_kwargs :
+    ants_kwargs
         Any additional registration parameters as specified in the
         documentation for `ants.registration`.
 
@@ -86,9 +86,11 @@ def transform(image, nii_data, **ants_kwargs):
         Additional transformation parameters as specified in the
         documentation for `ants.apply_transforms`. Should not contain
         any of these parameters:
+
             - fixed
             - moving
             - transforms
+
         A useful parameter that can be specified in `ants_kwargs` is
         `interpolator`. For transforming usual images it can be set
         to "linear", while for annotation atlases the value "genericLabel"

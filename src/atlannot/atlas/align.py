@@ -15,6 +15,7 @@ def unfurl_regions(atlas, meta, progress_bar=None):
     depth 2, i. e. it has regions at level 0 (= the background),
     level 1, and level 2, then the slice will be expanded into
     3 slices:
+
         - The original slice
         - The slice with regions at level 2 removed
         - The slice with regions at levels 2 and 1 removed (leaving
