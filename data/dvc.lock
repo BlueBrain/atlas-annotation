@@ -50,8 +50,8 @@ stages:
       md5: 1ad82e26144e6154f3b19972f5a03f81
       size: 1891712
     - path: combine_fiber.py
-      md5: c9d0f1ffb1844dfcad2dfa977f3a3799
-      size: 1221
+      md5: 77277aea9d6c323a24cd54678a21cc03
+      size: 1810
     outs:
     - path: annotation_25_2011_full.nrrd
       md5: 2b5d0b3961313b320e5867bc3f741c5c
@@ -67,8 +67,8 @@ stages:
       md5: 5012b7fa0c0fd23dc455462e9b6298f4
       size: 4035363
     - path: atlas_merge.py
-      md5: 87188de8334f6d6e641a13b62a1bcd99
-      size: 1580
+      md5: 78ce7a32433cdc6da1dcb56680f1c223
+      size: 2169
     - path: brain_regions.json
       md5: 2edb440f2c6afd463f6261712ba5bb6f
       size: 637735
@@ -90,8 +90,8 @@ stages:
       md5: 5012b7fa0c0fd23dc455462e9b6298f4
       size: 4035363
     - path: atlas_merge.py
-      md5: 87188de8334f6d6e641a13b62a1bcd99
-      size: 1580
+      md5: 78ce7a32433cdc6da1dcb56680f1c223
+      size: 2169
     - path: brain_regions.json
       md5: 2edb440f2c6afd463f6261712ba5bb6f
       size: 637735
