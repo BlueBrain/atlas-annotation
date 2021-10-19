@@ -17,7 +17,6 @@ from setuptools import find_packages, setup
 install_requires = [
     "antspyx==0.2.4",
     "atldld==0.2.2",
-    "dvc[ssh]>=2",
     "matplotlib",
     "numpy",
 ]
@@ -32,6 +31,9 @@ extras_require = {
         "pytest",
         "pytest-cov",
         "tox",
+    ],
+    "data": [
+        "dvc[ssh]>=2",
     ],
     "interactive": [
         "ipython",

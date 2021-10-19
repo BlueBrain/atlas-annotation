@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-ipython==7.16.1
-ipywidgets==7.6.3
+ipython==7.28.0
+ipywidgets==7.6.5
 nibabel==3.2.1
 pynrrd==0.4.2
-scipy==1.2.1
+scipy==1.7.1
 toml==0.10.2
-tqdm==4.56.2
+tqdm==4.62.3
