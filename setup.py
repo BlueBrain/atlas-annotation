@@ -52,6 +52,7 @@ extras_require = {
 
 setup(
     name="atlannot",
+    author="Blue Brain Project, EPFL",
     use_scm_version={
         "write_to": "src/atlannot/version.py",
         "write_to_template": '"""The package version."""\n__version__ = "{version}"\n',
