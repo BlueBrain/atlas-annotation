@@ -32,3 +32,6 @@ jobs:
           pip install -r requirements-interactive.txt
           pip install -U pytest pytest-cov
           pytest --color=yes --junitxml=report.xml
+      - name: Building Documentation
+        run: |
+          tox -e docs

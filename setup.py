@@ -35,6 +35,10 @@ extras_require = {
     "data": [
         "dvc[ssh]>=2",
     ],
+    "docs": [
+        "sphinx>=1.3",
+        "sphinx-bluebrain-theme",
+    ],
     "interactive": [
         "ipython",
         "ipywidgets",

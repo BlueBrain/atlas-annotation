@@ -181,20 +181,20 @@ def filter_region(
 
     Returns
     -------
-    filter_
+    filter
         3d numpy ndarray of boolean, boolean mask with all the voxels of
         a region and its children set to True.
     """
     if not is_leaf[allname]:
-        filter_ = np.in1d(
+        filter = np.in1d(
             annotation,
             np.concatenate(
                 (children[allname], [region_dictionary_to_id_allname[allname]])
             ),
         ).reshape(annotation.shape)
     else:
-        filter_ = annotation == region_dictionary_to_id_allname[allname]
-    return filter_
+        filter = annotation == region_dictionary_to_id_allname[allname]
+    return filter
 
 
 def return_ids_containing_str_list(str_list):
