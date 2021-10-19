@@ -12,4 +12,3 @@ htmlcov/
 !.env*.example
 .python-version
 /src/atlannot/version.py
-docs/_build/
