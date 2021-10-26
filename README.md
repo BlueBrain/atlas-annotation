@@ -15,7 +15,6 @@ them to CCFv3.
     * [Downloading data from scratch](#downloading-data-from-scratch)
     * [Pulling from the remote](#pulling-from-the-remote)
 * [Examples](#examples)
-    * [Experiments](#experiments)
 * [Notebooks, Widgets, and Experiments](#notebooks-widgets-and-experiments)
 * [Funding & Acknowledgment](#funding--acknowledgment)
 
@@ -88,18 +87,17 @@ See the [`data/README.md`](data/README.md) file for the description of different
 
 ## Examples
 
-### Experiments
-
-If you want to see how `atlannot` can be used, do not hesitate to check the `experiments/` folder 
-containing several scripts that can be easily launched by command line interface. 
-
-To access the experiment scripts, one needs to first clone the repository.
+You can find numerous examples of the usage of `atlannot` package in the scripts located
+in the [`experiments`](experiments) directory. 
 ```shell
-git clone https://github.com/BlueBrain/atlas-annotation
+git clone https://github.com/BlueBrain/atlas-annotation#egg=atlannot
 cd atlas-annotation/experiments
 ```
 
-To run the experiments, one needs to install additional packages for interactive use.
+To execute the scripts in this `experiments` folder, please first follow the data
+preparation instructions found in the [data](#data) section. 
+
+Next, one needs also to install additional packages for interactive use.
 ```shell
 pip install git+https://github.com/BlueBrain/atlas-annotation#egg=atlannot[interactive]
 ```
