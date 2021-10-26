@@ -11,9 +11,11 @@ them to CCFv3.
 * [Installation](#installation)
     * [Installation from source](#installation-from-source)
     * [Installation for development](#installation-for-development)
-* [Examples](#examples)
-    * [Experiments folder](#experiments-folder)
 * [Data](#data)
+    * [Downloading data from scratch](#downloading-data-from-scratch)
+    * [Pulling from the remote](#pulling-from-the-remote)
+* [Examples](#examples)
+    * [Experiments](#experiments)
 * [Notebooks, Widgets, and Experiments](#notebooks-widgets-and-experiments)
 * [Funding & Acknowledgment](#funding--acknowledgment)
 
