@@ -54,7 +54,7 @@ stages:
       size: 1810
     outs:
     - path: annotation_25_2011_full.nrrd
-      md5: 2b5d0b3961313b320e5867bc3f741c5c
+      md5: 661b39cd91b5fa945f07aa08ad52c04d
       size: 5819659
   atlas-coarse-merge:
     cmd: python atlas_merge.py coarse annotation_25_2011_full.nrrd annotation_25_2017.nrrd
