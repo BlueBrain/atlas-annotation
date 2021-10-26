@@ -103,11 +103,10 @@ To run the experiments, one needs to install additional packages for interactive
 pip install git+https://github.com/BlueBrain/atlas-annotation#egg=atlannot[interactive]
 ```
 
-Once the cloning and the installation and the download of data is done, you can use any
-script you want, for example:
+Once the cloning, the installation and the download of data is done, you can use any
+script, for example:
 ```shell
 python ants2d_atlas_fine.py
-python ants2d_avg_nissl_smoothing_uniform.py
 ```
 
 
