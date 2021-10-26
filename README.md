@@ -35,44 +35,79 @@ cd atlas-annotation
 pip install -e '.[data, dev, interactive]'
 ```
 
-## Examples
-
-### Experiments folder
-If you want to see how `atlannot` can be used, do not hesitate to check the `experiments/` folder 
-containing several scripts that can be easily launched by command line interface. 
-
-```shell
-cd experiments/
-python ants2d_atlas_fine.py
-```
-
 ## Data
 
-The data for this project is managed using the DVC tool. It is automatically
-installed together with this library.
+The data for this project is managed using the DVC tool. There are two options to
+get the data:
+- Download them from scratch
+- Pull the pre-downloaded data from a remote machine (on the BBP intranet)
 
-If you are working on the BB5 please run the following commands first:
+In either case, one needs to clone the repository and install the extra `data` dependencies.
 ```shell
-cd data
-dvc remote add --local gpfs /gpfs/bbp.cscs.ch/data/project/proj101/dvc/remotes/atlas_annotation
+git clone https://github.com/BlueBrain/atlas-annotation
+cd atlas-annotation/data
+pip install git+https://github.com/BlueBrain/atlas-annotation#egg=atlannot[data]
 ```
 
-All data is stored in the `data` directory. DVC is similar to git. To pull all original
-data from the remote run
+### Downloading data from scratch
+Downloading data from scratch can be done easily using dvc command.
 ```shell
-cd data
+dvc repro
+```
+This step might take some time. 
+
+In some cases you might not need all data. Then it is possible to download unprepared 
+data that you need by running specific DVC stages. Refer to the
+[`data/README.md`](data/README.md) file for the description of different data files.
+
+### Pulling from the remote
+This only works if you have access to `proj101` on BBP intranet. Otherwise, follow 
+the previous section [Downloading data from scratch](#downloading-data-from-scratch) 
+instructions.
+
+If you are working on the BB5 please run the following commands 
+first:
+```shell
+dvc remote add --local gpfs_proj101 /gpfs/bbp.cscs.ch/data/project/proj101/dvc/remotes/atlas_annotation
+```
+
+To pull all original data from the remote run
+```shell
 dvc pull
 ```
-Note that you need to have permissions for project 101, as the data is stored
-in the corresponding GPFS space.
 
 It is also possible to selectively pull data with
 ```shell
-cd data
 dvc pull <filename>.dvc
 ```
 where `<filename>` should be replaced by one of the filenames found in the `data` directory.
-See the `data/README.md` file for the description of different data files.
+See the [`data/README.md`](data/README.md) file for the description of different data files.
+
+## Examples
+
+### Experiments
+
+If you want to see how `atlannot` can be used, do not hesitate to check the `experiments/` folder 
+containing several scripts that can be easily launched by command line interface. 
+
+To access the experiment scripts, one needs to first clone the repository.
+```shell
+git clone https://github.com/BlueBrain/atlas-annotation
+cd atlas-annotation/experiments
+```
+
+To run the experiments, one needs to install additional packages for interactive use.
+```shell
+pip install git+https://github.com/BlueBrain/atlas-annotation#egg=atlannot[interactive]
+```
+
+Once the cloning and the installation and the download of data is done, you can use any
+script you want, for example:
+```shell
+python ants2d_atlas_fine.py
+python ants2d_avg_nissl_smoothing_uniform.py
+```
+
 
 ## Notebooks, Widgets, and Experiments
 
@@ -81,7 +116,7 @@ scripts is not activated by default. In order to use it you need to specify
 an additional `interactive` option upon installing this package. This can
 be done as follows:
 ```shell
-pip install ".[interactive]"
+pip install git+https://github.com/BlueBrain/atlas-annotation#egg=atlannot[interactive]
 ```
 
 Furthermore, you will need JupyterLab or Jupyter Notebook installed in your virtual
