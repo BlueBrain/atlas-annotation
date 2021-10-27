@@ -92,7 +92,7 @@ If you are working on the BB5 please run the following commands
 first:
 ```shell
 dvc remote add --local gpfs_proj101 \
-/gpfs/bbp.cscs.ch/data/project/proj101/dvc/remotes/atlas_annotation
+/gpfs/bbp.cscs.ch/data/project/proj101/dvc_remotes/atlas_annotation
 ```
 
 To pull all original data from the remote run
