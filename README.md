@@ -19,6 +19,28 @@ them to CCFv3.
 * [Funding & Acknowledgment](#funding--acknowledgment)
 
 ## Installation
+Note that due to some of our dependencies we're curently limited to python
+version `3.7`. Please make sure you set up a virtual environment with that
+version before trying to install this library.
+
+If you are part of the Blue Brain Project and are working on the BB5 you can
+find the correct python version in the archive modules between `archive/2020-02`
+and `archive/2020-12` (inclusive). Here's an example of a set of commands
+that will set up your environment on the BB5:
+```shell
+module purge
+module load archive/2020-12
+module load python
+python -m venv venv
+. ./venv/bin/activate
+python --version
+```
+
+We also recommend that you make sure that `pip` is up to date and that the
+packages `wheel` and `setuptools` are installed:
+```shell
+pip install --upgrade pip wheel setuptools
+```
 
 ### Installation from source
 If you want to try the latest version, you can install from source.
