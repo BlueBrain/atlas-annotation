@@ -138,11 +138,7 @@ def transform(image, nii_data, **ants_kwargs):
     # If label values are too big, can be wrongly changed during transform.
     is_atlas = ants_kwargs.get("interpolator") == "genericLabel"
     if is_atlas:
-        images_list, labels_mapping = remap_labels(
-            [
-                image,
-            ]
-        )
+        images_list, labels_mapping = remap_labels([image])
         image = images_list[0]
 
     image = ants.from_numpy(image)
