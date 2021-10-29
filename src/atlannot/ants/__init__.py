@@ -138,7 +138,12 @@ def transform(image, nii_data, **ants_kwargs):
     # If label values are too big, can be wrongly changed during transform.
     is_atlas = ants_kwargs.get("interpolator") == "genericLabel"
     if is_atlas:
-        image, labels_mapping = remap_labels(image)
+        images_list, labels_mapping = remap_labels(
+            [
+                image,
+            ]
+        )
+        image = images_list[0]
 
     image = ants.from_numpy(image)
     with tempfile.TemporaryDirectory() as out_dir:
@@ -157,17 +162,19 @@ def transform(image, nii_data, **ants_kwargs):
     if os.path.exists(nii_file):
         os.remove(nii_file)
 
+    # This is only true if the transformation was successful
+    if isinstance(warped, ants.ANTsImage):
+        warped = warped.numpy()
+    else:
+        raise RuntimeError("Could not apply the transformation")
+
     if is_atlas:
         warped_temp = np.zeros_like(warped)
         for before, after in labels_mapping.items():
             warped_temp[warped == after] = before
         warped = warped_temp
 
-    # This is only true if the transformation was successful
-    if isinstance(warped, ants.ANTsImage):
-        return warped.numpy()
-    else:
-        raise RuntimeError("Could not apply the transformation")
+    return warped
 
 
 def stack_2d_transforms(nii_data_array):
