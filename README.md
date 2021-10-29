@@ -77,7 +77,7 @@ Downloading data from scratch can be done easily using dvc command.
 ```shell
 dvc repro
 ```
-This step might take some time. 
+This step might take some time <span style="color:orange;">(around 1 hour)</span>. 
 
 In some cases you might not need all data. Then it is possible to download unprepared 
 data that you need by running specific DVC stages. Refer to the
@@ -109,6 +109,70 @@ See the [`data/README.md`](data/README.md) file for the description of different
 
 ## Examples
 
+Here are some examples of the functionalities that one can find in the `atlinter` package.
+
+### Registration
+
+One can compute the registration between a fixed and a moving image. 
+The inputs can be 2D or 3D, the only constraint is that they have to be of the same shape.
+
+```python
+import numpy as np
+
+from atlannot.ants import register, transform
+
+fixed = np.random.rand(20, 20)   # replace by a real image
+moving = np.random.rand(20, 20)  # replace by a real image
+# Computation of the displacement field from moving image to fixed image.
+nii_data = register(fixed.astype(np.float32), moving.astype(np.float32)) 
+# Apply the displacement to moving image.
+warped = transform(moving.astype(np.float32), nii_data)
+```
+
+### Image Manipulation
+
+`atlannot` has also a lot of utility functions to manipulate images
+
+```python
+import numpy as np
+from atlannot.utils import (
+  add_middle_line, 
+  edge_laplacian_thick, 
+  edge_laplacian_thin, 
+  edge_sobel, 
+  image_convolution,
+  split_halfs,
+)
+
+# Instantiate an image 
+img = np.random.rand(20, 20)  # Please replace by a real image
+
+# Apply some convolution to the image
+kernel = [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]]
+img1 = image_convolution(img, kernel=kernel)
+img2 = edge_laplacian_thick(img)
+img3 = edge_sobel(img)
+img4 = edge_laplacian_thick(img)
+
+# Add a middle line, can choose the axis, the tickness, ...
+img5 = add_middle_line(img, axis=0, thickness=2)
+
+# Split the image into two 
+half_imgs = split_halfs(img2, axis=0)[0]
+```
+
+### Utilities
+
+The `atlannot` contains other utilities:
+- Atlas utilities:
+  - Merge atlases to harmonize the scripts
+  - Unfurl regions if the regions are structured in tree
+  - Compute misalignments
+- Notebook utilities:
+  - Volume Viewer to see volume in every directions
+  - Add colored legend to atlas images
+
+### Concrete examples
 You can find numerous examples of the usage of `atlannot` package in the scripts located
 in the [`experiments`](experiments) directory. 
 ```shell
