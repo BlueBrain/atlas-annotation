@@ -19,7 +19,7 @@ them to CCFv3.
 * [Funding & Acknowledgment](#funding--acknowledgment)
 
 ## Installation
-Note that due to some of our dependencies we're curently limited to python
+Note that due to some of our dependencies we're currently limited to python
 version `3.7`. Please make sure you set up a virtual environment with that
 version before trying to install this library.
 
@@ -36,7 +36,7 @@ python -m venv venv
 python --version
 ```
 
-We also recommend that you make sure that `pip` is up to date and that the
+We also recommend that you make sure that `pip` is up-to-date and that the
 packages `wheel` and `setuptools` are installed:
 ```shell
 pip install --upgrade pip wheel setuptools
