@@ -117,6 +117,9 @@ One can compute the registration between a fixed and a moving image.
 Those images can be of any type (for example Atlas Annotations or simply intensity images).
 The inputs can be 2D or 3D, the only constraint is that they have to be of the same shape.
 
+The main use-case of `atlannot` is the registration of brain volumes from one coordinate 
+framework to another. It is then needed to allow some flexibility in terms of inputs type to
+accept any data such as regions annotations, intensity images. 
 
 ```python
 import numpy as np
