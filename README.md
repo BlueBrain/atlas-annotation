@@ -109,12 +109,14 @@ See the [`data/README.md`](data/README.md) file for the description of different
 
 ## Examples
 
-Here are some examples of the functionalities that one can find in the `atlinter` package.
+Here are some examples of the functionalities that one can find in the `atlannot` package.
 
 ### Registration
 
 One can compute the registration between a fixed and a moving image. 
+Those images can be of any type (for example Atlas Annotations or simply intensity images).
 The inputs can be 2D or 3D, the only constraint is that they have to be of the same shape.
+
 
 ```python
 import numpy as np
@@ -131,8 +133,32 @@ warped = transform(moving.astype(np.float32), nii_data)
 
 ### Image Manipulation
 
-`atlannot` has also a lot of utility functions to manipulate images
+`atlannot` has also a lot of utility functions to manipulate images in order
+to make some pre-processing/post-processing on images.
 
+A concrete example could be to combine a region annotation and an intensity image together and
+use the final result as an input to the registration.
+To merge information from both images, one could superpose regions borders of the
+annotation on top of the intensity image.
+
+```python
+import numpy as np
+from atlannot.utils import edge_laplacian_thin, merge
+
+intensity_img = np.random.rand(20, 20) # Load intensity image here
+
+# Create fake annotation image
+annotation_img = np.zeros((20, 20))    # Load annotation image here
+annotation_img[5:15, 5:15] = 1         # Load annotation image here
+
+# Compute the borders of the annotation image
+borders = edge_laplacian_thin(annotation_img)
+
+# Merge intensity image and annotation image
+merge_img = merge(intensity_img, borders)
+```
+
+See here other manipulation one can do on any kind of images:
 ```python
 import numpy as np
 from atlannot.utils import (
@@ -168,6 +194,7 @@ The `atlannot` contains other utilities:
   - Merge atlases to harmonize the scripts
   - Unfurl regions if the regions are structured in tree
   - Compute misalignments
+  - Remapping the labels
 - Notebook utilities:
   - Volume Viewer to see volume in every directions
   - Add colored legend to atlas images
