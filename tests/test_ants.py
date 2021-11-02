@@ -73,6 +73,11 @@ def test_transform(monkeypatch):
     nii_data = np.random.randn(10, 20, 1, 1, 2)
     atlannot.ants.transform(image, nii_data)
 
+    # 2D - atlas
+    atlas = np.random.randint(5, size=(10, 20)).astype(np.float32)
+    nii_data = np.random.randn(10, 20, 1, 1, 2)
+    atlannot.ants.transform(atlas, nii_data, interpolator="genericLabel")
+
     # 3D
     image = np.random.randn(5, 10, 20).astype(np.float32)
     nii_data = np.random.randn(5, 10, 20, 1, 3)
