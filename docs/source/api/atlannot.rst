@@ -19,7 +19,6 @@ Submodules
    :maxdepth: 4
 
    atlannot.utils
-   atlannot.version
 
 Module contents
 ---------------
