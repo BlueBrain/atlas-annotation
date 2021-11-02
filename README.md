@@ -9,7 +9,8 @@ for deforming the Nissl volume and the CCFv2 annotations in order to re-align
 them to CCFv3.
 
 * [Installation](#installation)
-    * [Installation from source](#installation-from-source)
+    * [Python Version and Environment](#python-version-and-environment)
+    * [Install "Atlas Annotation"](#install-atlas-annotation)
 * [Data](#data)
     * [Downloading data from scratch](#downloading-data-from-scratch)
     * [Pulling from the remote](#pulling-from-the-remote)
@@ -18,9 +19,12 @@ them to CCFv3.
 * [Funding & Acknowledgment](#funding--acknowledgment)
 
 ## Installation
-Note that due to some of our dependencies we're curently limited to python
+### Python Version and Environment
+Note that due to some of our dependencies we're currently limited to python
 version `3.7`. Please make sure you set up a virtual environment with that
-version before trying to install this library.
+version before trying to install this library. If you're unsure how to do that
+please have a look at [conda](https://docs.conda.io) or
+[pyenv](https://github.com/pyenv/pyenv).
 
 If you are part of the Blue Brain Project and are working on the BB5 you can
 find the correct python version in the archive modules between `archive/2020-02`
@@ -35,17 +39,24 @@ python -m venv venv
 python --version
 ```
 
-We also recommend that you make sure that `pip` is up to date and that the
+We also recommend that you make sure that `pip` is up-to-date and that the
 packages `wheel` and `setuptools` are installed:
 ```shell
 pip install --upgrade pip wheel setuptools
 ```
 
-### Installation from source
-If you want to try the latest version, you can install from source.
-
+### Install "Atlas Annotation"
+In order to access the data and the example scripts a local clone of this
+repository is required. Run these commands to get it:
 ```shell
-pip install git+https://github.com/BlueBrain/atlas-annotation
+git clone https://github.com/BlueBrain/atlas-annotation
+cd atlas-annotation
+```
+
+The "Atlas Interpolation" package can now be installed directly from the clone
+we just created:
+```shell
+pip install '.[data, interactive]'
 ```
 
 ## Data
