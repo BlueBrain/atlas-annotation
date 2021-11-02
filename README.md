@@ -60,16 +60,43 @@ pip install '.[data, interactive]'
 ```
 
 ## Data
-The data for this project is managed using the DVC tool. There are two options to
-get the data:
-- Download them from scratch
-- Pull the pre-downloaded data from a remote machine (on the BBP intranet)
+The data for this project is managed by the [DVC tool](https://dvc.org/) and all
+related files are located in the `data` directory. The DVC tool has already been
+installed together with the "Atlas Interpolation" package. Every time you need
+to run a DVC command (`dvc ...`) make sure to change to the `data` directory
+first (`cd data`).
 
-In either case, one needs to clone the repository and install the extra `data` dependencies.
+### Remote Storage Access
+We have already prepared all the data, but it is located on a remote storage
+that is only accessible to people within the Blue Brain Project who have
+access permissions to project `proj101`. If you're unsure you can test your
+permissions with the following command:
 ```shell
-git clone https://github.com/BlueBrain/atlas-annotation
-cd atlas-annotation/data
-pip install git+https://github.com/BlueBrain/atlas-annotation#egg=atlannot[data]
+ssh bbpv1.bbp.epfl.ch \
+"ls /gpfs/bbp.cscs.ch/data/project/proj101/dvc_remotes"
+```
+Possible outcomes:
+```shell
+# Access OK
+atlas_annotation
+atlas_interpolation
+
+# Access denied
+ls: cannot open directory [...]: Permission denied
+```
+Depending on whether you have access to the remote storage in the following
+sections you will either pull the data from the remote (`dvc pull`) or download
+the input data manually and re-run the data processing pipelines to reproduce
+the output data (`dvc repro`).
+
+If you work on the BB5 and have access to the remote storage then run the
+following command to short-circuit the remote access (because the remote is
+located on the BB5 itself):
+```shell
+cd data
+dvc remote add --local gpfs_proj101 \
+  /gpfs/bbp.cscs.ch/data/project/proj101/dvc_remotes/atlas_annotation
+cd ..
 ```
 
 ### Downloading data from scratch
