@@ -22,6 +22,7 @@ install_requires = [
     "atldld==0.2.2",
     "matplotlib",
     "numpy",
+    "pynrrd",
 ]
 
 extras_require = {
@@ -46,7 +47,6 @@ extras_require = {
         "ipython",
         "ipywidgets",
         "nibabel",
-        "pynrrd",
         "scipy",
         "toml",
         "tqdm",
