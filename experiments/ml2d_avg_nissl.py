@@ -81,7 +81,7 @@ def main():
     # Registration
     logger.info("Starting registration")
     dfs = []
-    for dim, x in enumerate(ml_input):
+    for _dim, x in enumerate(ml_input):
         img_reg, delta_xy = model_merged.predict(
             np.expand_dims(x, axis=0), batch_size=1
         )
