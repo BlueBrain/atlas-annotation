@@ -127,16 +127,19 @@ unprepared data that you need by running specific DVC stages. Refer to the
 files.
 
 ## Examples
-Here are some examples of the functionalities that one can find in the `atlannot` package.
+Here are some examples of the functionalities that one can find in the
+`atlannot` package.
 
 ### Registration
 One can compute the registration between a fixed and a moving image. 
-Those images can be of any type (for example Atlas Annotations or simply intensity images).
-The inputs can be 2D or 3D, the only constraint is that they have to be of the same shape.
+Those images can be of any type (for example Atlas Annotations or simply
+intensity images). The inputs can be 2D or 3D, the only constraint is that they
+have to be of the same shape.
 
-The main use-case of `atlannot` is the registration of brain volumes from one coordinate 
-framework to another. It is then needed to allow some flexibility in terms of inputs type to
-accept any data such as regions annotations, intensity images. 
+The main use-case of `atlannot` is the registration of brain volumes from one
+coordinate framework to another. It is then needed to allow some flexibility in
+terms of inputs type to accept any data such as regions annotations, intensity
+images. 
 
 ```python
 import numpy as np
@@ -155,10 +158,10 @@ warped = transform(moving.astype(np.float32), nii_data)
 `atlannot` has also a lot of utility functions to manipulate images in order
 to make some pre-processing/post-processing on images.
 
-A concrete example could be to combine a region annotation and an intensity image together and
-use the final result as an input to the registration.
-To merge information from both images, one could superpose regions borders of the
-annotation on top of the intensity image.
+A concrete example could be to combine a region annotation and an intensity
+image together and use the final result as an input to the registration.
+To merge information from both images, one could superpose regions borders of
+the annotation on top of the intensity image.
 
 ```python
 import numpy as np
@@ -218,23 +221,23 @@ The `atlannot` contains other utilities:
   - Add colored legend to atlas images
 
 ### Concrete examples
-You can find numerous examples of the usage of `atlannot` package in the scripts located
-in the [`experiments`](experiments) directory. 
+You can find numerous examples of the usage of `atlannot` package in the
+scripts located in the [`experiments`](experiments) directory. 
 ```shell
 git clone https://github.com/BlueBrain/atlas-annotation#egg=atlannot
 cd atlas-annotation/experiments
 ```
 
-To execute the scripts in this `experiments` folder, please first follow the data
-preparation instructions found in the [data](#data) section. 
+To execute the scripts in this `experiments` folder, please first follow the
+data preparation instructions found in the [data](#data) section. 
 
 Next, one needs also to install additional packages for interactive use.
 ```shell
 pip install git+https://github.com/BlueBrain/atlas-annotation#egg=atlannot[interactive]
 ```
 
-Once the cloning, the installation and the download of data is done, you can use any
-script, for example:
+Once the cloning, the installation and the download of data is done, you can 
+use any script, for example:
 ```shell
 python ants2d_atlas_fine.py
 ```
@@ -248,15 +251,17 @@ be done as follows:
 pip install git+https://github.com/BlueBrain/atlas-annotation#egg=atlannot[interactive]
 ```
 
-Furthermore, you will need JupyterLab or Jupyter Notebook installed in your virtual
-environment, as well as the corresponding `ipywidgets` plugin. Follow the following
-online instructions in order to do so:
-- How to install JupyterLab/Jupyter Notebook: https://jupyter.org/
-- How to install the `ipywidgets` plugin: https://ipywidgets.readthedocs.io/en/latest/user_install.html
+Furthermore, you will need JupyterLab or Jupyter Notebook installed in your
+virtual environment, as well as the corresponding `ipywidgets` plugin. Follow
+the following online instructions in order to do so:
+- How to install JupyterLab/Jupyter Notebook: https://jupyter.org
+- How to install the `ipywidgets` plugin:
+  https://ipywidgets.readthedocs.io/en/latest/user_install.html
 
 ## Funding & Acknowledgment
-The development of this software was supported by funding to the Blue Brain Project, 
-a research center of the École polytechnique fédérale de Lausanne (EPFL), 
-from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology.
+The development of this software was supported by funding to the Blue Brain
+Project, a research center of the École polytechnique fédérale de Lausanne
+(EPFL), from the Swiss government’s ETH Board of the Swiss Federal Institutes
+of Technology.
 
 Copyright (c) 2021 Blue Brain Project/EPFL
