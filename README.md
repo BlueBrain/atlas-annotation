@@ -60,7 +60,6 @@ pip install '.[data, interactive]'
 ```
 
 ## Data
-
 The data for this project is managed using the DVC tool. There are two options to
 get the data:
 - Download them from scratch
@@ -109,11 +108,9 @@ where `<filename>` should be replaced by one of the filenames found in the `data
 See the [`data/README.md`](data/README.md) file for the description of different data files.
 
 ## Examples
-
 Here are some examples of the functionalities that one can find in the `atlannot` package.
 
 ### Registration
-
 One can compute the registration between a fixed and a moving image. 
 Those images can be of any type (for example Atlas Annotations or simply intensity images).
 The inputs can be 2D or 3D, the only constraint is that they have to be of the same shape.
@@ -136,7 +133,6 @@ warped = transform(moving.astype(np.float32), nii_data)
 ```
 
 ### Image Manipulation
-
 `atlannot` has also a lot of utility functions to manipulate images in order
 to make some pre-processing/post-processing on images.
 
@@ -192,7 +188,6 @@ half_imgs = split_halfs(img2, axis=0)[0]
 ```
 
 ### Utilities
-
 The `atlannot` contains other utilities:
 - Atlas utilities:
   - Merge atlases to harmonize the scripts
@@ -225,9 +220,7 @@ script, for example:
 python ants2d_atlas_fine.py
 ```
 
-
 ## Notebooks, Widgets, and Experiments
-
 The additional functionality related to notebooks, widgets, and experiment
 scripts is not activated by default. In order to use it you need to specify
 an additional `interactive` option upon installing this package. This can
@@ -243,7 +236,6 @@ online instructions in order to do so:
 - How to install the `ipywidgets` plugin: https://ipywidgets.readthedocs.io/en/latest/user_install.html
 
 ## Funding & Acknowledgment
-
 The development of this software was supported by funding to the Blue Brain Project, 
 a research center of the École polytechnique fédérale de Lausanne (EPFL), 
 from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology.
