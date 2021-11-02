@@ -10,7 +10,6 @@ them to CCFv3.
 
 * [Installation](#installation)
     * [Installation from source](#installation-from-source)
-    * [Installation for development](#installation-for-development)
 * [Data](#data)
     * [Downloading data from scratch](#downloading-data-from-scratch)
     * [Pulling from the remote](#pulling-from-the-remote)
@@ -47,15 +46,6 @@ If you want to try the latest version, you can install from source.
 
 ```shell
 pip install git+https://github.com/BlueBrain/atlas-annotation
-```
-
-### Installation for development
-If you want a dev install, you should install the latest version from source with all the extra requirements for running test.
-
-```shell
-git clone https://github.com/BlueBrain/atlas-annotation
-cd atlas-annotation
-pip install -e '.[data, dev, interactive]'
 ```
 
 ## Data
