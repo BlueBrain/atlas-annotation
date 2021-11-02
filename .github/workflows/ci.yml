@@ -1,0 +1,68 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest commit
+        uses: actions/checkout@v2
+      - name: Set up python
+        uses: actions/setup-python@v2
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: lint-${{ runner.os }}-${{ hashFiles('tox.ini') }}
+      - name: Install tox
+        run: python -m pip install tox
+      - name: Run linting
+        run: tox -e lint
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest commit
+        uses: actions/checkout@v2
+        with: {"fetch-depth": 0}  # fetch all history with version tags
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with: {"python-version": "3.7"}
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: unit-${{ runner.os }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-interactive.txt') }}
+      - name: Set up the environment
+        run: |
+          # apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
+          # apt-get update && apt-get install -y libgl1-mesa-dev # Fix cv2 error: https://stackoverflow.com/q/63977422/2804645
+          pip install -U pip setuptools wheel
+          pip install -U pytest pytest-cov
+      - name: Install atlannot
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-interactive.txt
+          pip install ".[interactive]"
+      - name: Run unit tests
+        run: pytest --color=yes --durations=5 -v -m "" --cov
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest commit
+        uses: actions/checkout@v2
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with: {"python-version": "3.7"}
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: docs-${{ runner.os }}-${{ hashFiles('setup.py') }}
+      - name: Install tox
+        run: pip install tox
+      - name: Check the API docs
+        run: tox -e apidoc-check
+      - name: Build and check the docs
+        run: tox -e docs

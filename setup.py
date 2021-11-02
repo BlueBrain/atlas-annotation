@@ -30,8 +30,10 @@ extras_require = {
         "bandit",
         "black",
         "flake8",
+        "flake8-bugbear",
+        "flake8-comprehensions",
+        "flake8-docstrings",
         "isort",
-        "pydocstyle",
         "pytest",
         "pytest-cov",
         "tox",
@@ -56,6 +58,7 @@ extras_require = {
 setup(
     name="atlannot",
     author="Blue Brain Project, EPFL",
+    license="Apache-2.0",
     use_scm_version={
         "write_to": "src/atlannot/version.py",
         "write_to_template": '"""The package version."""\n__version__ = "{version}"\n',
@@ -66,8 +69,8 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/BlueBrain/atlas-annotation",
     project_urls={
-        "Source Code": "https://github.com/BlueBrain/atlas-annotation",
-        "Bug Tracker": "https://github.com/BlueBrain/atlas-annotation/issues",
+        "Source": "https://github.com/BlueBrain/atlas-annotation",
+        "Tracker": "https://github.com/BlueBrain/atlas-annotation/issues",
     },
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
