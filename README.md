@@ -12,8 +12,8 @@ them to CCFv3.
     * [Python Version and Environment](#python-version-and-environment)
     * [Install "Atlas Annotation"](#install-atlas-annotation)
 * [Data](#data)
-    * [Downloading data from scratch](#downloading-data-from-scratch)
-    * [Pulling from the remote](#pulling-from-the-remote)
+    * [Remote Storage Access](#remote-storage-access)
+    * [Get the Data](#get-the-data)
 * [Examples](#examples)
 * [Notebooks, Widgets, and Experiments](#notebooks-widgets-and-experiments)
 * [Funding & Acknowledgment](#funding--acknowledgment)
@@ -99,40 +99,32 @@ dvc remote add --local gpfs_proj101 \
 cd ..
 ```
 
-### Downloading data from scratch
-Downloading data from scratch can be done easily using dvc command.
+### Get the Data
+The purpose of the "Atlas Annotation" package is to align brain volumes and
+the corresponding atlases. This section explains how to get these data.
+
+If you have access to the remote storage (see above) then all data can be
+readily pulled from it:
 ```shell
-dvc repro
-```
-This step might take some time <span style="color:orange;">(around 1 hour)</span>. 
-
-In some cases you might not need all data. Then it is possible to download unprepared 
-data that you need by running specific DVC stages. Refer to the
-[`data/README.md`](data/README.md) file for the description of different data files.
-
-### Pulling from the remote
-This only works if you have access to `proj101` on BBP intranet. Otherwise, follow 
-the previous section [Downloading data from scratch](#downloading-data-from-scratch) 
-instructions.
-
-If you are working on the BB5 please run the following commands 
-first:
-```shell
-dvc remote add --local gpfs_proj101 \
-/gpfs/bbp.cscs.ch/data/project/proj101/dvc_remotes/atlas_annotation
-```
-
-To pull all original data from the remote run
-```shell
+cd data
 dvc pull
+cd ..
 ```
 
-It is also possible to selectively pull data with
+In the case where you don't have access to the remote storage, the data need
+to be downloaded from the original sources and the pre-processing needs to
+be run. Note that the pre-processing may take a long time (around an hour).
+Run the following commands to start this process:
 ```shell
-dvc pull <filename>.dvc
+cd data
+dvc repro
+cd ..
 ```
-where `<filename>` should be replaced by one of the filenames found in the `data` directory.
-See the [`data/README.md`](data/README.md) file for the description of different data files.
+
+In some cases you might not need all data. Then it is possible to download
+unprepared data that you need by running specific DVC stages. Refer to the
+[`data/README.md`](data/README.md) file for the description of different data
+files.
 
 ## Examples
 Here are some examples of the functionalities that one can find in the `atlannot` package.
