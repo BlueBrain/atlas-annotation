@@ -67,8 +67,8 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/BlueBrain/atlas-annotation",
     project_urls={
-        "Source Code": "https://github.com/BlueBrain/atlas-annotation",
-        "Bug Tracker": "https://github.com/BlueBrain/atlas-annotation/issues",
+        "Source": "https://github.com/BlueBrain/atlas-annotation",
+        "Tracker": "https://github.com/BlueBrain/atlas-annotation/issues",
     },
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
