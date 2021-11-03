@@ -8,7 +8,11 @@ Welcome to Atlas Annotation's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
+
+   installation
+   data
+   examples
 
 
 .. toctree::
