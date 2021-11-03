@@ -15,6 +15,7 @@ them to CCFv3.
    installation
    data
    examples
+   notebooks_widgets_experiments
 
 
 .. toctree::
