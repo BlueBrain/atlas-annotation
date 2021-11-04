@@ -146,12 +146,7 @@ def merge(ccfv2, ccfv3, brain_regions):
         if (
             region_data.is_leaf[allname]
             and id_reg not in ids_v3
-            and region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[id_reg]
-                ]
-            ]
-            in ids_v3
+            and region_meta.parent_id[id_reg] in ids_v3
         ):
             replace_label(ccfv2, id_reg, region_meta.parent_id[id_reg])
         elif region_data.is_leaf[allname] and (
@@ -206,19 +201,9 @@ def merge(ccfv2, ccfv3, brain_regions):
                 in region_data.id_to_region_dictionary_ALLNAME[id_reg]
             )
             and id_reg not in ids_v2
-            and region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[id_reg]
-                ]
-            ]
-            in ids_v2
+            and region_meta.parent_id[id_reg] in ids_v2
         ):
-            new_id = region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[id_reg]
-                ]
-            ]
-            replace_label(ccfv3, id_reg, new_id)
+            replace_label(ccfv3, id_reg, region_meta.parent_id[id_reg])
         if (
             "Frontal pole, cerebral cortex"
             in region_data.id_to_region_dictionary_ALLNAME[id_reg]
@@ -243,11 +228,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     while len(ids_to_correct) > 0:
         parent = ids_to_correct.pop()
         while parent not in uniques_v2:
-            parent = region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[parent]
-                ]
-            ]
+            parent = region_meta.parent_id[parent]
         for child in children_v3[region_data.id_to_region_dictionary_ALLNAME[parent]]:
             replace_label(ccfv3, child, parent)
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
@@ -261,11 +242,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     while len(ids_to_correct) > 0:
         parent = ids_to_correct.pop()
         while parent not in uniques_v3:
-            parent = region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[parent]
-                ]
-            ]
+            parent = region_meta.parent_id[parent]
         for child in children_v3[region_data.id_to_region_dictionary_ALLNAME[parent]]:
             replace_label(ccfv3, child, parent)
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
