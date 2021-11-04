@@ -342,11 +342,20 @@ def merge(ccfv2, ccfv3, brain_regions):
         ids_to_correct = ids_v2 - ids_v3 - {8, 997}
 
     logger.info("Applying replacements")
-    ccfv2_new = ccfv2.copy()
-    ccfv3_new = ccfv3.copy()
-    for id_old, id_new in zip(ids_v2_old, ids_v2_new):
-        replace(ccfv2_new, id_old, id_new)
-    for id_old, id_new in zip(ids_v3_old, ids_v3_new):
-        replace(ccfv3_new, id_old, id_new)
+    ccfv2_new = atlas_remap(ccfv2, ids_v2_old, ids_v2_new)
+    ccfv3_new = atlas_remap(ccfv3, ids_v3_old, ids_v3_new)
 
     return ccfv2_new, ccfv3_new
+
+
+def atlas_remap(atlas, values_from, values_to):
+    """Remap atlas values fast.
+
+    Source:
+    https://stackoverflow.com/a/35464758/2804645
+    """
+    sort_idx = np.argsort(values_from)
+    idx = np.searchsorted(values_from, atlas.ravel(), sorter=sort_idx)
+    new_atlas = values_to[sort_idx][idx].reshape(atlas.shape)
+
+    return new_atlas
