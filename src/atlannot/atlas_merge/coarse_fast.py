@@ -128,14 +128,11 @@ def merge(ccfv2, ccfv3, brain_regions):
         The merged CCFv3 atlas.
     """
     region_data = RegionData(brain_regions)
+    region_meta = RegionMeta.from_root_region(brain_regions)
 
     logger.info("Computing uniques")
-    uniques_v2 = region_data.find_unique_regions(ccfv2, top_region_name="root")
-    uniques_v3 = region_data.find_unique_regions(ccfv3, top_region_name="root")
-
-    logger.info("Computing children")
-    children_v2, _ = region_data.find_children(uniques_v2)
-    children_v3, _ = region_data.find_children(uniques_v3)
+    uniques_v2 = region_meta.collect_ancestors(np.unique(ccfv2))
+    uniques_v3 = region_meta.collect_ancestors(np.unique(ccfv3))
 
     logger.info("Prepping new arrays")
     ccfv2_corrected = ccfv2.copy()
@@ -253,6 +250,10 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     ids_to_correct = ids_to_correct[ids_to_correct != 997]
     ids_to_correct = ids_to_correct[ids_to_correct != 8]
+
+    logger.info("Computing children")
+    children_v2, _ = region_data.find_children(np.array(sorted(uniques_v2)))
+    children_v3, _ = region_data.find_children(np.array(sorted(uniques_v3)))
 
     logger.info("While loop 1")
     while len(ids_to_correct) > 0:
