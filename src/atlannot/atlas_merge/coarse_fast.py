@@ -136,15 +136,11 @@ def merge(ccfv2, ccfv3, brain_regions):
     ccfv3 = ccfv3.copy()
 
     logger.info("Computing unique leaf region IDs")
-    ids_v2 = np.unique(ccfv2)
-    ids_v3 = np.unique(ccfv3)
-
-    logger.info("Computing unique region IDs")
-    uniques_v2 = region_meta.collect_ancestors(ids_v2)
-    uniques_v3 = region_meta.collect_ancestors(ids_v3)
+    ids_v2 = set(np.unique(ccfv2))
+    ids_v3 = set(np.unique(ccfv3))
 
     logger.info("First loop")
-    ids_to_correct = ids_v2[np.isin(ids_v2, ids_v3, invert=True)]
+    ids_to_correct = ids_v2 - ids_v3
     for id_reg in ids_to_correct:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if (
@@ -185,7 +181,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     manual_relabel(ccfv2, ccfv3)
 
     logger.info("Second loop")
-    for id_reg in np.unique(np.concatenate((ids_v2, ids_v3)))[1:]:
+    for id_reg in (ids_v2 | ids_v3) - {0}:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
             if "ayer 1" in allname:
@@ -215,7 +211,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     ccfv3[np.where(ccfv3 == 355)] = 314
 
     logger.info("Third loop")
-    for id_reg in ids_v3[1:]:
+    for id_reg in ids_v3 - {0}:
         if (
             (
                 "fiber tracts" in region_data.id_to_region_dictionary_ALLNAME[id_reg]
@@ -245,14 +241,13 @@ def merge(ccfv2, ccfv3, brain_regions):
             ccfv2[np.where(ccfv2 == id_reg)] = 184
 
     logger.info("Some manual stuff again")
-    ids_v2 = np.unique(ccfv2)
-    ids_v3 = np.unique(ccfv3)
-    ids_to_correct = ids_v2[np.isin(ids_v2, ids_v3, invert=True)]
+    ids_v2 = set(np.unique(ccfv2))
+    ids_v3 = set(np.unique(ccfv3))
+    ids_to_correct = ids_v3 - ids_v2 - {8, 997}
 
-    ids_to_correct = ids_v3[np.isin(ids_v3, ids_v2, invert=True)]
-
-    ids_to_correct = ids_to_correct[ids_to_correct != 997]
-    ids_to_correct = ids_to_correct[ids_to_correct != 8]
+    logger.info("Computing unique region IDs")
+    uniques_v2 = region_meta.collect_ancestors(ids_v2)
+    uniques_v3 = region_meta.collect_ancestors(ids_v3)
 
     logger.info("Computing children")
     children_v2, _ = region_data.find_children(np.array(sorted(uniques_v2)))
@@ -260,7 +255,7 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     logger.info("While loop 1")
     while len(ids_to_correct) > 0:
-        parent = ids_to_correct[0]
+        parent = ids_to_correct.pop()
         while parent not in uniques_v2:
             parent = region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
@@ -271,20 +266,16 @@ def merge(ccfv2, ccfv3, brain_regions):
             ccfv3[np.where(ccfv3 == child)] = parent
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
             ccfv2[np.where(ccfv2 == child)] = parent
-        ids_v2 = np.unique(ccfv2)
-        ids_v3 = np.unique(ccfv3)
-        ids_to_correct = ids_v3[np.isin(ids_v3, ids_v2, invert=True)]
-        ids_to_correct = ids_to_correct[ids_to_correct != 997]
-        ids_to_correct = ids_to_correct[ids_to_correct != 8]
+        ids_v2 = set(np.unique(ccfv2))
+        ids_v3 = set(np.unique(ccfv3))
+        ids_to_correct = ids_v3 - ids_v2 - {8, 997}
 
     logger.info("Post while loop 1")
-    ids_to_correct = ids_v2[np.isin(ids_v2, ids_v3, invert=True)]
-    ids_to_correct = ids_to_correct[ids_to_correct != 997]
-    ids_to_correct = ids_to_correct[ids_to_correct != 8]
+    ids_to_correct = ids_v2 - ids_v3 - {8, 997}
 
     logger.info("While loop 2")
     while len(ids_to_correct) > 0:
-        parent = ids_to_correct[0]
+        parent = ids_to_correct.pop()
         while parent not in uniques_v3:
             parent = region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
@@ -295,10 +286,8 @@ def merge(ccfv2, ccfv3, brain_regions):
             ccfv3[np.where(ccfv3 == child)] = parent
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
             ccfv2[np.where(ccfv2 == child)] = parent
-        ids_v2 = np.unique(ccfv2)
-        ids_v3 = np.unique(ccfv3)
-        ids_to_correct = ids_v2[np.isin(ids_v2, ids_v3, invert=True)]
-        ids_to_correct = ids_to_correct[ids_to_correct != 997]
-        ids_to_correct = ids_to_correct[ids_to_correct != 8]
+        ids_v2 = set(np.unique(ccfv2))
+        ids_v3 = set(np.unique(ccfv3))
+        ids_to_correct = ids_v2 - ids_v3 - {8, 997}
 
     return ccfv2, ccfv3
