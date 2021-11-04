@@ -134,6 +134,10 @@ def merge(ccfv2, ccfv3, brain_regions):
     def get_allname(id_):
         return region_data.id_to_region_dictionary_ALLNAME[id_]
 
+    def is_leaf(id_):
+        # leaf = not parent of anyone
+        return id_ not in region_meta.parent_id.values()
+
     logger.info("Prepping new arrays")
     ccfv2 = ccfv2.copy()
     ccfv3 = ccfv3.copy()
@@ -147,12 +151,12 @@ def merge(ccfv2, ccfv3, brain_regions):
     for id_reg in ids_to_correct:
         allname = get_allname(id_reg)
         if (
-            region_data.is_leaf[allname]
+            is_leaf(id_reg)
             and id_reg not in ids_v3
             and region_meta.parent_id[id_reg] in ids_v3
         ):
             replace_label(ccfv2, id_reg, region_meta.parent_id[id_reg])
-        elif region_data.is_leaf[allname] and (
+        elif is_leaf(id_reg) and (
             "Medial amygdalar nucleus" in allname
             or "Subiculum" in allname
             or "Bed nuclei of the stria terminalis" in allname
