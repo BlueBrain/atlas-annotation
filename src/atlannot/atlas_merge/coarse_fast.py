@@ -153,27 +153,14 @@ def merge(ccfv2, ccfv3, brain_regions):
             ]
             in ids_v3
         ):
-            ccfv2[
-                ccfv2 == id_reg
-            ] = region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[id_reg]
-                ]
-            ]
+            replace_label(ccfv2, id_reg, region_meta.parent_id[id_reg])
         elif region_data.is_leaf[allname] and (
             "Medial amygdalar nucleus" in allname
             or "Subiculum" in allname
             or "Bed nuclei of the stria terminalis" in allname
         ):
-            ccfv2[
-                ccfv2 == id_reg
-            ] = region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.region_dictionary_to_id_parent[
-                        region_data.id_to_region_dictionary[id_reg]
-                    ]
-                ]
-            ]
+            id_new = region_meta.parent_id[region_meta.parent_id[id_reg]]
+            replace_label(ccfv2, id_reg, id_new)
         elif "Paraventricular hypothalamic nucleus" in allname:
             replace_label(ccfv3, id_reg, 38)
 
