@@ -351,11 +351,31 @@ def merge(ccfv2, ccfv3, brain_regions):
 def atlas_remap(atlas, values_from, values_to):
     """Remap atlas values fast.
 
-    Source:
-    https://stackoverflow.com/a/35464758/2804645
+    This only works if
+
+    * ``values_from`` contains all unique values in ``atlas``,
+    * ``values_from`` is sorted.
+
+    In other words, it must be that ``values_from = np.unique(atlas)``.
+
+    Source: https://stackoverflow.com/a/35464758/2804645
+
+    Parameters
+    ----------
+    atlas : np.ndarray
+        The atlas volume to remap. Can be of any shape.
+    values_from : np.ndarray
+        The values to map from. It must be that
+        ``values_from = np.unique(atlas)``.
+    values_to : np.ndarray
+        The values to map to. Must have the same shape as ``values_from``.
+
+    Returns
+    -------
+    np.ndarray
+        The remapped atlas.
     """
-    sort_idx = np.argsort(values_from)
-    idx = np.searchsorted(values_from, atlas.ravel(), sorter=sort_idx)
-    new_atlas = values_to[sort_idx][idx].reshape(atlas.shape)
+    idx = np.searchsorted(values_from, atlas.ravel())
+    new_atlas = values_to[idx].reshape(atlas.shape)
 
     return new_atlas
