@@ -26,85 +26,85 @@ def replace_label(atlas, old_value, new_value):
     atlas[atlas == old_value] = new_value
 
 
-def manual_relabel(ccfv2_corrected, ccfv3_corrected):
+def manual_relabel(ccfv2, ccfv3):
     # Entorhinal area, lateral part
-    replace_label(ccfv2_corrected, 60, 28)  # L6b -> L6a
-    replace_label(ccfv2_corrected, 999, 20)  # L2/3 -> L2 # double check?
-    replace_label(ccfv2_corrected, 715, 20)  # L2a -> L2
-    replace_label(ccfv2_corrected, 764, 20)  # L2b -> L2
-    replace_label(ccfv2_corrected, 92, 139)  # L4 -> L5
-    replace_label(ccfv2_corrected, 312, 139)  # L4/5 -> L5
+    replace_label(ccfv2, 60, 28)  # L6b -> L6a
+    replace_label(ccfv2, 999, 20)  # L2/3 -> L2 # double check?
+    replace_label(ccfv2, 715, 20)  # L2a -> L2
+    replace_label(ccfv2, 764, 20)  # L2b -> L2
+    replace_label(ccfv2, 92, 139)  # L4 -> L5
+    replace_label(ccfv2, 312, 139)  # L4/5 -> L5
 
     # Entorhinal area, medial part, dorsal zone
-    replace_label(ccfv2_corrected, 468, 543)  # L2a -> L2
-    replace_label(ccfv2_corrected, 508, 543)  # L2b -> L2
-    replace_label(ccfv2_corrected, 712, 727)  # L4 -> L5 # double check?
+    replace_label(ccfv2, 468, 543)  # L2a -> L2
+    replace_label(ccfv2, 508, 543)  # L2b -> L2
+    replace_label(ccfv2, 712, 727)  # L4 -> L5 # double check?
 
-    replace_label(ccfv2_corrected, 195, 304)  # L2 -> L2/3
-    replace_label(ccfv2_corrected, 524, 582)  # L2 -> L2/3
-    replace_label(ccfv2_corrected, 606, 430)  # L2 -> L2/3
-    replace_label(ccfv2_corrected, 747, 556)  # L2 -> L2/3
+    replace_label(ccfv2, 195, 304)  # L2 -> L2/3
+    replace_label(ccfv2, 524, 582)  # L2 -> L2/3
+    replace_label(ccfv2, 606, 430)  # L2 -> L2/3
+    replace_label(ccfv2, 747, 556)  # L2 -> L2/3
 
     # subreg of Cochlear nuclei -> Cochlear nuclei
-    replace_label(ccfv2_corrected, 96, 607)
-    replace_label(ccfv2_corrected, 101, 607)
-    replace_label(ccfv2_corrected, 112, 607)
-    replace_label(ccfv2_corrected, 560, 607)
-    replace_label(ccfv3_corrected, 96, 607)
-    replace_label(ccfv3_corrected, 101, 607)
+    replace_label(ccfv2, 96, 607)
+    replace_label(ccfv2, 101, 607)
+    replace_label(ccfv2, 112, 607)
+    replace_label(ccfv2, 560, 607)
+    replace_label(ccfv3, 96, 607)
+    replace_label(ccfv3, 101, 607)
     # subreg of Nucleus ambiguus -> Nucleus ambiguus
-    replace_label(ccfv2_corrected, 143, 135)
-    replace_label(ccfv2_corrected, 939, 135)
-    replace_label(ccfv3_corrected, 143, 135)
-    replace_label(ccfv3_corrected, 939, 135)
+    replace_label(ccfv2, 143, 135)
+    replace_label(ccfv2, 939, 135)
+    replace_label(ccfv3, 143, 135)
+    replace_label(ccfv3, 939, 135)
     # subreg of Accessory olfactory bulb -> Accessory olfactory bulb
-    replace_label(ccfv2_corrected, 188, 151)
-    replace_label(ccfv2_corrected, 196, 151)
-    replace_label(ccfv2_corrected, 204, 151)
-    replace_label(ccfv3_corrected, 188, 151)
-    replace_label(ccfv3_corrected, 196, 151)
-    replace_label(ccfv3_corrected, 204, 151)
+    replace_label(ccfv2, 188, 151)
+    replace_label(ccfv2, 196, 151)
+    replace_label(ccfv2, 204, 151)
+    replace_label(ccfv3, 188, 151)
+    replace_label(ccfv3, 196, 151)
+    replace_label(ccfv3, 204, 151)
     # subreg of Medial mammillary nucleus -> Medial mammillary nucleus
-    replace_label(ccfv2_corrected, 798, 491)
-    replace_label(ccfv3_corrected, 798, 491)
-    replace_label(ccfv3_corrected, 606826647, 491)
-    replace_label(ccfv3_corrected, 606826651, 491)
-    replace_label(ccfv3_corrected, 606826655, 491)
-    replace_label(ccfv3_corrected, 606826659, 491)
+    replace_label(ccfv2, 798, 491)
+    replace_label(ccfv3, 798, 491)
+    replace_label(ccfv3, 606826647, 491)
+    replace_label(ccfv3, 606826651, 491)
+    replace_label(ccfv3, 606826655, 491)
+    replace_label(ccfv3, 606826659, 491)
     # Subreg to Dorsal part of the lateral geniculate complex
-    replace_label(ccfv3_corrected, 496345664, 170)
-    replace_label(ccfv3_corrected, 496345668, 170)
-    replace_label(ccfv3_corrected, 496345672, 170)
+    replace_label(ccfv3, 496345664, 170)
+    replace_label(ccfv3, 496345668, 170)
+    replace_label(ccfv3, 496345672, 170)
     # Subreg to Lateral reticular nucleus
-    replace_label(ccfv2_corrected, 955, 235)
-    replace_label(ccfv2_corrected, 963, 235)
-    replace_label(ccfv3_corrected, 955, 235)
-    replace_label(ccfv3_corrected, 963, 235)
+    replace_label(ccfv2, 955, 235)
+    replace_label(ccfv2, 963, 235)
+    replace_label(ccfv3, 955, 235)
+    replace_label(ccfv3, 963, 235)
 
     # subreg of Posterior parietal association areas combined layer by layer
-    replace_label(ccfv3_corrected, 312782550, 532)
-    replace_label(ccfv3_corrected, 312782604, 532)
-    replace_label(ccfv3_corrected, 312782554, 241)
-    replace_label(ccfv3_corrected, 312782608, 241)
-    replace_label(ccfv3_corrected, 312782558, 635)
-    replace_label(ccfv3_corrected, 312782612, 635)
-    replace_label(ccfv3_corrected, 312782562, 683)
-    replace_label(ccfv3_corrected, 312782616, 683)
-    replace_label(ccfv3_corrected, 312782566, 308)
-    replace_label(ccfv3_corrected, 312782620, 308)
-    replace_label(ccfv3_corrected, 312782570, 340)
-    replace_label(ccfv3_corrected, 312782624, 340)
+    replace_label(ccfv3, 312782550, 532)
+    replace_label(ccfv3, 312782604, 532)
+    replace_label(ccfv3, 312782554, 241)
+    replace_label(ccfv3, 312782608, 241)
+    replace_label(ccfv3, 312782558, 635)
+    replace_label(ccfv3, 312782612, 635)
+    replace_label(ccfv3, 312782562, 683)
+    replace_label(ccfv3, 312782616, 683)
+    replace_label(ccfv3, 312782566, 308)
+    replace_label(ccfv3, 312782620, 308)
+    replace_label(ccfv3, 312782570, 340)
+    replace_label(ccfv3, 312782624, 340)
 
     # subreg to Parabrachial nucleus
-    replace_label(ccfv2_corrected, 123, 867)
-    replace_label(ccfv2_corrected, 860, 867)
-    replace_label(ccfv2_corrected, 868, 867)
-    replace_label(ccfv2_corrected, 875, 867)
-    replace_label(ccfv2_corrected, 883, 867)
-    replace_label(ccfv2_corrected, 891, 867)
-    replace_label(ccfv2_corrected, 899, 867)
-    replace_label(ccfv2_corrected, 915, 867)
-    replace_label(ccfv3_corrected, 123, 867)
+    replace_label(ccfv2, 123, 867)
+    replace_label(ccfv2, 860, 867)
+    replace_label(ccfv2, 868, 867)
+    replace_label(ccfv2, 875, 867)
+    replace_label(ccfv2, 883, 867)
+    replace_label(ccfv2, 891, 867)
+    replace_label(ccfv2, 899, 867)
+    replace_label(ccfv2, 915, 867)
+    replace_label(ccfv3, 123, 867)
 
 
 def merge(ccfv2, ccfv3, brain_regions):
