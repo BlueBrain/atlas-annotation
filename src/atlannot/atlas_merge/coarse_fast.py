@@ -243,7 +243,6 @@ def merge(ccfv2, ccfv3, brain_regions):
     logger.info("Some manual stuff again")
     ids_v2 = set(np.unique(ccfv2))
     ids_v3 = set(np.unique(ccfv3))
-    ids_to_correct = ids_v3 - ids_v2 - {8, 997}
 
     logger.info("Computing unique region IDs")
     uniques_v2 = region_meta.collect_ancestors(ids_v2)
@@ -254,6 +253,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     children_v3, _ = region_data.find_children(np.array(sorted(uniques_v3)))
 
     logger.info("While loop 1")
+    ids_to_correct = ids_v3 - ids_v2 - {8, 997}
     while len(ids_to_correct) > 0:
         parent = ids_to_correct.pop()
         while parent not in uniques_v2:
@@ -270,10 +270,8 @@ def merge(ccfv2, ccfv3, brain_regions):
         ids_v3 = set(np.unique(ccfv3))
         ids_to_correct = ids_v3 - ids_v2 - {8, 997}
 
-    logger.info("Post while loop 1")
-    ids_to_correct = ids_v2 - ids_v3 - {8, 997}
-
     logger.info("While loop 2")
+    ids_to_correct = ids_v2 - ids_v3 - {8, 997}
     while len(ids_to_correct) > 0:
         parent = ids_to_correct.pop()
         while parent not in uniques_v3:
