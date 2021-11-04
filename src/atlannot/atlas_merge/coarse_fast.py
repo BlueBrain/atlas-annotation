@@ -175,7 +175,7 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ]
             ]
         elif "Paraventricular hypothalamic nucleus" in allname:
-            ccfv2[ccfv2 == id_reg] = 38
+            replace_label(ccfv3, id_reg, 38)
 
     logger.info("Manual replacements")
     manual_relabel(ccfv2, ccfv3)
@@ -185,30 +185,30 @@ def merge(ccfv2, ccfv3, brain_regions):
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
             if "ayer 1" in allname:
-                ccfv3[np.where(ccfv3 == id_reg)] = 801
-                ccfv2[np.where(ccfv2 == id_reg)] = 801
+                replace_label(ccfv3, id_reg, 801)
+                replace_label(ccfv2, id_reg, 801)
             elif "ayer 2/3" in allname:
-                ccfv3[np.where(ccfv3 == id_reg)] = 561
-                ccfv2[np.where(ccfv2 == id_reg)] = 561
+                replace_label(ccfv3, id_reg, 561)
+                replace_label(ccfv2, id_reg, 561)
             elif "ayer 4" in allname:
-                ccfv3[np.where(ccfv3 == id_reg)] = 913
-                ccfv2[np.where(ccfv2 == id_reg)] = 913
+                replace_label(ccfv3, id_reg, 913)
+                replace_label(ccfv2, id_reg, 913)
             elif "ayer 5" in allname:
-                ccfv3[np.where(ccfv3 == id_reg)] = 937
-                ccfv2[np.where(ccfv2 == id_reg)] = 937
+                replace_label(ccfv3, id_reg, 937)
+                replace_label(ccfv2, id_reg, 937)
             elif "ayer 6a" in allname:
-                ccfv3[np.where(ccfv3 == id_reg)] = 457
-                ccfv2[np.where(ccfv2 == id_reg)] = 457
+                replace_label(ccfv3, id_reg, 457)
+                replace_label(ccfv2, id_reg, 457)
             elif "ayer 6b" in allname:
-                ccfv3[np.where(ccfv3 == id_reg)] = 497
-                ccfv2[np.where(ccfv2 == id_reg)] = 497
+                replace_label(ccfv3, id_reg, 497)
+                replace_label(ccfv2, id_reg, 497)
 
     logger.info("Manual replacements #2")
     # subreg of Prosubiculum to subiculum
-    ccfv3[np.where(ccfv3 == 484682470)] = 502
+    replace_label(ccfv3, 484682470, 502)
     # Orbital area, medial part, layer 6b -> 6a
-    ccfv3[np.where(ccfv3 == 527696977)] = 910
-    ccfv3[np.where(ccfv3 == 355)] = 314
+    replace_label(ccfv3, 527696977, 910)
+    replace_label(ccfv3, 355, 314)
 
     logger.info("Third loop")
     for id_reg in ids_v3 - {0}:
@@ -226,19 +226,18 @@ def merge(ccfv2, ccfv3, brain_regions):
             ]
             in ids_v2
         ):
-            ccfv3[
-                np.where(ccfv3 == id_reg)
-            ] = region_data.region_dictionary_to_id[
+            new_id = region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
                     region_data.id_to_region_dictionary[id_reg]
                 ]
             ]
+            replace_label(ccfv3, id_reg, new_id)
         if (
             "Frontal pole, cerebral cortex"
             in region_data.id_to_region_dictionary_ALLNAME[id_reg]
         ):
-            ccfv3[np.where(ccfv3 == id_reg)] = 184
-            ccfv2[np.where(ccfv2 == id_reg)] = 184
+            replace_label(ccfv3, id_reg, 184)
+            replace_label(ccfv2, id_reg, 184)
 
     logger.info("Some manual stuff again")
     ids_v2 = set(np.unique(ccfv2))
@@ -263,9 +262,9 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ]
             ]
         for child in children_v3[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv3[np.where(ccfv3 == child)] = parent
+            replace_label(ccfv3, child, parent)
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv2[np.where(ccfv2 == child)] = parent
+            replace_label(ccfv2, child, parent)
         ids_v2 = set(np.unique(ccfv2))
         ids_v3 = set(np.unique(ccfv3))
         ids_to_correct = ids_v3 - ids_v2 - {8, 997}
@@ -281,9 +280,9 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ]
             ]
         for child in children_v3[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv3[np.where(ccfv3 == child)] = parent
+            replace_label(ccfv3, child, parent)
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv2[np.where(ccfv2 == child)] = parent
+            replace_label(ccfv2, child, parent)
         ids_v2 = set(np.unique(ccfv2))
         ids_v3 = set(np.unique(ccfv3))
         ids_to_correct = ids_v2 - ids_v3 - {8, 997}
