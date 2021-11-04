@@ -27,13 +27,7 @@ def replace_label(atlas, old_value, new_value):
 
 
 def replace(ids, old_id, new_id):
-    try:
-        pos = ids.index(new_id)
-    except ValueError:
-        logger.warning("Can't replace non-existing ID %d", old_id)
-        return
-
-    ids[pos] = new_id
+    ids[ids == old_id] = new_id
 
 
 def manual_relabel(ccfv2, ccfv3):
@@ -232,10 +226,16 @@ def merge(ccfv2, ccfv3, brain_regions):
     logger.info("Prepping new arrays")
     ccfv2 = ccfv2.copy()
     ccfv3 = ccfv3.copy()
+    ccfv2_new = ccfv2.copy()
+    ccfv3_new = ccfv3.copy()
+    ids_v2_old = np.unique(ccfv2)
+    ids_v2_new = ids_v2_old.copy()
+    ids_v3_old = np.unique(ccfv3)
+    ids_v3_new = ids_v3_old.copy()
 
     logger.info("Computing unique leaf region IDs")
-    ids_v2 = set(np.unique(ccfv2))
-    ids_v3 = set(np.unique(ccfv3))
+    ids_v2 = set(ids_v2_new)
+    ids_v3 = set(ids_v3_new)
 
     logger.info("First loop")
     ids_to_correct = ids_v2 - ids_v3
@@ -247,6 +247,7 @@ def merge(ccfv2, ccfv3, brain_regions):
             and region_meta.parent_id[id_reg] in ids_v3
         ):
             replace_label(ccfv2, id_reg, region_meta.parent_id[id_reg])
+            replace(ids_v2_new, id_reg, region_meta.parent_id[id_reg])
         elif is_leaf(id_reg) and (
             "Medial amygdalar nucleus" in allname
             or "Subiculum" in allname
@@ -254,11 +255,14 @@ def merge(ccfv2, ccfv3, brain_regions):
         ):
             id_new = region_meta.parent_id[region_meta.parent_id[id_reg]]
             replace_label(ccfv2, id_reg, id_new)
+            replace(ids_v2_new, id_reg, id_new)
         elif "Paraventricular hypothalamic nucleus" in allname:
             replace_label(ccfv3, id_reg, 38)
+            replace(ids_v3_new, id_reg, 38)
 
     logger.info("Manual replacements")
     manual_relabel(ccfv2, ccfv3)
+    manual_relabel_ids(ids_v2_new, ids_v3_new)
 
     logger.info("Second loop")
     for id_reg in (ids_v2 | ids_v3) - {0}:
@@ -267,28 +271,43 @@ def merge(ccfv2, ccfv3, brain_regions):
             if "ayer 1" in allname:
                 replace_label(ccfv3, id_reg, 801)
                 replace_label(ccfv2, id_reg, 801)
+                replace(ids_v3_new, id_reg, 801)
+                replace(ids_v2_new, id_reg, 801)
             elif "ayer 2/3" in allname:
                 replace_label(ccfv3, id_reg, 561)
                 replace_label(ccfv2, id_reg, 561)
+                replace(ids_v3_new, id_reg, 561)
+                replace(ids_v2_new, id_reg, 561)
             elif "ayer 4" in allname:
                 replace_label(ccfv3, id_reg, 913)
                 replace_label(ccfv2, id_reg, 913)
+                replace(ids_v3_new, id_reg, 913)
+                replace(ids_v2_new, id_reg, 913)
             elif "ayer 5" in allname:
                 replace_label(ccfv3, id_reg, 937)
                 replace_label(ccfv2, id_reg, 937)
+                replace(ids_v3_new, id_reg, 937)
+                replace(ids_v2_new, id_reg, 937)
             elif "ayer 6a" in allname:
                 replace_label(ccfv3, id_reg, 457)
                 replace_label(ccfv2, id_reg, 457)
+                replace(ids_v3_new, id_reg, 457)
+                replace(ids_v2_new, id_reg, 457)
             elif "ayer 6b" in allname:
                 replace_label(ccfv3, id_reg, 497)
                 replace_label(ccfv2, id_reg, 497)
+                replace(ids_v3_new, id_reg, 497)
+                replace(ids_v2_new, id_reg, 497)
 
     logger.info("Manual replacements #2")
     # subreg of Prosubiculum to subiculum
     replace_label(ccfv3, 484682470, 502)
+    replace(ids_v3_new, 484682470, 502)
     # Orbital area, medial part, layer 6b -> 6a
     replace_label(ccfv3, 527696977, 910)
     replace_label(ccfv3, 355, 314)
+    replace(ids_v3_new, 527696977, 910)
+    replace(ids_v3_new, 355, 314)
 
     logger.info("Third loop")
     for id_reg in ids_v3 - {0}:
@@ -301,13 +320,16 @@ def merge(ccfv2, ccfv3, brain_regions):
             and region_meta.parent_id[id_reg] in ids_v2
         ):
             replace_label(ccfv3, id_reg, region_meta.parent_id[id_reg])
+            replace(ids_v3_new, id_reg, region_meta.parent_id[id_reg])
         if "Frontal pole, cerebral cortex" in get_allname(id_reg):
             replace_label(ccfv3, id_reg, 184)
             replace_label(ccfv2, id_reg, 184)
+            replace(ids_v3_new, id_reg, 184)
+            replace(ids_v2_new, id_reg, 184)
 
     logger.info("Some manual stuff again")
-    ids_v2 = set(np.unique(ccfv2))
-    ids_v3 = set(np.unique(ccfv3))
+    ids_v2 = set(ids_v2_new)
+    ids_v3 = set(ids_v3_new)
 
     logger.info("Computing unique region IDs")
     uniques_v2 = region_meta.collect_ancestors(ids_v2)
@@ -325,10 +347,12 @@ def merge(ccfv2, ccfv3, brain_regions):
             parent = region_meta.parent_id[parent]
         for child in children_v3[get_allname(parent)]:
             replace_label(ccfv3, child, parent)
+            replace(ids_v3_new, child, parent)
         for child in children_v2[get_allname(parent)]:
             replace_label(ccfv2, child, parent)
-        ids_v2 = set(np.unique(ccfv2))
-        ids_v3 = set(np.unique(ccfv3))
+            replace(ids_v2_new, child, parent)
+        ids_v2 = set(ids_v2_new)
+        ids_v3 = set(ids_v3_new)
         ids_to_correct = ids_v3 - ids_v2 - {8, 997}
 
     logger.info("While loop 2")
@@ -339,10 +363,20 @@ def merge(ccfv2, ccfv3, brain_regions):
             parent = region_meta.parent_id[parent]
         for child in children_v3[get_allname(parent)]:
             replace_label(ccfv3, child, parent)
+            replace(ids_v3_new, child, parent)
         for child in children_v2[get_allname(parent)]:
             replace_label(ccfv2, child, parent)
-        ids_v2 = set(np.unique(ccfv2))
-        ids_v3 = set(np.unique(ccfv3))
+            replace(ids_v2_new, child, parent)
+        ids_v2 = set(ids_v2_new)
+        ids_v3 = set(ids_v3_new)
         ids_to_correct = ids_v2 - ids_v3 - {8, 997}
+
+    logger.info("Applying replacements")
+    for id_old, id_new in zip(ids_v2_old, ids_v2_new):
+        replace(ccfv2_new, id_old, id_new)
+    for id_old, id_new in zip(ids_v3_old, ids_v3_new):
+        replace(ccfv3_new, id_old, id_new)
+    assert np.array_equal(ccfv2_new, ccfv2)
+    assert np.array_equal(ccfv3_new, ccfv3)
 
     return ccfv2, ccfv3
