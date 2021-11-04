@@ -26,6 +26,16 @@ def replace_label(atlas, old_value, new_value):
     atlas[atlas == old_value] = new_value
 
 
+def replace(ids, old_id, new_id):
+    try:
+        pos = ids.index(new_id)
+    except ValueError:
+        logger.warning("Can't replace non-existing ID %d", old_id)
+        return
+
+    ids[pos] = new_id
+
+
 def manual_relabel(ccfv2, ccfv3):
     # Entorhinal area, lateral part
     replace_label(ccfv2, 60, 28)  # L6b -> L6a
@@ -105,6 +115,87 @@ def manual_relabel(ccfv2, ccfv3):
     replace_label(ccfv2, 899, 867)
     replace_label(ccfv2, 915, 867)
     replace_label(ccfv3, 123, 867)
+
+
+def manual_relabel_ids(ids_v2, ids_v3):
+    # Entorhinal area, lateral part
+    replace(ids_v2, 60, 28)  # L6b -> L6a
+    replace(ids_v2, 999, 20)  # L2/3 -> L2 # double check?
+    replace(ids_v2, 715, 20)  # L2a -> L2
+    replace(ids_v2, 764, 20)  # L2b -> L2
+    replace(ids_v2, 92, 139)  # L4 -> L5
+    replace(ids_v2, 312, 139)  # L4/5 -> L5
+
+    # Entorhinal area, medial part, dorsal zone
+    replace(ids_v2, 468, 543)  # L2a -> L2
+    replace(ids_v2, 508, 543)  # L2b -> L2
+    replace(ids_v2, 712, 727)  # L4 -> L5 # double check?
+
+    replace(ids_v2, 195, 304)  # L2 -> L2/3
+    replace(ids_v2, 524, 582)  # L2 -> L2/3
+    replace(ids_v2, 606, 430)  # L2 -> L2/3
+    replace(ids_v2, 747, 556)  # L2 -> L2/3
+
+    # subreg of Cochlear nuclei -> Cochlear nuclei
+    replace(ids_v2, 96, 607)
+    replace(ids_v2, 101, 607)
+    replace(ids_v2, 112, 607)
+    replace(ids_v2, 560, 607)
+    replace(ids_v3, 96, 607)
+    replace(ids_v3, 101, 607)
+    # subreg of Nucleus ambiguus -> Nucleus ambiguus
+    replace(ids_v2, 143, 135)
+    replace(ids_v2, 939, 135)
+    replace(ids_v3, 143, 135)
+    replace(ids_v3, 939, 135)
+    # subreg of Accessory olfactory bulb -> Accessory olfactory bulb
+    replace(ids_v2, 188, 151)
+    replace(ids_v2, 196, 151)
+    replace(ids_v2, 204, 151)
+    replace(ids_v3, 188, 151)
+    replace(ids_v3, 196, 151)
+    replace(ids_v3, 204, 151)
+    # subreg of Medial mammillary nucleus -> Medial mammillary nucleus
+    replace(ids_v2, 798, 491)
+    replace(ids_v3, 798, 491)
+    replace(ids_v3, 606826647, 491)
+    replace(ids_v3, 606826651, 491)
+    replace(ids_v3, 606826655, 491)
+    replace(ids_v3, 606826659, 491)
+    # Subreg to Dorsal part of the lateral geniculate complex
+    replace(ids_v3, 496345664, 170)
+    replace(ids_v3, 496345668, 170)
+    replace(ids_v3, 496345672, 170)
+    # Subreg to Lateral reticular nucleus
+    replace(ids_v2, 955, 235)
+    replace(ids_v2, 963, 235)
+    replace(ids_v3, 955, 235)
+    replace(ids_v3, 963, 235)
+
+    # subreg of Posterior parietal association areas combined layer by layer
+    replace(ids_v3, 312782550, 532)
+    replace(ids_v3, 312782604, 532)
+    replace(ids_v3, 312782554, 241)
+    replace(ids_v3, 312782608, 241)
+    replace(ids_v3, 312782558, 635)
+    replace(ids_v3, 312782612, 635)
+    replace(ids_v3, 312782562, 683)
+    replace(ids_v3, 312782616, 683)
+    replace(ids_v3, 312782566, 308)
+    replace(ids_v3, 312782620, 308)
+    replace(ids_v3, 312782570, 340)
+    replace(ids_v3, 312782624, 340)
+
+    # subreg to Parabrachial nucleus
+    replace(ids_v2, 123, 867)
+    replace(ids_v2, 860, 867)
+    replace(ids_v2, 868, 867)
+    replace(ids_v2, 875, 867)
+    replace(ids_v2, 883, 867)
+    replace(ids_v2, 891, 867)
+    replace(ids_v2, 899, 867)
+    replace(ids_v2, 915, 867)
+    replace(ids_v3, 123, 867)
 
 
 def merge(ccfv2, ccfv3, brain_regions):
