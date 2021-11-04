@@ -135,26 +135,27 @@ def merge(ccfv2, ccfv3, brain_regions):
     ccfv2 = ccfv2.copy()
     ccfv3 = ccfv3.copy()
 
-    logger.info("Computing uniques")
-    uniques_v2 = region_meta.collect_ancestors(np.unique(ccfv2))
-    uniques_v3 = region_meta.collect_ancestors(np.unique(ccfv3))
+    logger.info("Computing unique leaf region IDs")
+    ids_v2 = np.unique(ccfv2)
+    ids_v3 = np.unique(ccfv3)
 
-    ids = np.unique(ccfv2)
-    ids2 = np.unique(ccfv3)
+    logger.info("Computing unique region IDs")
+    uniques_v2 = region_meta.collect_ancestors(ids_v2)
+    uniques_v3 = region_meta.collect_ancestors(ids_v3)
 
     logger.info("First loop")
-    ids_to_correct = ids[np.isin(ids, ids2, invert=True)]
+    ids_to_correct = ids_v2[np.isin(ids_v2, ids_v3, invert=True)]
     for id_reg in ids_to_correct:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if (
             region_data.is_leaf[allname]
-            and id_reg not in ids2
+            and id_reg not in ids_v3
             and region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
                     region_data.id_to_region_dictionary[id_reg]
                 ]
             ]
-            in ids2
+            in ids_v3
         ):
             ccfv2[
                 ccfv2 == id_reg
@@ -184,7 +185,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     manual_relabel(ccfv2, ccfv3)
 
     logger.info("Second loop")
-    for id_reg in np.unique(np.concatenate((ids, ids2)))[1:]:
+    for id_reg in np.unique(np.concatenate((ids_v2, ids_v3)))[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
             if "ayer 1" in allname:
@@ -214,20 +215,20 @@ def merge(ccfv2, ccfv3, brain_regions):
     ccfv3[np.where(ccfv3 == 355)] = 314
 
     logger.info("Third loop")
-    for id_reg in ids2[1:]:
+    for id_reg in ids_v3[1:]:
         if (
             (
                 "fiber tracts" in region_data.id_to_region_dictionary_ALLNAME[id_reg]
                 or "Interpeduncular nucleus"
                 in region_data.id_to_region_dictionary_ALLNAME[id_reg]
             )
-            and id_reg not in ids
+            and id_reg not in ids_v2
             and region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
                     region_data.id_to_region_dictionary[id_reg]
                 ]
             ]
-            in ids
+            in ids_v2
         ):
             ccfv3[
                 np.where(ccfv3 == id_reg)
@@ -244,11 +245,11 @@ def merge(ccfv2, ccfv3, brain_regions):
             ccfv2[np.where(ccfv2 == id_reg)] = 184
 
     logger.info("Some manual stuff again")
-    ids = np.unique(ccfv2)
-    ids2 = np.unique(ccfv3)
-    ids_to_correct = ids[np.isin(ids, ids2, invert=True)]
+    ids_v2 = np.unique(ccfv2)
+    ids_v3 = np.unique(ccfv3)
+    ids_to_correct = ids_v2[np.isin(ids_v2, ids_v3, invert=True)]
 
-    ids_to_correct = ids2[np.isin(ids2, ids, invert=True)]
+    ids_to_correct = ids_v3[np.isin(ids_v3, ids_v2, invert=True)]
 
     ids_to_correct = ids_to_correct[ids_to_correct != 997]
     ids_to_correct = ids_to_correct[ids_to_correct != 8]
@@ -270,14 +271,14 @@ def merge(ccfv2, ccfv3, brain_regions):
             ccfv3[np.where(ccfv3 == child)] = parent
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
             ccfv2[np.where(ccfv2 == child)] = parent
-        ids = np.unique(ccfv2)
-        ids2 = np.unique(ccfv3)
-        ids_to_correct = ids2[np.isin(ids2, ids, invert=True)]
+        ids_v2 = np.unique(ccfv2)
+        ids_v3 = np.unique(ccfv3)
+        ids_to_correct = ids_v3[np.isin(ids_v3, ids_v2, invert=True)]
         ids_to_correct = ids_to_correct[ids_to_correct != 997]
         ids_to_correct = ids_to_correct[ids_to_correct != 8]
 
     logger.info("Post while loop 1")
-    ids_to_correct = ids[np.isin(ids, ids2, invert=True)]
+    ids_to_correct = ids_v2[np.isin(ids_v2, ids_v3, invert=True)]
     ids_to_correct = ids_to_correct[ids_to_correct != 997]
     ids_to_correct = ids_to_correct[ids_to_correct != 8]
 
@@ -294,9 +295,9 @@ def merge(ccfv2, ccfv3, brain_regions):
             ccfv3[np.where(ccfv3 == child)] = parent
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
             ccfv2[np.where(ccfv2 == child)] = parent
-        ids = np.unique(ccfv2)
-        ids2 = np.unique(ccfv3)
-        ids_to_correct = ids[np.isin(ids, ids2, invert=True)]
+        ids_v2 = np.unique(ccfv2)
+        ids_v3 = np.unique(ccfv3)
+        ids_to_correct = ids_v2[np.isin(ids_v2, ids_v3, invert=True)]
         ids_to_correct = ids_to_correct[ids_to_correct != 997]
         ids_to_correct = ids_to_correct[ids_to_correct != 8]
 
