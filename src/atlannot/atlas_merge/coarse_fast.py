@@ -127,18 +127,20 @@ def merge(ccfv2, ccfv3, brain_regions):
     ccfv3_corrected : np.ndarray
         The merged CCFv3 atlas.
     """
+    logger.info("Preparing region metadata")
     region_data = RegionData(brain_regions)
     region_meta = RegionMeta.from_root_region(brain_regions)
+
+    logger.info("Prepping new arrays")
+    ccfv2 = ccfv2.copy()
+    ccfv3 = ccfv3.copy()
 
     logger.info("Computing uniques")
     uniques_v2 = region_meta.collect_ancestors(np.unique(ccfv2))
     uniques_v3 = region_meta.collect_ancestors(np.unique(ccfv3))
 
-    logger.info("Prepping new arrays")
-    ccfv2_corrected = ccfv2.copy()
-    ccfv3_corrected = ccfv3.copy()
-    ids = np.unique(ccfv2_corrected)
-    ids2 = np.unique(ccfv3_corrected)
+    ids = np.unique(ccfv2)
+    ids2 = np.unique(ccfv3)
 
     logger.info("First loop")
     ids_to_correct = ids[np.isin(ids, ids2, invert=True)]
@@ -154,8 +156,8 @@ def merge(ccfv2, ccfv3, brain_regions):
             ]
             in ids2
         ):
-            ccfv2_corrected[
-                ccfv2_corrected == id_reg
+            ccfv2[
+                ccfv2 == id_reg
             ] = region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
                     region_data.id_to_region_dictionary[id_reg]
@@ -166,8 +168,8 @@ def merge(ccfv2, ccfv3, brain_regions):
             or "Subiculum" in allname
             or "Bed nuclei of the stria terminalis" in allname
         ):
-            ccfv2_corrected[
-                ccfv2_corrected == id_reg
+            ccfv2[
+                ccfv2 == id_reg
             ] = region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
                     region_data.region_dictionary_to_id_parent[
@@ -176,40 +178,40 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ]
             ]
         elif "Paraventricular hypothalamic nucleus" in allname:
-            ccfv2_corrected[ccfv2_corrected == id_reg] = 38
+            ccfv2[ccfv2 == id_reg] = 38
 
     logger.info("Manual replacements")
-    manual_relabel(ccfv2_corrected, ccfv3_corrected)
+    manual_relabel(ccfv2, ccfv3)
 
     logger.info("Second loop")
     for id_reg in np.unique(np.concatenate((ids, ids2)))[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
             if "ayer 1" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 801
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 801
+                ccfv3[np.where(ccfv3 == id_reg)] = 801
+                ccfv2[np.where(ccfv2 == id_reg)] = 801
             elif "ayer 2/3" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 561
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 561
+                ccfv3[np.where(ccfv3 == id_reg)] = 561
+                ccfv2[np.where(ccfv2 == id_reg)] = 561
             elif "ayer 4" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 913
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 913
+                ccfv3[np.where(ccfv3 == id_reg)] = 913
+                ccfv2[np.where(ccfv2 == id_reg)] = 913
             elif "ayer 5" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 937
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 937
+                ccfv3[np.where(ccfv3 == id_reg)] = 937
+                ccfv2[np.where(ccfv2 == id_reg)] = 937
             elif "ayer 6a" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 457
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 457
+                ccfv3[np.where(ccfv3 == id_reg)] = 457
+                ccfv2[np.where(ccfv2 == id_reg)] = 457
             elif "ayer 6b" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 497
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 497
+                ccfv3[np.where(ccfv3 == id_reg)] = 497
+                ccfv2[np.where(ccfv2 == id_reg)] = 497
 
     logger.info("Manual replacements #2")
     # subreg of Prosubiculum to subiculum
-    ccfv3_corrected[np.where(ccfv3_corrected == 484682470)] = 502
+    ccfv3[np.where(ccfv3 == 484682470)] = 502
     # Orbital area, medial part, layer 6b -> 6a
-    ccfv3_corrected[np.where(ccfv3_corrected == 527696977)] = 910
-    ccfv3_corrected[np.where(ccfv3_corrected == 355)] = 314
+    ccfv3[np.where(ccfv3 == 527696977)] = 910
+    ccfv3[np.where(ccfv3 == 355)] = 314
 
     logger.info("Third loop")
     for id_reg in ids2[1:]:
@@ -227,8 +229,8 @@ def merge(ccfv2, ccfv3, brain_regions):
             ]
             in ids
         ):
-            ccfv3_corrected[
-                np.where(ccfv3_corrected == id_reg)
+            ccfv3[
+                np.where(ccfv3 == id_reg)
             ] = region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
                     region_data.id_to_region_dictionary[id_reg]
@@ -238,12 +240,12 @@ def merge(ccfv2, ccfv3, brain_regions):
             "Frontal pole, cerebral cortex"
             in region_data.id_to_region_dictionary_ALLNAME[id_reg]
         ):
-            ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 184
-            ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 184
+            ccfv3[np.where(ccfv3 == id_reg)] = 184
+            ccfv2[np.where(ccfv2 == id_reg)] = 184
 
     logger.info("Some manual stuff again")
-    ids = np.unique(ccfv2_corrected)
-    ids2 = np.unique(ccfv3_corrected)
+    ids = np.unique(ccfv2)
+    ids2 = np.unique(ccfv3)
     ids_to_correct = ids[np.isin(ids, ids2, invert=True)]
 
     ids_to_correct = ids2[np.isin(ids2, ids, invert=True)]
@@ -265,11 +267,11 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ]
             ]
         for child in children_v3[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv3_corrected[np.where(ccfv3_corrected == child)] = parent
+            ccfv3[np.where(ccfv3 == child)] = parent
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv2_corrected[np.where(ccfv2_corrected == child)] = parent
-        ids = np.unique(ccfv2_corrected)
-        ids2 = np.unique(ccfv3_corrected)
+            ccfv2[np.where(ccfv2 == child)] = parent
+        ids = np.unique(ccfv2)
+        ids2 = np.unique(ccfv3)
         ids_to_correct = ids2[np.isin(ids2, ids, invert=True)]
         ids_to_correct = ids_to_correct[ids_to_correct != 997]
         ids_to_correct = ids_to_correct[ids_to_correct != 8]
@@ -289,13 +291,13 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ]
             ]
         for child in children_v3[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv3_corrected[np.where(ccfv3_corrected == child)] = parent
+            ccfv3[np.where(ccfv3 == child)] = parent
         for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv2_corrected[np.where(ccfv2_corrected == child)] = parent
-        ids = np.unique(ccfv2_corrected)
-        ids2 = np.unique(ccfv3_corrected)
+            ccfv2[np.where(ccfv2 == child)] = parent
+        ids = np.unique(ccfv2)
+        ids2 = np.unique(ccfv3)
         ids_to_correct = ids[np.isin(ids, ids2, invert=True)]
         ids_to_correct = ids_to_correct[ids_to_correct != 997]
         ids_to_correct = ids_to_correct[ids_to_correct != 8]
 
-    return ccfv2_corrected, ccfv3_corrected
+    return ccfv2, ccfv3
