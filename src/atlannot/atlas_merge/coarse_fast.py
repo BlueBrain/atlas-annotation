@@ -222,7 +222,7 @@ def merge(ccfv2, ccfv3, brain_regions):
         elif in_region_like("Paraventricular hypothalamic nucleus", id_):
             replace(v3_to, id_, 38)
 
-    logger.info("Manual replacements")
+    logger.info("Manual replacements #1")
     manual_relabel(v2_to, v3_to)
 
     logger.info("Second loop")
@@ -271,39 +271,27 @@ def merge(ccfv2, ccfv3, brain_regions):
             replace(v3_to, id_, 184)
             replace(v2_to, id_, 184)
 
-    logger.info("Preparing the while loops")
-    unique_v2 = set(v2_to)
-    unique_v3 = set(v3_to)
-    allowed_v2 = region_meta.collect_ancestors(unique_v2)
-    allowed_v3 = region_meta.collect_ancestors(unique_v3)
+    def while_correct(ids_1, ids_2, allowed_1, allowed_2):
+        unique_1 = set(ids_1)
+        unique_2 = set(ids_2)
+        ids_to_correct_ = unique_1 - unique_2 - {8, 997}
+        while len(ids_to_correct_) > 0:
+            id__ = ids_to_correct_.pop()
+            while id__ not in allowed_v2:
+                id__ = parent(id__)
+            for child in descendants(id__, allowed_1):
+                replace(ids_1, child, id__)
+            for child in descendants(id__, allowed_2):
+                replace(ids_2, child, id__)
+            unique_2 = set(ids_2)
+            unique_1 = set(ids_1)
+            ids_to_correct_ = unique_1 - unique_2 - {8, 997}
 
-    logger.info("While loop 1")
-    ids_to_correct = unique_v3 - unique_v2 - {8, 997}
-    while len(ids_to_correct) > 0:
-        id_ = ids_to_correct.pop()
-        while id_ not in allowed_v2:
-            id_ = parent(id_)
-        for child in descendants(id_, allowed_v3):
-            replace(v3_to, child, id_)
-        for child in descendants(id_, allowed_v2):
-            replace(v2_to, child, id_)
-        unique_v2 = set(v2_to)
-        unique_v3 = set(v3_to)
-        ids_to_correct = unique_v3 - unique_v2 - {8, 997}
-
-    logger.info("While loop 2")
-    ids_to_correct = unique_v2 - unique_v3 - {8, 997}
-    while len(ids_to_correct) > 0:
-        id_ = ids_to_correct.pop()
-        while id_ not in allowed_v3:
-            id_ = parent(id_)
-        for child in descendants(id_, allowed_v3):
-            replace(v3_to, child, id_)
-        for child in descendants(id_, allowed_v2):
-            replace(v2_to, child, id_)
-        unique_v2 = set(v2_to)
-        unique_v3 = set(v3_to)
-        ids_to_correct = unique_v2 - unique_v3 - {8, 997}
+    logger.info("While loop corrections")
+    allowed_v2 = region_meta.collect_ancestors(v2_to)
+    allowed_v3 = region_meta.collect_ancestors(v3_to)
+    while_correct(v3_to, v2_to, allowed_v3, allowed_v2)
+    while_correct(v2_to, v3_to, allowed_v2, allowed_v3)
 
     logger.info("Applying replacements")
     ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
