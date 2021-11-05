@@ -324,15 +324,9 @@ def merge(ccfv2, ccfv3, region_meta):
     logger.info("Manual relabeling #2")
     manual_relabel_2(v2_to, v3_to)
 
-    logger.info("Re-instating the corrected atlases")
+    logger.info("Ramapping atlases")
     ccfv2_corrected = atlas_remap(ccfv2, v2_from, v2_to)
     ccfv3_corrected = atlas_remap(ccfv3, v3_from, v3_to)
-
-    logger.info("Applying replacements")
-    ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
-    ccfv3_new = atlas_remap(ccfv3, v3_from, v3_to)
-    assert np.array_equal(ccfv2_new, ccfv2_corrected)
-    assert np.array_equal(ccfv3_new, ccfv3_corrected)
 
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
@@ -372,6 +366,12 @@ def merge(ccfv2, ccfv3, region_meta):
             if id_reg in allowed_v3:
                 replace(ccfv3_corrected, id_reg, id_main)
 
+    logger.info("Preparing region ID maps")
+    v2_from = np.unique(ccfv2_corrected)
+    v2_to = v2_from.copy()
+    v3_from = np.unique(ccfv3_corrected)
+    v3_to = v3_from.copy()
+
     logger.info("More for-loop corrections")
     unique_v2 = set(np.unique(ccfv2_corrected))
     unique_v3 = set(np.unique(ccfv3_corrected))
@@ -402,5 +402,11 @@ def merge(ccfv2, ccfv3, region_meta):
         unique_v2 = set(np.unique(ccfv2_corrected))
         unique_v3 = set(np.unique(ccfv3_corrected))
         ids_to_correct = unique_v3 - unique_v2
+
+    # logger.info("Ramapping atlases")
+    # ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
+    # ccfv3_new = atlas_remap(ccfv3, v3_from, v3_to)
+    # assert np.array_equal(ccfv2_new, ccfv2_corrected)
+    # assert np.array_equal(ccfv3_new, ccfv3_corrected)
 
     return ccfv2_corrected, ccfv3_corrected
