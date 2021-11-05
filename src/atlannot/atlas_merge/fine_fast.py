@@ -78,7 +78,7 @@ def explore_voxel(origin, data, count=-1):
     return origin_value
 
 
-def manual_relabel(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
+def manual_relabel_1(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
     """Perform a manual re-labeling step on the CCFv2 and CCFv3 atlases.
 
     The replacements were compiled by Dimitri Rodarie.
@@ -174,6 +174,47 @@ def manual_relabel(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
     replace(ids_v3, 123, 867)
 
 
+def manual_relabel_2(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
+    """Perform a manual re-labeling step on the CCFv2 and CCFv3 atlases.
+
+    The replacements were compiled by Dimitri Rodarie.
+
+    Parameters
+    ----------
+    ids_v2
+        The (unique) region IDs of the CCFv2 atlas.
+    ids_v3
+        The (unique) region IDs of the CCFv3 atlas.
+    """
+    # subreg of Prosubiculum to subiculum
+    replace(ids_v3, 484682470, 502)
+    # Orbital area, medial part, layer 6b -> 6a
+    replace(ids_v3, 527696977, 910)
+    replace(ids_v3, 355, 314)
+
+    # Frontal pole children to their parent
+    replace(ids_v3, 68, 184)
+    replace(ids_v3, 667, 184)
+    replace(ids_v3, 526157192, 184)
+    replace(ids_v3, 526157196, 184)
+    replace(ids_v3, 526322264, 184)
+    replace(ids_v2, 68, 184)
+    replace(ids_v2, 667, 184)
+
+    # Every region ventral to cortex transition area is merge because
+    # Entorhinal area, medial part, ventral zone is not in ccfv3
+    # ie 259,  324,  371, 1133, 655, 663, 780 -> 663
+    replace(ids_v2, 259, 663)
+    replace(ids_v2, 324, 663)
+    replace(ids_v2, 371, 663)
+    replace(ids_v2, 1133, 663)
+
+    replace(ids_v2, 655, 663)
+    replace(ids_v2, 780, 663)
+    replace(ids_v3, 655, 663)
+    replace(ids_v3, 780, 663)
+
+
 def merge(ccfv2, ccfv3, brain_regions):
     """Perform the coarse atlas merging.
 
@@ -249,7 +290,7 @@ def merge(ccfv2, ccfv3, brain_regions):
             ccfv2_corrected[ccfv2_corrected == id_reg] = 38
 
     logger.info("Manual relabeling #1")
-    manual_relabel(ccfv2_corrected, ccfv3_corrected)
+    manual_relabel_1(ccfv2_corrected, ccfv3_corrected)
 
     logger.info("Second for loop correction")
     for id_reg in np.unique(np.concatenate((ids_v2, ids_v3)))[1:]:
@@ -275,33 +316,7 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 497
 
     logger.info("Manual relabeling #2")
-    # subreg of Prosubiculum to subiculum
-    ccfv3_corrected[np.where(ccfv3_corrected == 484682470)] = 502
-    # Orbital area, medial part, layer 6b -> 6a
-    ccfv3_corrected[np.where(ccfv3_corrected == 527696977)] = 910
-    ccfv3_corrected[np.where(ccfv3_corrected == 355)] = 314
-
-    # Frontal pole children to their parent
-    ccfv3_corrected[ccfv3_corrected == 68] = 184
-    ccfv3_corrected[ccfv3_corrected == 667] = 184
-    ccfv3_corrected[ccfv3_corrected == 526157192] = 184
-    ccfv3_corrected[ccfv3_corrected == 526157196] = 184
-    ccfv3_corrected[ccfv3_corrected == 526322264] = 184
-    ccfv2_corrected[ccfv2_corrected == 68] = 184
-    ccfv2_corrected[ccfv2_corrected == 667] = 184
-
-    # Every region ventral to cortex transition area is merge because
-    # Entorhinal area, medial part, ventral zone is not in ccfv3
-    # ie 259,  324,  371, 1133, 655, 663, 780 -> 663
-    ccfv2_corrected[np.where(ccfv2_corrected == 259)] = 663
-    ccfv2_corrected[np.where(ccfv2_corrected == 324)] = 663
-    ccfv2_corrected[np.where(ccfv2_corrected == 371)] = 663
-    ccfv2_corrected[np.where(ccfv2_corrected == 1133)] = 663
-
-    ccfv2_corrected[np.where(ccfv2_corrected == 655)] = 663
-    ccfv2_corrected[np.where(ccfv2_corrected == 780)] = 663
-    ccfv3_corrected[np.where(ccfv3_corrected == 655)] = 663
-    ccfv3_corrected[np.where(ccfv3_corrected == 780)] = 663
+    manual_relabel_2(ccfv2_corrected, ccfv3_corrected)
 
     logger.info("Some filter for-loops")
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
