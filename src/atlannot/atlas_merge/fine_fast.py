@@ -239,6 +239,10 @@ def merge(ccfv2, ccfv3, brain_regions):
     region_data = RegionData(brain_regions)
     region_meta = RegionMeta.from_root_region(brain_regions)
 
+    def parent(region_id):
+        """Get the parent region ID of a region."""
+        return region_meta.parent_id.get(region_id)
+
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2)
     v2_to = v2_from.copy()
@@ -264,36 +268,17 @@ def merge(ccfv2, ccfv3, brain_regions):
         if (
             region_data.is_leaf[allname]
             and id_reg not in ids_v3
-            and region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[id_reg]
-                ]
-            ]
-            in ids_v3
+            and parent(id_reg) in ids_v3
         ):
-            ccfv2_corrected[
-                ccfv2_corrected == id_reg
-            ] = region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[id_reg]
-                ]
-            ]
+            replace(ccfv2_corrected, id_reg, parent(id_reg))
         elif region_data.is_leaf[allname] and (
             "Medial amygdalar nucleus" in allname
             or "Subiculum" in allname
             or "Bed nuclei of the stria terminalis" in allname
         ):
-            ccfv2_corrected[
-                ccfv2_corrected == id_reg
-            ] = region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.region_dictionary_to_id_parent[
-                        region_data.id_to_region_dictionary[id_reg]
-                    ]
-                ]
-            ]
+            replace(ccfv2_corrected, id_reg, parent(parent(id_reg)))
         elif "Paraventricular hypothalamic nucleus" in allname:
-            ccfv2_corrected[ccfv2_corrected == id_reg] = 38
+            replace(ccfv2_corrected, id_reg, 38)
 
     logger.info("Manual relabeling #1")
     manual_relabel_1(ccfv2_corrected, ccfv3_corrected)
