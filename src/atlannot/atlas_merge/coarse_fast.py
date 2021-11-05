@@ -162,13 +162,6 @@ def merge(ccfv2, ccfv3, brain_regions):
     logger.info("Preparing region metadata")
     region_meta = RegionMeta.from_root_region(brain_regions)
 
-    def get_allname(region_id):
-        x = ""
-        while region_id != region_meta.background_id:
-            x = f"|{region_meta.name[region_id]}" + x
-            region_id = region_meta.parent_id[region_id]
-        return x
-
     def is_leaf(region_id):
         # leaf = not parent of anyone
         return region_id not in region_meta.parent_id.values()
@@ -196,10 +189,16 @@ def merge(ccfv2, ccfv3, brain_regions):
         for child_id in children(region_id):
             if child_id in allowed_ids or is_leaf(child_id):
                 all_descendants.add(child_id)
-
             all_descendants |= descendants(child_id, allowed_ids)
 
         return all_descendants
+
+    def in_region_like(name_part, region_id):
+        """Check if region belongs to a region with a given name part."""
+        while region_id != region_meta.background_id:
+            if name_part in region_meta.name[region_id]:
+                return True
+            region_id = parent(region_id)
 
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2)
@@ -212,16 +211,15 @@ def merge(ccfv2, ccfv3, brain_regions):
     ids_v3 = set(v3_to)
     ids_to_correct = ids_v2 - ids_v3
     for id_reg in ids_to_correct:
-        allname = get_allname(id_reg)
         if is_leaf(id_reg) and id_reg not in ids_v3 and parent(id_reg) in ids_v3:
             replace(v2_to, id_reg, parent(id_reg))
         elif is_leaf(id_reg) and (
-            "Medial amygdalar nucleus" in allname
-            or "Subiculum" in allname
-            or "Bed nuclei of the stria terminalis" in allname
+            in_region_like("Medial amygdalar nucleus", id_reg)
+            or in_region_like("Subiculum", id_reg)
+            or in_region_like("Bed nuclei of the stria terminalis", id_reg)
         ):
             replace(v2_to, id_reg, parent(parent(id_reg)))
-        elif "Paraventricular hypothalamic nucleus" in allname:
+        elif in_region_like("Paraventricular hypothalamic nucleus", id_reg):
             replace(v3_to, id_reg, 38)
 
     logger.info("Manual replacements")
@@ -229,26 +227,27 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     logger.info("Second loop")
     for id_reg in (ids_v2 | ids_v3) - {0}:
-        allname = get_allname(id_reg)
-        if "Visual areas" in allname:
-            if "ayer 1" in allname:
-                replace(v3_to, id_reg, 801)
-                replace(v2_to, id_reg, 801)
-            elif "ayer 2/3" in allname:
-                replace(v3_to, id_reg, 561)
-                replace(v2_to, id_reg, 561)
-            elif "ayer 4" in allname:
-                replace(v3_to, id_reg, 913)
-                replace(v2_to, id_reg, 913)
-            elif "ayer 5" in allname:
-                replace(v3_to, id_reg, 937)
-                replace(v2_to, id_reg, 937)
-            elif "ayer 6a" in allname:
-                replace(v3_to, id_reg, 457)
-                replace(v2_to, id_reg, 457)
-            elif "ayer 6b" in allname:
-                replace(v3_to, id_reg, 497)
-                replace(v2_to, id_reg, 497)
+        if not in_region_like("Visual areas", id_reg):
+            continue
+
+        if in_region_like("ayer 1", id_reg):
+            replace(v3_to, id_reg, 801)
+            replace(v2_to, id_reg, 801)
+        elif in_region_like("ayer 2/3", id_reg):
+            replace(v3_to, id_reg, 561)
+            replace(v2_to, id_reg, 561)
+        elif in_region_like("ayer 4", id_reg):
+            replace(v3_to, id_reg, 913)
+            replace(v2_to, id_reg, 913)
+        elif in_region_like("ayer 5", id_reg):
+            replace(v3_to, id_reg, 937)
+            replace(v2_to, id_reg, 937)
+        elif in_region_like("ayer 6a", id_reg):
+            replace(v3_to, id_reg, 457)
+            replace(v2_to, id_reg, 457)
+        elif in_region_like("ayer 6b", id_reg):
+            replace(v3_to, id_reg, 497)
+            replace(v2_to, id_reg, 497)
 
     logger.info("Manual replacements #2")
     # subreg of Prosubiculum to subiculum
@@ -261,14 +260,14 @@ def merge(ccfv2, ccfv3, brain_regions):
     for id_reg in ids_v3 - {0}:
         if (
             (
-                "fiber tracts" in get_allname(id_reg)
-                or "Interpeduncular nucleus" in get_allname(id_reg)
+                in_region_like("fiber tracts", id_reg)
+                or in_region_like("Interpeduncular nucleus", id_reg)
             )
             and id_reg not in ids_v2
             and parent(id_reg) in ids_v2
         ):
             replace(v3_to, id_reg, parent(id_reg))
-        if "Frontal pole, cerebral cortex" in get_allname(id_reg):
+        if in_region_like("Frontal pole, cerebral cortex", id_reg):
             replace(v3_to, id_reg, 184)
             replace(v2_to, id_reg, 184)
 
