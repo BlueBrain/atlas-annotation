@@ -261,6 +261,23 @@ def merge(ccfv2, ccfv3, brain_regions):
             if parent_id == region_id:
                 yield child_id
 
+    def descendants(region_id, allowed_ids):
+        """Get all filtered descendant IDs of a given region ID.
+
+        A descendant is only accepted if it's in ``allowed_ids`` or is a
+        leaf region.
+
+        This is mimicking Dimitri's algorithm, I'm not sure about why this must
+        be that way.
+        """
+        all_descendants = set()
+        for child_id in children(region_id):
+            if child_id in allowed_ids or is_leaf(child_id):
+                all_descendants.add(child_id)
+            all_descendants |= descendants(child_id, allowed_ids)
+
+        return all_descendants
+
     def filter_region(annotation, id_reg, children):
         """Filter a region.
 
@@ -296,23 +313,6 @@ def merge(ccfv2, ccfv3, brain_regions):
         else:
             filter_ = annotation == region_data.region_dictionary_to_id_ALLNAME[allname]
         return filter_
-
-    def descendants(region_id, allowed_ids):
-        """Get all filtered descendant IDs of a given region ID.
-
-        A descendant is only accepted if it's in ``allowed_ids`` or is a
-        leaf region.
-
-        This is mimicking Dimitri's algorithm, I'm not sure about why this must
-        be that way.
-        """
-        all_descendants = set()
-        for child_id in children(region_id):
-            if child_id in allowed_ids or is_leaf(child_id):
-                all_descendants.add(child_id)
-            all_descendants |= descendants(child_id, allowed_ids)
-
-        return all_descendants
 
     logger.info("First for-loop correction")
     unique_v2 = set(v2_to)
