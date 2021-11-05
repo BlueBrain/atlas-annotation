@@ -15,6 +15,7 @@
 import logging
 
 import numpy as np
+from numpy import ma
 
 from atlannot.atlas.region_meta import RegionMeta
 from atlannot.atlas_merge.common import atlas_remap, replace
@@ -30,7 +31,7 @@ def explore_voxel(origin, data, count=-1):
 
     Parameters
     ----------
-    origin : sequence
+    origin : tuple
         A triplet with the (x, y, z) coordinates of the origin voxel.
     data : np.ndarray
         A 3D array with the volume data.
@@ -43,20 +44,18 @@ def explore_voxel(origin, data, count=-1):
         The value of some voxel in the data volume.
     """
     logger.debug("exploring voxel %s", origin)
-    origin_value = data[origin[0], origin[1], origin[2]]
-    explored = np.zeros(data.shape, dtype=bool)
-    explored[origin[0], origin[1], origin[2]] = True
+    if not isinstance(origin, tuple):
+        raise ValueError("The 'origin parameter must be a tuple (got {type(origin)})")
+
+    origin_value = data[origin]
+    explored = {origin}
     to_explore = [origin]
-    maxx = len(explored)
-    maxy = len(explored[0])
-    maxz = len(explored[0][0])
     while len(to_explore) > 0 and count != 0:
-        current_voxel = to_explore[0]
-        current_value = data[current_voxel[0], current_voxel[1], current_voxel[2]]
-        if current_value != origin_value and current_value != 0:
-            return current_value
-        to_explore = to_explore[1:]
-        for (x, y, z) in [
+        pos = to_explore.pop(0)
+        value = data[pos]
+        if value != origin_value and value:
+            return value
+        for dx, dy, dz in [
             (-1, 0, 0),
             (0, -1, 0),
             (1, 0, 0),
@@ -64,17 +63,12 @@ def explore_voxel(origin, data, count=-1):
             (0, 0, -1),
             (0, 0, 1),
         ]:
-            new_vox = [current_voxel[0] + x, current_voxel[1] + y, current_voxel[2] + z]
-            if (
-                0 <= new_vox[0] < maxx
-                and 0 <= new_vox[1] < maxy
-                and 0 <= new_vox[2] < maxz
-                and not explored[new_vox[0], new_vox[1], new_vox[2]]
-            ):
-                explored[new_vox[0], new_vox[1], new_vox[2]] = True
-                to_explore.append(new_vox)
+            new_pos = (pos[0] + dx, pos[1] + dy, pos[2] + dz)
+            if (0, 0, 0) <= new_pos < data.shape and new_pos not in explored:
+                explored.add(new_pos)
+                to_explore.append(new_pos)
         count -= 1
-    # print("Error", origin)
+
     return origin_value
 
 
