@@ -299,19 +299,11 @@ def merge(ccfv2, ccfv3, brain_regions):
             3D numpy ndarray of boolean, boolean mask with all the voxels of a
             region and its children set to True.
         """
-        allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
-        if not region_data.is_leaf[allname]:
-            filter_ = np.in1d(
-                annotation,
-                np.concatenate(
-                    (
-                        list(descendant_ids),
-                        [region_data.region_dictionary_to_id_ALLNAME[allname]],
-                    )
-                ),
-            ).reshape(annotation.shape)
+        if is_leaf(id_reg):
+            filter_ = annotation == id_reg
+            assert len(descendant_ids) == 0
         else:
-            filter_ = annotation == region_data.region_dictionary_to_id_ALLNAME[allname]
+            filter_ = np.isin(annotation, [id_reg, *descendant_ids])
         return filter_
 
     logger.info("First for-loop correction")
