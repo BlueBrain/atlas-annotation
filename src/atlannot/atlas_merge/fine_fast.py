@@ -332,12 +332,6 @@ def merge(ccfv2, ccfv3, brain_regions):
     assert np.array_equal(ccfv2_new, ccfv2_corrected)
     assert np.array_equal(ccfv3_new, ccfv3_corrected)
 
-    logger.info("Computing unique regions")
-    uniques = region_data.find_unique_regions(ccfv2, top_region_name="root")
-    uniques2 = region_data.find_unique_regions(ccfv3, top_region_name="root")
-    children_v2, _ = region_data.find_children(uniques)
-    children_v3, _ = region_data.find_children(uniques2)
-
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
     logger.info("Some filter for-loops")
@@ -348,7 +342,10 @@ def merge(ccfv2, ccfv3, brain_regions):
         masked_atlas = ma.masked_array(atlas, hide_mask)
 
         error_voxel = np.where(atlas == region_id)
-        new_values = [explore_voxel(xyz, masked_atlas, count) for xyz in zip(*error_voxel)]
+        new_values = [
+            explore_voxel(xyz, masked_atlas, count)
+            for xyz in zip(*error_voxel)
+        ]
         atlas[error_voxel] = new_values
 
     # Correct annotation edge for CCFv2 and CCFv3
@@ -367,10 +364,10 @@ def merge(ccfv2, ccfv3, brain_regions):
         run_filter(ccfv3_corrected, id_reg, 3)
 
     for id_main in [795]:
-        for id_reg in children_v2[region_data.id_to_region_dictionary_ALLNAME[id_main]]:
-            if id_reg in uniques:
+        for id_reg in descendants(id_main, allowed_v2):
+            if id_reg in allowed_v2:
                 replace(ccfv2_corrected, id_reg, id_main)
-            if id_reg in uniques2:
+            if id_reg in allowed_v3:
                 replace(ccfv3_corrected, id_reg, id_main)
 
     logger.info("More for-loop corrections")
@@ -396,11 +393,11 @@ def merge(ccfv2, ccfv3, brain_regions):
     logger.info("While-loop correction")
     while len(ids_to_correct) > 0:
         id_ = ids_to_correct.pop()
-        while id_ not in uniques:
+        while id_ not in allowed_v2:
             id_ = parent(id_)
-        for child in children_v3[region_data.id_to_region_dictionary_ALLNAME[id_]]:
+        for child in descendants(id_, allowed_v3):
             replace(ccfv3_corrected, child, id_)
-        for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[id_]]:
+        for child in descendants(id_, allowed_v2):
             replace(ccfv2_corrected, child, id_)
         unique_v2 = set(np.unique(ccfv2_corrected))
         unique_v3 = set(np.unique(ccfv3_corrected))
