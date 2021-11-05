@@ -14,7 +14,8 @@
 """The fine merging of the annotation atlases."""
 import numpy as np
 
-from .JSONread import RegionData
+from atlannot.atlas_merge.JSONread import RegionData
+from atlannot.atlas_merge.common import atlas_remap, replace
 
 
 def explore_voxel(origin, data, count=-1):
@@ -69,6 +70,102 @@ def explore_voxel(origin, data, count=-1):
         count -= 1
     # print("Error", origin)
     return origin_value
+
+
+def manual_relabel(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
+    """Perform a manual re-labeling step on the CCFv2 and CCFv3 atlases.
+
+    The replacements were compiled by Dimitri Rodarie.
+
+    Parameters
+    ----------
+    ids_v2
+        The (unique) region IDs of the CCFv2 atlas.
+    ids_v3
+        The (unique) region IDs of the CCFv3 atlas.
+    """
+    # Hippocampus Field CA2 is strongly different -> merge it with CA1
+    replace(ids_v2, 423, 382)
+    replace(ids_v3, 423, 382)
+
+    # Entorhinal area, lateral part
+    replace(ids_v2, 60, 28)  # L6b -> L6a
+    replace(ids_v2, 999, 20)  # L2/3 -> L2 # double check?
+    replace(ids_v2, 715, 20)  # L2a -> L2
+    replace(ids_v2, 764, 20)  # L2b -> L2
+    replace(ids_v2, 92, 139)  # L4 -> L5
+    replace(ids_v2, 312, 139)  # L4/5 -> L5
+
+    # Entorhinal area, medial part, dorsal zone
+    replace(ids_v2, 468, 543)  # L2a -> L2
+    replace(ids_v2, 508, 543)  # L2b -> L2
+    replace(ids_v2, 712, 727)  # L4 -> L5 # double check?
+
+    replace(ids_v2, 195, 304)  # L2 -> L2/3
+    replace(ids_v2, 524, 582)  # L2 -> L2/3
+    replace(ids_v2, 606, 430)  # L2 -> L2/3
+    replace(ids_v2, 747, 556)  # L2 -> L2/3
+
+    # subreg of Cochlear nuclei -> Cochlear nuclei
+    replace(ids_v2, 96, 607)
+    replace(ids_v2, 101, 607)
+    replace(ids_v2, 112, 607)
+    replace(ids_v2, 560, 607)
+    replace(ids_v3, 96, 607)
+    replace(ids_v3, 101, 607)
+    # subreg of Nucleus ambiguus -> Nucleus ambiguus
+    replace(ids_v2, 143, 135)
+    replace(ids_v2, 939, 135)
+    replace(ids_v3, 143, 135)
+    replace(ids_v3, 939, 135)
+    # subreg of Accessory olfactory bulb -> Accessory olfactory bulb
+    replace(ids_v2, 188, 151)
+    replace(ids_v2, 196, 151)
+    replace(ids_v2, 204, 151)
+    replace(ids_v3, 188, 151)
+    replace(ids_v3, 196, 151)
+    replace(ids_v3, 204, 151)
+    # subreg of Medial mammillary nucleus -> Medial mammillary nucleus
+    replace(ids_v2, 798, 491)
+    replace(ids_v3, 798, 491)
+    replace(ids_v3, 606826647, 491)
+    replace(ids_v3, 606826651, 491)
+    replace(ids_v3, 606826655, 491)
+    replace(ids_v3, 606826659, 491)
+    # Subreg to Dorsal part of the lateral geniculate complex
+    replace(ids_v3, 496345664, 170)
+    replace(ids_v3, 496345668, 170)
+    replace(ids_v3, 496345672, 170)
+    # Subreg to Lateral reticular nucleus
+    replace(ids_v2, 955, 235)
+    replace(ids_v2, 963, 235)
+    replace(ids_v3, 955, 235)
+    replace(ids_v3, 963, 235)
+
+    # subreg of Posterior parietal association areas combined layer by layer
+    replace(ids_v3, 312782550, 532)
+    replace(ids_v3, 312782604, 532)
+    replace(ids_v3, 312782554, 241)
+    replace(ids_v3, 312782608, 241)
+    replace(ids_v3, 312782558, 635)
+    replace(ids_v3, 312782612, 635)
+    replace(ids_v3, 312782562, 683)
+    replace(ids_v3, 312782616, 683)
+    replace(ids_v3, 312782566, 308)
+    replace(ids_v3, 312782620, 308)
+    replace(ids_v3, 312782570, 340)
+    replace(ids_v3, 312782624, 340)
+
+    # subreg to Parabrachial nucleus
+    replace(ids_v2, 123, 867)
+    replace(ids_v2, 860, 867)
+    replace(ids_v2, 868, 867)
+    replace(ids_v2, 875, 867)
+    replace(ids_v2, 883, 867)
+    replace(ids_v2, 891, 867)
+    replace(ids_v2, 899, 867)
+    replace(ids_v2, 915, 867)
+    replace(ids_v3, 123, 867)
 
 
 def merge(ccfv2, ccfv3, brain_regions):
@@ -140,88 +237,7 @@ def merge(ccfv2, ccfv3, brain_regions):
         elif "Paraventricular hypothalamic nucleus" in allname:
             ccfv2_corrected[ccfv2_corrected == id_reg] = 38
 
-    # Hippocampus Field CA2 is strongly different -> merge it with CA1
-    ccfv2_corrected[ccfv2_corrected == 423] = 382
-    ccfv3_corrected[ccfv3_corrected == 423] = 382
-
-    # Entorhinal area, lateral part
-    ccfv2_corrected[np.where(ccfv2_corrected == 60)] = 28  # L6b -> L6a
-    ccfv2_corrected[np.where(ccfv2_corrected == 999)] = 20  # L2/3 -> L2 # double check?
-    ccfv2_corrected[np.where(ccfv2_corrected == 715)] = 20  # L2a -> L2
-    ccfv2_corrected[np.where(ccfv2_corrected == 764)] = 20  # L2b -> L2
-    ccfv2_corrected[np.where(ccfv2_corrected == 92)] = 139  # L4 -> L5
-    ccfv2_corrected[np.where(ccfv2_corrected == 312)] = 139  # L4/5 -> L5
-
-    # Entorhinal area, medial part, dorsal zone
-    ccfv2_corrected[np.where(ccfv2_corrected == 468)] = 543  # L2a -> L2
-    ccfv2_corrected[np.where(ccfv2_corrected == 508)] = 543  # L2b -> L2
-    ccfv2_corrected[np.where(ccfv2_corrected == 712)] = 727  # L4 -> L5 # double check?
-
-    ccfv2_corrected[np.where(ccfv2_corrected == 195)] = 304  # L2 -> L2/3
-    ccfv2_corrected[np.where(ccfv2_corrected == 524)] = 582  # L2 -> L2/3
-    ccfv2_corrected[np.where(ccfv2_corrected == 606)] = 430  # L2 -> L2/3
-    ccfv2_corrected[np.where(ccfv2_corrected == 747)] = 556  # L2 -> L2/3
-
-    # subreg of Cochlear nuclei -> Cochlear nuclei
-    ccfv2_corrected[np.where(ccfv2_corrected == 96)] = 607
-    ccfv2_corrected[np.where(ccfv2_corrected == 101)] = 607
-    ccfv2_corrected[np.where(ccfv2_corrected == 112)] = 607
-    ccfv2_corrected[np.where(ccfv2_corrected == 560)] = 607
-    ccfv3_corrected[np.where(ccfv3_corrected == 96)] = 607
-    ccfv3_corrected[np.where(ccfv3_corrected == 101)] = 607
-    # subreg of Nucleus ambiguus -> Nucleus ambiguus
-    ccfv2_corrected[np.where(ccfv2_corrected == 143)] = 135
-    ccfv2_corrected[np.where(ccfv2_corrected == 939)] = 135
-    ccfv3_corrected[np.where(ccfv3_corrected == 143)] = 135
-    ccfv3_corrected[np.where(ccfv3_corrected == 939)] = 135
-    # subreg of Accessory olfactory bulb -> Accessory olfactory bulb
-    ccfv2_corrected[np.where(ccfv2_corrected == 188)] = 151
-    ccfv2_corrected[np.where(ccfv2_corrected == 196)] = 151
-    ccfv2_corrected[np.where(ccfv2_corrected == 204)] = 151
-    ccfv3_corrected[np.where(ccfv3_corrected == 188)] = 151
-    ccfv3_corrected[np.where(ccfv3_corrected == 196)] = 151
-    ccfv3_corrected[np.where(ccfv3_corrected == 204)] = 151
-    # subreg of Medial mammillary nucleus -> Medial mammillary nucleus
-    ccfv2_corrected[np.where(ccfv2_corrected == 798)] = 491
-    ccfv3_corrected[np.where(ccfv3_corrected == 798)] = 491
-    ccfv3_corrected[np.where(ccfv3_corrected == 606826647)] = 491
-    ccfv3_corrected[np.where(ccfv3_corrected == 606826651)] = 491
-    ccfv3_corrected[np.where(ccfv3_corrected == 606826655)] = 491
-    ccfv3_corrected[np.where(ccfv3_corrected == 606826659)] = 491
-    # Subreg to Dorsal part of the lateral geniculate complex
-    ccfv3_corrected[np.where(ccfv3_corrected == 496345664)] = 170
-    ccfv3_corrected[np.where(ccfv3_corrected == 496345668)] = 170
-    ccfv3_corrected[np.where(ccfv3_corrected == 496345672)] = 170
-    # Subreg to Lateral reticular nucleus
-    ccfv2_corrected[np.where(ccfv2_corrected == 955)] = 235
-    ccfv2_corrected[np.where(ccfv2_corrected == 963)] = 235
-    ccfv3_corrected[np.where(ccfv3_corrected == 955)] = 235
-    ccfv3_corrected[np.where(ccfv3_corrected == 963)] = 235
-
-    # subreg of Posterior parietal association areas combined layer by layer
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782550)] = 532
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782604)] = 532
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782554)] = 241
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782608)] = 241
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782558)] = 635
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782612)] = 635
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782562)] = 683
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782616)] = 683
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782566)] = 308
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782620)] = 308
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782570)] = 340
-    ccfv3_corrected[np.where(ccfv3_corrected == 312782624)] = 340
-
-    # subreg to Parabrachial nucleus
-    ccfv2_corrected[np.where(ccfv2_corrected == 123)] = 867
-    ccfv2_corrected[np.where(ccfv2_corrected == 860)] = 867
-    ccfv2_corrected[np.where(ccfv2_corrected == 868)] = 867
-    ccfv2_corrected[np.where(ccfv2_corrected == 875)] = 867
-    ccfv2_corrected[np.where(ccfv2_corrected == 883)] = 867
-    ccfv2_corrected[np.where(ccfv2_corrected == 891)] = 867
-    ccfv2_corrected[np.where(ccfv2_corrected == 899)] = 867
-    ccfv2_corrected[np.where(ccfv2_corrected == 915)] = 867
-    ccfv3_corrected[np.where(ccfv3_corrected == 123)] = 867
+    manual_relabel(ccfv2_corrected, ccfv3_corrected)
 
     for id_reg in np.unique(np.concatenate((ids_v2, ids_v3)))[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
