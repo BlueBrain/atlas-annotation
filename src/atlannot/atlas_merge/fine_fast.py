@@ -46,13 +46,13 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
     if not isinstance(start_pos, tuple):
         raise ValueError("The 'origin parameter must be a tuple (got {type(origin)})")
 
-    origin_value = masked_atlas[start_pos]
-    explored = {start_pos}
-    to_explore = [start_pos]
-    while len(to_explore) > 0 and count != 0:
-        pos = to_explore.pop(0)
+    start_value = masked_atlas[start_pos]
+    seen = {start_pos}
+    queue = [start_pos]
+    while len(queue) > 0 and count != 0:
+        pos = queue.pop(0)
         value = masked_atlas[pos]
-        if value != origin_value and value:
+        if value != start_value and value:  # "and value" means not masked
             return value
         for dx, dy, dz in [
             (-1, 0, 0),
@@ -63,12 +63,12 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
             (0, 0, 1),
         ]:
             new_pos = (pos[0] + dx, pos[1] + dy, pos[2] + dz)
-            if (0, 0, 0) <= new_pos < masked_atlas.shape and new_pos not in explored:
-                explored.add(new_pos)
-                to_explore.append(new_pos)
+            if (0, 0, 0) <= new_pos < masked_atlas.shape and new_pos not in seen:
+                seen.add(new_pos)
+                queue.append(new_pos)
         count -= 1
 
-    return origin_value
+    return start_value
 
 
 def manual_relabel_1(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
