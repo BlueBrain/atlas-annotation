@@ -345,13 +345,11 @@ def merge(ccfv2, ccfv3, brain_regions):
     def run_filter(atlas, region_id, count):
         keep_ids = [region_id, *descendants(region_id, allowed_v2)]
         hide_mask = np.isin(atlas, keep_ids, invert=True)
-
-        masked_atlas = np.copy(atlas)
-        masked_atlas[hide_mask] = 0
+        masked_atlas = ma.masked_array(atlas, hide_mask)
 
         error_voxel = np.where(atlas == region_id)
-        for xyz in zip(*error_voxel):
-            atlas[xyz] = explore_voxel(xyz, masked_atlas, count)
+        new_values = [explore_voxel(xyz, masked_atlas, count) for xyz in zip(*error_voxel)]
+        atlas[error_voxel] = new_values
 
     # Correct annotation edge for CCFv2 and CCFv3
     # no limit for striatum
