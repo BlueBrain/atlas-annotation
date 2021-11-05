@@ -271,17 +271,21 @@ def merge(ccfv2, ccfv3, brain_regions):
             and parent(id_reg) in ids_v3
         ):
             replace(ccfv2_corrected, id_reg, parent(id_reg))
+            replace(v2_to, id_reg, parent(id_reg))
         elif region_data.is_leaf[allname] and (
             "Medial amygdalar nucleus" in allname
             or "Subiculum" in allname
             or "Bed nuclei of the stria terminalis" in allname
         ):
             replace(ccfv2_corrected, id_reg, parent(parent(id_reg)))
+            replace(v2_to, id_reg, parent(parent(id_reg)))
         elif "Paraventricular hypothalamic nucleus" in allname:
             replace(ccfv2_corrected, id_reg, 38)
+            replace(v2_to, id_reg, 38)
 
     logger.info("Manual relabeling #1")
     manual_relabel_1(ccfv2_corrected, ccfv3_corrected)
+    manual_relabel_1(v2_to, v3_to)
 
     logger.info("Second for loop correction")
     for id_reg in np.unique(np.concatenate((ids_v2, ids_v3)))[1:]:
@@ -290,24 +294,43 @@ def merge(ccfv2, ccfv3, brain_regions):
             if "ayer 1" in allname:
                 replace(ccfv3_corrected, id_reg, 801)
                 replace(ccfv2_corrected, id_reg, 801)
+                replace(v3_to, id_reg, 801)
+                replace(v2_to, id_reg, 801)
             elif "ayer 2/3" in allname:
                 replace(ccfv3_corrected, id_reg, 561)
                 replace(ccfv2_corrected, id_reg, 561)
+                replace(v3_to, id_reg, 561)
+                replace(v2_to, id_reg, 561)
             elif "ayer 4" in allname:
                 replace(ccfv3_corrected, id_reg, 913)
                 replace(ccfv2_corrected, id_reg, 913)
+                replace(v3_to, id_reg, 913)
+                replace(v2_to, id_reg, 913)
             elif "ayer 5" in allname:
                 replace(ccfv3_corrected, id_reg, 937)
                 replace(ccfv2_corrected, id_reg, 937)
+                replace(v3_to, id_reg, 937)
+                replace(v2_to, id_reg, 937)
             elif "ayer 6a" in allname:
                 replace(ccfv3_corrected, id_reg, 457)
                 replace(ccfv2_corrected, id_reg, 457)
+                replace(v3_to, id_reg, 457)
+                replace(v2_to, id_reg, 457)
             elif "ayer 6b" in allname:
                 replace(ccfv3_corrected, id_reg, 497)
                 replace(ccfv2_corrected, id_reg, 497)
+                replace(v3_to, id_reg, 497)
+                replace(v2_to, id_reg, 497)
 
     logger.info("Manual relabeling #2")
     manual_relabel_2(ccfv2_corrected, ccfv3_corrected)
+    manual_relabel_2(v2_to, v3_to)
+
+    logger.info("Applying replacements")
+    ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
+    ccfv3_new = atlas_remap(ccfv3, v3_from, v3_to)
+    assert np.array_equal(ccfv2_new, ccfv2_corrected)
+    assert np.array_equal(ccfv3_new, ccfv3_corrected)
 
     logger.info("Some filter for-loops")
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
