@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The fine merging of the annotation atlases."""
-from collections import deque
 import logging
+from collections import deque
 
 import numpy as np
 from numpy import ma
@@ -288,11 +288,7 @@ def merge(ccfv2, ccfv3, region_meta):
     unique_v3 = set(v3_to)
     ids_to_correct = unique_v2 - unique_v3
     for id_reg in ids_to_correct:
-        if (
-            is_leaf(id_reg)
-            and id_reg not in unique_v3
-            and parent(id_reg) in unique_v3
-        ):
+        if is_leaf(id_reg) and id_reg not in unique_v3 and parent(id_reg) in unique_v3:
             replace(v2_to, id_reg, parent(id_reg))
         elif is_leaf(id_reg) and (
             in_region_like("Medial amygdalar nucleus", id_reg)
@@ -345,8 +341,7 @@ def merge(ccfv2, ccfv3, region_meta):
         error_voxel = np.where(atlas == region_id)
         logger.info(f"Exploring %d voxels", len(error_voxel[0]))
         new_values = [
-            explore_voxel(xyz, masked_atlas, count)
-            for xyz in zip(*error_voxel)
+            explore_voxel(xyz, masked_atlas, count) for xyz in zip(*error_voxel)
         ]
         atlas[error_voxel] = new_values
 
