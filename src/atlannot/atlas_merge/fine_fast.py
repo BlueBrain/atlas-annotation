@@ -239,6 +239,12 @@ def merge(ccfv2, ccfv3, brain_regions):
     region_data = RegionData(brain_regions)
     region_meta = RegionMeta.from_root_region(brain_regions)
 
+    logger.info("Preparing region ID maps")
+    v2_from = np.unique(ccfv2)
+    v2_to = v2_from.copy()
+    v3_from = np.unique(ccfv3)
+    v3_to = v3_from.copy()
+
     logger.info("Computing unique regions")
     uniques = region_data.find_unique_regions(ccfv2, top_region_name="root")
     children, _ = region_data.find_children(uniques)
