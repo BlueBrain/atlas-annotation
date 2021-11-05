@@ -154,9 +154,9 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     Returns
     -------
-    ccfv2_corrected : np.ndarray
+    ccfv2_new : np.ndarray
         The merged CCFv2 atlas.
-    ccfv3_corrected : np.ndarray
+    ccfv3_new : np.ndarray
         The merged CCFv3 atlas.
     """
     logger.info("Preparing region metadata")
