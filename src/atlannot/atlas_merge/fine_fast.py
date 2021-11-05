@@ -243,6 +243,38 @@ def merge(ccfv2, ccfv3, brain_regions):
         """Get the parent region ID of a region."""
         return region_meta.parent_id.get(region_id)
 
+    def filter_region(annotation, allname, children):
+        """Filter a region.
+
+        Computes a 3d boolean mask to filter a region and its subregion from
+        the annotations.
+
+        Parameters
+        ----------
+        annotation : np.ndarray
+            3D numpy ndarray of integers ids of the regions.
+        allname : str
+            Complete name of the region.
+        children : dict
+            Dictionary of region complete name to list of child region ids.
+
+        Returns
+        -------
+        filter_ : np.ndarray
+            3D numpy ndarray of boolean, boolean mask with all the voxels of a
+            region and its children set to True.
+        """
+        if not region_data.is_leaf[allname]:
+            filter_ = np.in1d(
+                annotation,
+                np.concatenate(
+                    (children[allname], [region_data.region_dictionary_to_id_ALLNAME[allname]])
+                ),
+            ).reshape(annotation.shape)
+        else:
+            filter_ = annotation == region_data.region_dictionary_to_id_ALLNAME[allname]
+        return filter_
+
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2)
     v2_to = v2_from.copy()
@@ -338,7 +370,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     # Correct annotation edge for ccfv2 and ccfv3
     # no limit for striatum
     id_reg = 278
-    filter_ = region_data.filter_region(
+    filter_ = filter_region(
         ccfv2_corrected,
         region_data.id_to_region_dictionary_ALLNAME[id_reg],
         children,
@@ -350,7 +382,7 @@ def merge(ccfv2, ccfv3, brain_regions):
         ccfv2_corrected[x, y, z] = explore_voxel([x, y, z], copy_filt, -1)
 
     for id_reg in (803, 477):
-        filter_ = region_data.filter_region(
+        filter_ = filter_region(
             ccfv3_corrected,
             region_data.id_to_region_dictionary_ALLNAME[id_reg],
             children,
@@ -364,7 +396,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     # Correct ccfv2 annotation edge Cerebral cortex, Basic Cell group and
     # regions and root  1089, 688, 8, 997
     for id_reg in (688, 8, 997):
-        filter_ = region_data.filter_region(
+        filter_ = filter_region(
             ccfv2_corrected,
             region_data.id_to_region_dictionary_ALLNAME[id_reg],
             children,
@@ -377,7 +409,7 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     # Correct ccfv3 annotation edge for Hippocampal formation, Cortical subplate
     for id_reg in (1089, 703):
-        filter_ = region_data.filter_region(
+        filter_ = filter_region(
             ccfv3_corrected,
             region_data.id_to_region_dictionary_ALLNAME[id_reg],
             children,
