@@ -11,7 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The coarse merging of the annotation atlases."""
+"""The coarse merging of the annotation atlases.
+
+This is the refactored and optimized version of ``coarse::coarse_merge``. It
+uses ``RegionMeta`` instead of ``JSONread`` and greatly speeds up the merging
+by optimizing a number of steps. The original logic was designed by
+Dimitri Rodarie.
+
+The biggest optimization is to not do label replacements directly on the atlases
+but on the set of unique labels, which is much smaller than the atlas volume.
+The labels in the atlases are remapped at the very end of the whole procedure
+using fast vectorized numpy operations, see ``atlas_remap``.
+"""
+from __future__ import annotations
+
 import logging
 
 import numpy as np
@@ -21,11 +34,33 @@ from atlannot.atlas.region_meta import RegionMeta
 logger = logging.getLogger(__name__)
 
 
-def replace(ids, old_id, new_id):
-    ids[ids == old_id] = new_id
+def replace(array: np.ndarray, old_value: int, new_value: int) -> None:
+    """Replace integer values in a numpy array.
+
+    Parameters
+    ----------
+    array
+        An arbitrary numpy array.
+    old_value
+        The value to replace.
+    new_value
+        The new value that replaces the old one.
+    """
+    array[array == old_value] = new_value
 
 
-def manual_relabel(ids_v2, ids_v3):
+def manual_relabel(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
+    """Perform a manual re-labeling step on the CCFv2 and CCFv3 atlases.
+
+    The replacements were compiled by Dimitri Rodarie.
+
+    Parameters
+    ----------
+    ids_v2
+        The (unique) region IDs of the CCFv2 atlas.
+    ids_v3
+        The (unique) region IDs of the CCFv3 atlas.
+    """
     # Entorhinal area, lateral part
     replace(ids_v2, 60, 28)  # L6b -> L6a
     replace(ids_v2, 999, 20)  # L2/3 -> L2 # double check?
@@ -106,7 +141,9 @@ def manual_relabel(ids_v2, ids_v3):
     replace(ids_v3, 123, 867)
 
 
-def atlas_remap(atlas, values_from, values_to):
+def atlas_remap(
+    atlas: np.ndarray, values_from: np.ndarray, values_to: np.ndarray
+) -> np.ndarray:
     """Remap atlas values fast.
 
     This only works if
@@ -120,12 +157,12 @@ def atlas_remap(atlas, values_from, values_to):
 
     Parameters
     ----------
-    atlas : np.ndarray
+    atlas
         The atlas volume to remap. Can be of any shape.
-    values_from : np.ndarray
+    values_from
         The values to map from. It must be that
         ``values_from = np.unique(atlas)``.
-    values_to : np.ndarray
+    values_to
         The values to map to. Must have the same shape as ``values_from``.
 
     Returns
@@ -139,16 +176,18 @@ def atlas_remap(atlas, values_from, values_to):
     return new_atlas
 
 
-def merge(ccfv2, ccfv3, brain_regions):
+def merge(
+    ccfv2: np.ndarray, ccfv3: np.ndarray, brain_regions: dict
+) -> tuple[np.ndarray, np.ndarray]:
     """Perform the coarse atlas merging.
 
     Parameters
     ----------
-    ccfv2 : np.ndarray
+    ccfv2
         The first atlas to merge, usually CCFv2.
-    ccfv3 : np.ndarray
+    ccfv3
         The second atlas to merge, usually CCFv3.
-    brain_regions : dict
+    brain_regions
         The brain regions dictionary. Can be obtained from the "msg" key of
         the `brain_regions.json` (`1.json`) file.
 
