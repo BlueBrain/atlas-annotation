@@ -19,7 +19,6 @@ from numpy import ma
 
 from atlannot.atlas.region_meta import RegionMeta
 from atlannot.atlas_merge.common import atlas_remap, replace
-from atlannot.atlas_merge.JSONread import RegionData
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +229,6 @@ def merge(ccfv2, ccfv3, brain_regions):
         The merged CCFv3 atlas.
     """
     logger.info("Processing the region metadata")
-    region_data = RegionData(brain_regions)
     region_meta = RegionMeta.from_root_region(brain_regions)
 
     logger.info("Preparing region ID maps")
