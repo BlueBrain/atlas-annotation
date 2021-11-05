@@ -17,7 +17,6 @@ import logging
 import numpy as np
 
 from atlannot.atlas.region_meta import RegionMeta
-from atlannot.atlas_merge.JSONread import RegionData
 
 logger = logging.getLogger(__name__)
 
@@ -161,18 +160,46 @@ def merge(ccfv2, ccfv3, brain_regions):
         The merged CCFv3 atlas.
     """
     logger.info("Preparing region metadata")
-    region_data = RegionData(brain_regions)
     region_meta = RegionMeta.from_root_region(brain_regions)
 
     def get_allname(region_id):
-        return region_data.id_to_region_dictionary_ALLNAME[region_id]
+        x = ""
+        while region_id != region_meta.background_id:
+            x = f"|{region_meta.name[region_id]}" + x
+            region_id = region_meta.parent_id[region_id]
+        return x
 
     def is_leaf(region_id):
         # leaf = not parent of anyone
         return region_id not in region_meta.parent_id.values()
 
     def parent(region_id):
-        return region_meta.parent_id[region_id]
+        """Get the parent region ID of a region."""
+        return region_meta.parent_id.get(region_id)
+
+    def children(region_id):
+        """Get all child region IDs of a given region."""
+        for child_id, parent_id in region_meta.parent_id.items():
+            if parent_id == region_id:
+                yield child_id
+
+    def descendants(region_id, allowed_ids):
+        """Get all filtered descendant IDs of a given region ID.
+
+        A descendant is only accepted if it's in ``allowed_ids`` or is a
+        leaf region.
+
+        This is mimicking Dimitri's algorithm, I'm not sure about why this must
+        be that way.
+        """
+        all_descendants = set()
+        for child_id in children(region_id):
+            if child_id in allowed_ids or is_leaf(child_id):
+                all_descendants.add(child_id)
+
+            all_descendants |= descendants(child_id, allowed_ids)
+
+        return all_descendants
 
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2)
@@ -253,19 +280,15 @@ def merge(ccfv2, ccfv3, brain_regions):
     uniques_v2 = region_meta.collect_ancestors(ids_v2)
     uniques_v3 = region_meta.collect_ancestors(ids_v3)
 
-    logger.info("Computing children")
-    children_v2, _ = region_data.find_children(np.array(sorted(uniques_v2)))
-    children_v3, _ = region_data.find_children(np.array(sorted(uniques_v3)))
-
     logger.info("While loop 1")
     ids_to_correct = ids_v3 - ids_v2 - {8, 997}
     while len(ids_to_correct) > 0:
         id_ = ids_to_correct.pop()
         while id_ not in uniques_v2:
             id_ = parent(id_)
-        for child in children_v3[get_allname(id_)]:
+        for child in descendants(id_, uniques_v3):
             replace(v3_to, child, id_)
-        for child in children_v2[get_allname(id_)]:
+        for child in descendants(id_, uniques_v2):
             replace(v2_to, child, id_)
         ids_v2 = set(v2_to)
         ids_v3 = set(v3_to)
@@ -277,9 +300,9 @@ def merge(ccfv2, ccfv3, brain_regions):
         id_ = ids_to_correct.pop()
         while id_ not in uniques_v3:
             id_ = parent(id_)
-        for child in children_v3[get_allname(id_)]:
+        for child in descendants(id_, uniques_v3):
             replace(v3_to, child, id_)
-        for child in children_v2[get_allname(id_)]:
+        for child in descendants(id_, uniques_v2):
             replace(v2_to, child, id_)
         ids_v2 = set(v2_to)
         ids_v3 = set(v3_to)
