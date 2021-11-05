@@ -239,9 +239,27 @@ def merge(ccfv2, ccfv3, brain_regions):
     region_data = RegionData(brain_regions)
     region_meta = RegionMeta.from_root_region(brain_regions)
 
+    logger.info("Preparing region ID maps")
+    v2_from = np.unique(ccfv2)
+    v2_to = v2_from.copy()
+    v3_from = np.unique(ccfv3)
+    v3_to = v3_from.copy()
+    allowed_v2 = region_meta.collect_ancestors(v2_to)
+    allowed_v3 = region_meta.collect_ancestors(v3_to)
+
+    def is_leaf(region_id):
+        # leaf = not parent of anyone
+        return region_id not in region_meta.parent_id.values()
+
     def parent(region_id):
         """Get the parent region ID of a region."""
         return region_meta.parent_id.get(region_id)
+
+    def children(region_id):
+        """Get all child region IDs of a given region."""
+        for child_id, parent_id in region_meta.parent_id.items():
+            if parent_id == region_id:
+                yield child_id
 
     def filter_region(annotation, id_reg, children):
         """Filter a region.
@@ -279,11 +297,22 @@ def merge(ccfv2, ccfv3, brain_regions):
             filter_ = annotation == region_data.region_dictionary_to_id_ALLNAME[allname]
         return filter_
 
-    logger.info("Preparing region ID maps")
-    v2_from = np.unique(ccfv2)
-    v2_to = v2_from.copy()
-    v3_from = np.unique(ccfv3)
-    v3_to = v3_from.copy()
+    def descendants(region_id, allowed_ids):
+        """Get all filtered descendant IDs of a given region ID.
+
+        A descendant is only accepted if it's in ``allowed_ids`` or is a
+        leaf region.
+
+        This is mimicking Dimitri's algorithm, I'm not sure about why this must
+        be that way.
+        """
+        all_descendants = set()
+        for child_id in children(region_id):
+            if child_id in allowed_ids or is_leaf(child_id):
+                all_descendants.add(child_id)
+            all_descendants |= descendants(child_id, allowed_ids)
+
+        return all_descendants
 
     logger.info("First for-loop correction")
     unique_v2 = set(v2_to)
@@ -347,8 +376,8 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     logger.info("Computing unique regions")
     uniques = region_data.find_unique_regions(ccfv2, top_region_name="root")
-    children, _ = region_data.find_children(uniques)
     uniques2 = region_data.find_unique_regions(ccfv3, top_region_name="root")
+    children, _ = region_data.find_children(uniques)
     children2, _ = region_data.find_children(uniques2)
 
     logger.info("Some filter for-loops")
