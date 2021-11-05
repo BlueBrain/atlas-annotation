@@ -330,8 +330,6 @@ def merge(ccfv2, ccfv3, region_meta):
 
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
-    logger.info("Some filter for-loops")
-
     def run_filter(atlas, region_id, count):
         keep_ids = [region_id, *descendants(region_id, allowed_v2)]
         hide_mask = np.isin(atlas, keep_ids, invert=True)
@@ -346,16 +344,21 @@ def merge(ccfv2, ccfv3, region_meta):
 
     # Correct annotation edge for CCFv2 and CCFv3
     # no limit for striatum
+    logger.info("First filter")
     run_filter(ccfv2_corrected, 278, -1)
+
+    logger.info("Second filter")
     for id_reg in [803, 477]:
         run_filter(ccfv3_corrected, id_reg, -1)
 
     # Correct CCFv2 annotation edge Cerebral cortex, Basic Cell group and
     # regions and root  1089, 688, 8, 997
+    logger.info("Third filter")
     for id_reg in [688, 8, 997]:
         run_filter(ccfv2_corrected, id_reg, 3)
 
     # Correct CCFv3 annotation edge for Hippocampal formation, Cortical subplate
+    logger.info("Fourth filter")
     for id_reg in [1089, 703]:
         run_filter(ccfv3_corrected, id_reg, 3)
 
