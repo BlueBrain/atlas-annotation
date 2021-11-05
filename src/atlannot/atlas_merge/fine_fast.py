@@ -202,7 +202,7 @@ def manual_relabel_2(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
     replace(ids_v2, 667, 184)
 
     # Every region ventral to cortex transition area is merge because
-    # Entorhinal area, medial part, ventral zone is not in ccfv3
+    # Entorhinal area, medial part, ventral zone is not in CCFv3
     # ie 259,  324,  371, 1133, 655, 663, 780 -> 663
     replace(ids_v2, 259, 663)
     replace(ids_v2, 324, 663)
@@ -344,45 +344,32 @@ def merge(ccfv2, ccfv3, brain_regions):
     children_v2, _ = region_data.find_children(uniques)
     children_v3, _ = region_data.find_children(uniques2)
 
-    logger.info("Some filter for-loops")
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
-    # Correct annotation edge for ccfv2 and ccfv3
+    logger.info("Some filter for-loops")
+
+    def run_filter(atlas, region_id, count):
+        filter_ = np.isin(atlas, [region_id, *descendants(region_id, allowed_v2)])
+        copy_filt = np.copy(atlas)
+        copy_filt[~filter_] = 0
+        error_voxel = np.where(copy_filt == region_id)
+        for xyz in zip(*error_voxel):
+            atlas[xyz] = explore_voxel(xyz, copy_filt, count)
+
+    # Correct annotation edge for CCFv2 and CCFv3
     # no limit for striatum
-    id_reg = 278
-    filter_ = np.isin(ccfv2_corrected, [id_reg, *descendants(id_reg, allowed_v2)])
-    copy_filt = np.copy(ccfv2_corrected)
-    copy_filt[~filter_] = 0
-    error_voxel = np.where(copy_filt == id_reg)
-    for (x, y, z) in zip(*error_voxel):
-        ccfv2_corrected[x, y, z] = explore_voxel([x, y, z], copy_filt, -1)
+    run_filter(ccfv2_corrected, 278, -1)
+    for id_reg in [803, 477]:
+        run_filter(ccfv3_corrected, id_reg, -1)
 
-    for id_reg in (803, 477):
-        filter_ = np.isin(ccfv3_corrected, [id_reg, *descendants(id_reg, allowed_v2)])
-        copy_filt = np.copy(ccfv3_corrected)
-        copy_filt[~filter_] = 0
-        error_voxel = np.where(copy_filt == id_reg)
-        for (x, y, z) in zip(*error_voxel):
-            ccfv3_corrected[x, y, z] = explore_voxel([x, y, z], copy_filt, -1)
-
-    # Correct ccfv2 annotation edge Cerebral cortex, Basic Cell group and
+    # Correct CCFv2 annotation edge Cerebral cortex, Basic Cell group and
     # regions and root  1089, 688, 8, 997
-    for id_reg in (688, 8, 997):
-        filter_ = np.isin(ccfv2_corrected, [id_reg, *descendants(id_reg, allowed_v2)])
-        copy_filt = np.copy(ccfv2_corrected)
-        copy_filt[~filter_] = 0
-        error_voxel = np.where(copy_filt == id_reg)
-        for (x, y, z) in zip(*error_voxel):
-            ccfv2_corrected[x, y, z] = explore_voxel([x, y, z], copy_filt, 3)
+    for id_reg in [688, 8, 997]:
+        run_filter(ccfv2_corrected, id_reg, 3)
 
-    # Correct ccfv3 annotation edge for Hippocampal formation, Cortical subplate
-    for id_reg in (1089, 703):
-        filter_ = np.isin(ccfv3_corrected, [id_reg, *descendants(id_reg, allowed_v2)])
-        copy_filt = np.copy(ccfv3_corrected)
-        copy_filt[~filter_] = 0
-        error_voxel = np.where(copy_filt == id_reg)
-        for (x, y, z) in zip(*error_voxel):
-            ccfv3_corrected[x, y, z] = explore_voxel([x, y, z], copy_filt, 3)
+    # Correct CCFv3 annotation edge for Hippocampal formation, Cortical subplate
+    for id_reg in [1089, 703]:
+        run_filter(ccfv3_corrected, id_reg, 3)
 
     for id_main in [795]:
         for id_reg in children_v2[region_data.id_to_region_dictionary_ALLNAME[id_main]]:
