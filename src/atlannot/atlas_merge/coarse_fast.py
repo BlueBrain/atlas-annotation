@@ -151,6 +151,7 @@ def merge(
     ccfv3_new : np.ndarray
         The merged CCFv3 atlas.
     """
+
     def is_leaf(region_id):
         # leaf = not parent of anyone
         return region_id not in region_meta.parent_id.values()
