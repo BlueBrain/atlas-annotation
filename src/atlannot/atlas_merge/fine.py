@@ -71,14 +71,14 @@ def explore_voxel(origin, data, count=-1):
     return origin_value
 
 
-def fine_merge(annotation, annotation2, brain_regions):
+def fine_merge(ccfv2, ccfv3, brain_regions):
     """Perform the coarse atlas merging.
 
     Parameters
     ----------
-    annotation : np.ndarray
+    ccfv2 : np.ndarray
         The first atlas to merge, usually CCFv2
-    annotation2 : np.ndarray
+    ccfv3 : np.ndarray
         The second atlas to merge, usually CCFv3
     brain_regions : dict
         The brain regions dictionary. Can be obtained from the "msg" key of
@@ -93,28 +93,28 @@ def fine_merge(annotation, annotation2, brain_regions):
     """
     region_data = RegionData(brain_regions)
 
-    uniques = region_data.find_unique_regions(annotation, top_region_name="root")
+    uniques = region_data.find_unique_regions(ccfv2, top_region_name="root")
     children, _ = region_data.find_children(uniques)
-    uniques2 = region_data.find_unique_regions(annotation2, top_region_name="root")
+    uniques2 = region_data.find_unique_regions(ccfv3, top_region_name="root")
     children2, _ = region_data.find_children(uniques2)
 
-    ccfv2_corrected = np.copy(annotation)
-    ccfv3_corrected = np.copy(annotation2)
-    ids = np.unique(ccfv2_corrected)
-    ids2 = np.unique(ccfv3_corrected)
-    ids_to_correct = ids[np.in1d(ids, ids2, invert=True)]
+    ccfv2_corrected = np.copy(ccfv2)
+    ccfv3_corrected = np.copy(ccfv3)
+    ids_v2 = np.unique(ccfv2_corrected)
+    ids_v3 = np.unique(ccfv3_corrected)
+    ids_to_correct = ids_v2[np.in1d(ids_v2, ids_v3, invert=True)]
 
     for id_reg in ids_to_correct:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if (
             region_data.is_leaf[allname]
-            and id_reg not in ids2
+            and id_reg not in ids_v3
             and region_data.region_dictionary_to_id[
                 region_data.region_dictionary_to_id_parent[
                     region_data.id_to_region_dictionary[id_reg]
                 ]
             ]
-            in ids2
+            in ids_v3
         ):
             ccfv2_corrected[
                 ccfv2_corrected == id_reg
@@ -223,7 +223,7 @@ def fine_merge(annotation, annotation2, brain_regions):
     ccfv2_corrected[np.where(ccfv2_corrected == 915)] = 867
     ccfv3_corrected[np.where(ccfv3_corrected == 123)] = 867
 
-    for id_reg in np.unique(np.concatenate((ids, ids2)))[1:]:
+    for id_reg in np.unique(np.concatenate((ids_v2, ids_v3)))[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
             if "ayer 1" in allname:
@@ -335,26 +335,26 @@ def fine_merge(annotation, annotation2, brain_regions):
             if id_reg in uniques2:
                 ccfv3_corrected[ccfv3_corrected == id_reg] = id_main
 
-    ids = np.unique(ccfv2_corrected)
-    ids2 = np.unique(ccfv3_corrected)
-    for id_reg in ids[1:]:
+    ids_v2 = np.unique(ccfv2_corrected)
+    ids_v3 = np.unique(ccfv3_corrected)
+    for id_reg in ids_v2[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "fiber tracts" in allname:
             ccfv2_corrected[ccfv2_corrected == id_reg] = 1009
         elif "ventricular systems" in allname:
             ccfv2_corrected[ccfv2_corrected == id_reg] = 997
-    for id_reg in ids2[1:]:
+    for id_reg in ids_v3[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "fiber tracts" in allname:
             ccfv3_corrected[ccfv3_corrected == id_reg] = 1009
         elif "ventricular systems" in allname:
             ccfv3_corrected[ccfv3_corrected == id_reg] = 997
 
-    ids = np.unique(ccfv2_corrected)
-    ids2 = np.unique(ccfv3_corrected)
-    ids_to_correct = ids[np.in1d(ids, ids2, invert=True)]
+    ids_v2 = np.unique(ccfv2_corrected)
+    ids_v3 = np.unique(ccfv3_corrected)
+    ids_to_correct = ids_v2[np.in1d(ids_v2, ids_v3, invert=True)]
 
-    ids_to_correct = ids2[np.in1d(ids2, ids, invert=True)]
+    ids_to_correct = ids_v3[np.in1d(ids_v3, ids_v2, invert=True)]
 
     while len(ids_to_correct) > 0:
         parent = ids_to_correct[0]
@@ -368,8 +368,8 @@ def fine_merge(annotation, annotation2, brain_regions):
             ccfv3_corrected[np.where(ccfv3_corrected == child)] = parent
         for child in children[region_data.id_to_region_dictionary_ALLNAME[parent]]:
             ccfv2_corrected[np.where(ccfv2_corrected == child)] = parent
-        ids = np.unique(ccfv2_corrected)
-        ids2 = np.unique(ccfv3_corrected)
-        ids_to_correct = ids2[np.in1d(ids2, ids, invert=True)]
+        ids_v2 = np.unique(ccfv2_corrected)
+        ids_v3 = np.unique(ccfv3_corrected)
+        ids_to_correct = ids_v3[np.in1d(ids_v3, ids_v2, invert=True)]
 
     return ccfv2_corrected, ccfv3_corrected
