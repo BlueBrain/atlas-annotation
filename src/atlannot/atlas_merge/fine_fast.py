@@ -71,7 +71,7 @@ def explore_voxel(origin, data, count=-1):
     return origin_value
 
 
-def fine_merge(annotation, annotation2, brain_regions):
+def merge(annotation, annotation2, brain_regions):
     """Perform the coarse atlas merging.
 
     Parameters
