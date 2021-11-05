@@ -285,20 +285,10 @@ def merge(ccfv2, ccfv3, brain_regions):
     v3_from = np.unique(ccfv3)
     v3_to = v3_from.copy()
 
-    logger.info("Computing unique regions")
-    uniques = region_data.find_unique_regions(ccfv2, top_region_name="root")
-    children, _ = region_data.find_children(uniques)
-    uniques2 = region_data.find_unique_regions(ccfv3, top_region_name="root")
-    children2, _ = region_data.find_children(uniques2)
-
-    logger.info("Creating new atlases")
-    ccfv2_corrected = np.copy(ccfv2)
-    ccfv3_corrected = np.copy(ccfv3)
-    unique_v2 = set(np.unique(ccfv2_corrected))
-    unique_v3 = set(np.unique(ccfv3_corrected))
-    ids_to_correct = unique_v2 - unique_v3
-
     logger.info("First for-loop correction")
+    unique_v2 = set(v2_to)
+    unique_v3 = set(v3_to)
+    ids_to_correct = unique_v2 - unique_v3
     for id_reg in ids_to_correct:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if (
@@ -306,21 +296,17 @@ def merge(ccfv2, ccfv3, brain_regions):
             and id_reg not in unique_v3
             and parent(id_reg) in unique_v3
         ):
-            replace(ccfv2_corrected, id_reg, parent(id_reg))
             replace(v2_to, id_reg, parent(id_reg))
         elif region_data.is_leaf[allname] and (
             "Medial amygdalar nucleus" in allname
             or "Subiculum" in allname
             or "Bed nuclei of the stria terminalis" in allname
         ):
-            replace(ccfv2_corrected, id_reg, parent(parent(id_reg)))
             replace(v2_to, id_reg, parent(parent(id_reg)))
         elif "Paraventricular hypothalamic nucleus" in allname:
-            replace(ccfv2_corrected, id_reg, 38)
             replace(v2_to, id_reg, 38)
 
     logger.info("Manual relabeling #1")
-    manual_relabel_1(ccfv2_corrected, ccfv3_corrected)
     manual_relabel_1(v2_to, v3_to)
 
     logger.info("Second for loop correction")
@@ -328,45 +314,42 @@ def merge(ccfv2, ccfv3, brain_regions):
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
             if "ayer 1" in allname:
-                replace(ccfv3_corrected, id_reg, 801)
-                replace(ccfv2_corrected, id_reg, 801)
                 replace(v3_to, id_reg, 801)
                 replace(v2_to, id_reg, 801)
             elif "ayer 2/3" in allname:
-                replace(ccfv3_corrected, id_reg, 561)
-                replace(ccfv2_corrected, id_reg, 561)
                 replace(v3_to, id_reg, 561)
                 replace(v2_to, id_reg, 561)
             elif "ayer 4" in allname:
-                replace(ccfv3_corrected, id_reg, 913)
-                replace(ccfv2_corrected, id_reg, 913)
                 replace(v3_to, id_reg, 913)
                 replace(v2_to, id_reg, 913)
             elif "ayer 5" in allname:
-                replace(ccfv3_corrected, id_reg, 937)
-                replace(ccfv2_corrected, id_reg, 937)
                 replace(v3_to, id_reg, 937)
                 replace(v2_to, id_reg, 937)
             elif "ayer 6a" in allname:
-                replace(ccfv3_corrected, id_reg, 457)
-                replace(ccfv2_corrected, id_reg, 457)
                 replace(v3_to, id_reg, 457)
                 replace(v2_to, id_reg, 457)
             elif "ayer 6b" in allname:
-                replace(ccfv3_corrected, id_reg, 497)
-                replace(ccfv2_corrected, id_reg, 497)
                 replace(v3_to, id_reg, 497)
                 replace(v2_to, id_reg, 497)
 
     logger.info("Manual relabeling #2")
-    manual_relabel_2(ccfv2_corrected, ccfv3_corrected)
     manual_relabel_2(v2_to, v3_to)
+
+    logger.info("Re-instating the corrected atlases")
+    ccfv2_corrected = atlas_remap(ccfv2, v2_from, v2_to)
+    ccfv3_corrected = atlas_remap(ccfv3, v3_from, v3_to)
 
     logger.info("Applying replacements")
     ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
     ccfv3_new = atlas_remap(ccfv3, v3_from, v3_to)
     assert np.array_equal(ccfv2_new, ccfv2_corrected)
     assert np.array_equal(ccfv3_new, ccfv3_corrected)
+
+    logger.info("Computing unique regions")
+    uniques = region_data.find_unique_regions(ccfv2, top_region_name="root")
+    children, _ = region_data.find_children(uniques)
+    uniques2 = region_data.find_unique_regions(ccfv3, top_region_name="root")
+    children2, _ = region_data.find_children(uniques2)
 
     logger.info("Some filter for-loops")
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
