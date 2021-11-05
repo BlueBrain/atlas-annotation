@@ -396,17 +396,13 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     logger.info("While-loop correction")
     while len(ids_to_correct) > 0:
-        parent = ids_to_correct[0]
-        while parent not in uniques:
-            parent = region_data.region_dictionary_to_id[
-                region_data.region_dictionary_to_id_parent[
-                    region_data.id_to_region_dictionary[parent]
-                ]
-            ]
-        for child in children2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            replace(ccfv3_corrected, child, parent)
-        for child in children[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            replace(ccfv2_corrected, child, parent)
+        id_ = ids_to_correct[0]
+        while id_ not in uniques:
+            id_ = parent(id_)
+        for child in children2[region_data.id_to_region_dictionary_ALLNAME[id_]]:
+            replace(ccfv3_corrected, child, id_)
+        for child in children[region_data.id_to_region_dictionary_ALLNAME[id_]]:
+            replace(ccfv2_corrected, child, id_)
         ids_v2 = np.unique(ccfv2_corrected)
         ids_v3 = np.unique(ccfv3_corrected)
         ids_to_correct = ids_v3[np.in1d(ids_v3, ids_v2, invert=True)]
