@@ -278,7 +278,7 @@ def merge(ccfv2, ccfv3, brain_regions):
 
         return all_descendants
 
-    def filter_region(annotation, id_reg, children):
+    def filter_region(annotation, id_reg, descendant_ids):
         """Filter a region.
 
         Computes a 3d boolean mask to filter a region and its subregion from
@@ -290,8 +290,8 @@ def merge(ccfv2, ccfv3, brain_regions):
             3D numpy ndarray of integers ids of the regions.
         id_reg : int
             The region ID.
-        children : dict
-            Dictionary of region complete name to list of child region ids.
+        descendant_ids : set
+            List of descendand IDs of the given region
 
         Returns
         -------
@@ -305,7 +305,7 @@ def merge(ccfv2, ccfv3, brain_regions):
                 annotation,
                 np.concatenate(
                     (
-                        children[allname],
+                        list(descendant_ids),
                         [region_data.region_dictionary_to_id_ALLNAME[allname]],
                     )
                 ),
@@ -377,8 +377,8 @@ def merge(ccfv2, ccfv3, brain_regions):
     logger.info("Computing unique regions")
     uniques = region_data.find_unique_regions(ccfv2, top_region_name="root")
     uniques2 = region_data.find_unique_regions(ccfv3, top_region_name="root")
-    children, _ = region_data.find_children(uniques)
-    children2, _ = region_data.find_children(uniques2)
+    children_v2, _ = region_data.find_children(uniques)
+    children_v3, _ = region_data.find_children(uniques2)
 
     logger.info("Some filter for-loops")
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
@@ -386,7 +386,11 @@ def merge(ccfv2, ccfv3, brain_regions):
     # Correct annotation edge for ccfv2 and ccfv3
     # no limit for striatum
     id_reg = 278
-    filter_ = filter_region(ccfv2_corrected, id_reg, children)
+    filter_ = filter_region(
+        ccfv2_corrected,
+        id_reg,
+        descendants(id_reg, allowed_v2),
+    )
     copy_filt = np.copy(ccfv2_corrected)
     copy_filt[~filter_] = 0
     error_voxel = np.where(copy_filt == id_reg)
@@ -394,7 +398,11 @@ def merge(ccfv2, ccfv3, brain_regions):
         ccfv2_corrected[x, y, z] = explore_voxel([x, y, z], copy_filt, -1)
 
     for id_reg in (803, 477):
-        filter_ = filter_region(ccfv3_corrected, id_reg, children)
+        filter_ = filter_region(
+            ccfv3_corrected,
+            id_reg,
+            descendants(id_reg, allowed_v2),
+        )
         copy_filt = np.copy(ccfv3_corrected)
         copy_filt[~filter_] = 0
         error_voxel = np.where(copy_filt == id_reg)
@@ -404,7 +412,11 @@ def merge(ccfv2, ccfv3, brain_regions):
     # Correct ccfv2 annotation edge Cerebral cortex, Basic Cell group and
     # regions and root  1089, 688, 8, 997
     for id_reg in (688, 8, 997):
-        filter_ = filter_region(ccfv2_corrected, id_reg, children)
+        filter_ = filter_region(
+            ccfv2_corrected,
+            id_reg,
+            descendants(id_reg, allowed_v2),
+        )
         copy_filt = np.copy(ccfv2_corrected)
         copy_filt[~filter_] = 0
         error_voxel = np.where(copy_filt == id_reg)
@@ -413,7 +425,11 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     # Correct ccfv3 annotation edge for Hippocampal formation, Cortical subplate
     for id_reg in (1089, 703):
-        filter_ = filter_region(ccfv3_corrected, id_reg, children)
+        filter_ = filter_region(
+            ccfv3_corrected,
+            id_reg,
+            descendants(id_reg, allowed_v2),
+        )
         copy_filt = np.copy(ccfv3_corrected)
         copy_filt[~filter_] = 0
         error_voxel = np.where(copy_filt == id_reg)
@@ -421,7 +437,7 @@ def merge(ccfv2, ccfv3, brain_regions):
             ccfv3_corrected[x, y, z] = explore_voxel([x, y, z], copy_filt, 3)
 
     for id_main in [795]:
-        for id_reg in children[region_data.id_to_region_dictionary_ALLNAME[id_main]]:
+        for id_reg in children_v2[region_data.id_to_region_dictionary_ALLNAME[id_main]]:
             if id_reg in uniques:
                 replace(ccfv2_corrected, id_reg, id_main)
             if id_reg in uniques2:
@@ -452,9 +468,9 @@ def merge(ccfv2, ccfv3, brain_regions):
         id_ = ids_to_correct.pop()
         while id_ not in uniques:
             id_ = parent(id_)
-        for child in children2[region_data.id_to_region_dictionary_ALLNAME[id_]]:
+        for child in children_v3[region_data.id_to_region_dictionary_ALLNAME[id_]]:
             replace(ccfv3_corrected, child, id_)
-        for child in children[region_data.id_to_region_dictionary_ALLNAME[id_]]:
+        for child in children_v2[region_data.id_to_region_dictionary_ALLNAME[id_]]:
             replace(ccfv2_corrected, child, id_)
         unique_v2 = set(np.unique(ccfv2_corrected))
         unique_v3 = set(np.unique(ccfv3_corrected))
