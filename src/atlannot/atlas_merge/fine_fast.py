@@ -359,54 +359,64 @@ def merge(ccfv2, ccfv3, region_meta):
     for id_reg in [1089, 703]:
         run_filter(ccfv3_corrected, id_reg, 3)
 
-    for id_main in [795]:
-        for id_reg in descendants(id_main, allowed_v2):
-            if id_reg in allowed_v2:
-                replace(ccfv2_corrected, id_reg, id_main)
-            if id_reg in allowed_v3:
-                replace(ccfv3_corrected, id_reg, id_main)
-
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2_corrected)
     v2_to = v2_from.copy()
     v3_from = np.unique(ccfv3_corrected)
     v3_to = v3_from.copy()
 
+    # REMOVE THOSE LATER
+    ccfv2 = ccfv2_corrected.copy()
+    ccfv3 = ccfv3_corrected.copy()
+
+    logger.info("Some more manual replacement of descendants")
+    for id_main in [795]:
+        for id_reg in descendants(id_main, allowed_v2):
+            if id_reg in allowed_v2:
+                replace(ccfv2_corrected, id_reg, id_main)
+                replace(v2_to, id_reg, id_main)
+            if id_reg in allowed_v3:
+                replace(ccfv3_corrected, id_reg, id_main)
+                replace(v3_to, id_reg, id_main)
+
     logger.info("More for-loop corrections")
-    unique_v2 = set(np.unique(ccfv2_corrected))
-    unique_v3 = set(np.unique(ccfv3_corrected))
+    unique_v2 = set(v2_to)
+    unique_v3 = set(v3_to)
     for id_reg in unique_v2 - {0}:
         if in_region_like("fiber tracts", id_reg):
             replace(ccfv2_corrected, id_reg, 1009)
+            replace(v2_to, id_reg, 1009)
         elif in_region_like("ventricular systems", id_reg):
             replace(ccfv2_corrected, id_reg, 997)
+            replace(v2_to, id_reg, 997)
     for id_reg in unique_v3 - {0}:
         if in_region_like("fiber tracts", id_reg):
             replace(ccfv3_corrected, id_reg, 1009)
+            replace(v3_to, id_reg, 1009)
         elif in_region_like("ventricular systems", id_reg):
             replace(ccfv3_corrected, id_reg, 997)
-
-    unique_v2 = set(np.unique(ccfv2_corrected))
-    unique_v3 = set(np.unique(ccfv3_corrected))
-    ids_to_correct = unique_v3 - unique_v2
+            replace(v3_to, id_reg, 997)
 
     logger.info("While-loop correction")
+    unique_v2 = set(v2_to)
+    unique_v3 = set(v3_to)
+    ids_to_correct = unique_v3 - unique_v2
     while len(ids_to_correct) > 0:
         id_ = ids_to_correct.pop()
         while id_ not in allowed_v2:
             id_ = parent(id_)
         for child in descendants(id_, allowed_v3):
             replace(ccfv3_corrected, child, id_)
+            replace(v3_to, child, id_)
         for child in descendants(id_, allowed_v2):
             replace(ccfv2_corrected, child, id_)
-        unique_v2 = set(np.unique(ccfv2_corrected))
-        unique_v3 = set(np.unique(ccfv3_corrected))
+            replace(v2_to, child, id_)
+        unique_v2 = set(v2_to)
+        unique_v3 = set(v3_to)
         ids_to_correct = unique_v3 - unique_v2
 
-    # logger.info("Ramapping atlases")
-    # ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
-    # ccfv3_new = atlas_remap(ccfv3, v3_from, v3_to)
-    # assert np.array_equal(ccfv2_new, ccfv2_corrected)
-    # assert np.array_equal(ccfv3_new, ccfv3_corrected)
+    logger.info("Ramapping atlases")
+    ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
+    ccfv3_new = atlas_remap(ccfv3, v3_from, v3_to)
 
-    return ccfv2_corrected, ccfv3_corrected
+    return ccfv2_new, ccfv3_new
