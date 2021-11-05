@@ -294,17 +294,17 @@ def merge(ccfv2, ccfv3, brain_regions):
     logger.info("Creating new atlases")
     ccfv2_corrected = np.copy(ccfv2)
     ccfv3_corrected = np.copy(ccfv3)
-    ids_v2 = np.unique(ccfv2_corrected)
-    ids_v3 = np.unique(ccfv3_corrected)
-    ids_to_correct = ids_v2[np.in1d(ids_v2, ids_v3, invert=True)]
+    unique_v2 = set(np.unique(ccfv2_corrected))
+    unique_v3 = set(np.unique(ccfv3_corrected))
+    ids_to_correct = unique_v2 - unique_v3
 
     logger.info("First for-loop correction")
     for id_reg in ids_to_correct:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if (
             region_data.is_leaf[allname]
-            and id_reg not in ids_v3
-            and parent(id_reg) in ids_v3
+            and id_reg not in unique_v3
+            and parent(id_reg) in unique_v3
         ):
             replace(ccfv2_corrected, id_reg, parent(id_reg))
             replace(v2_to, id_reg, parent(id_reg))
@@ -324,7 +324,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     manual_relabel_1(v2_to, v3_to)
 
     logger.info("Second for loop correction")
-    for id_reg in np.unique(np.concatenate((ids_v2, ids_v3)))[1:]:
+    for id_reg in (unique_v2 | unique_v3) - {0}:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
             if "ayer 1" in allname:
@@ -416,38 +416,36 @@ def merge(ccfv2, ccfv3, brain_regions):
                 replace(ccfv3_corrected, id_reg, id_main)
 
     logger.info("More for-loop corrections")
-    ids_v2 = np.unique(ccfv2_corrected)
-    ids_v3 = np.unique(ccfv3_corrected)
-    for id_reg in ids_v2[1:]:
+    unique_v2 = set(np.unique(ccfv2_corrected))
+    unique_v3 = set(np.unique(ccfv3_corrected))
+    for id_reg in unique_v2 - {0}:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "fiber tracts" in allname:
             replace(ccfv2_corrected, id_reg, 1009)
         elif "ventricular systems" in allname:
             replace(ccfv2_corrected, id_reg, 997)
-    for id_reg in ids_v3[1:]:
+    for id_reg in unique_v3 - {0}:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "fiber tracts" in allname:
             replace(ccfv3_corrected, id_reg, 1009)
         elif "ventricular systems" in allname:
             replace(ccfv3_corrected, id_reg, 997)
 
-    ids_v2 = np.unique(ccfv2_corrected)
-    ids_v3 = np.unique(ccfv3_corrected)
-    ids_to_correct = ids_v2[np.in1d(ids_v2, ids_v3, invert=True)]
-
-    ids_to_correct = ids_v3[np.in1d(ids_v3, ids_v2, invert=True)]
+    unique_v2 = set(np.unique(ccfv2_corrected))
+    unique_v3 = set(np.unique(ccfv3_corrected))
+    ids_to_correct = unique_v3 - unique_v2
 
     logger.info("While-loop correction")
     while len(ids_to_correct) > 0:
-        id_ = ids_to_correct[0]
+        id_ = ids_to_correct.pop()
         while id_ not in uniques:
             id_ = parent(id_)
         for child in children2[region_data.id_to_region_dictionary_ALLNAME[id_]]:
             replace(ccfv3_corrected, child, id_)
         for child in children[region_data.id_to_region_dictionary_ALLNAME[id_]]:
             replace(ccfv2_corrected, child, id_)
-        ids_v2 = np.unique(ccfv2_corrected)
-        ids_v3 = np.unique(ccfv3_corrected)
-        ids_to_correct = ids_v3[np.in1d(ids_v3, ids_v2, invert=True)]
+        unique_v2 = set(np.unique(ccfv2_corrected))
+        unique_v3 = set(np.unique(ccfv3_corrected))
+        ids_to_correct = unique_v3 - unique_v2
 
     return ccfv2_corrected, ccfv3_corrected
