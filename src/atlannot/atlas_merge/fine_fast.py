@@ -12,10 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The fine merging of the annotation atlases."""
+import logging
+
 import numpy as np
 
+from atlannot.atlas.region_meta import RegionMeta
 from atlannot.atlas_merge.JSONread import RegionData
 from atlannot.atlas_merge.common import atlas_remap, replace
+
+logger = logging.getLogger(__name__)
 
 
 def explore_voxel(origin, data, count=-1):
@@ -37,6 +42,7 @@ def explore_voxel(origin, data, count=-1):
     value : int
         The value of some voxel in the data volume.
     """
+    logger.debug("exploring voxel %s", origin)
     origin_value = data[origin[0], origin[1], origin[2]]
     explored = np.zeros(data.shape, dtype=bool)
     explored[origin[0], origin[1], origin[2]] = True
@@ -188,19 +194,24 @@ def merge(ccfv2, ccfv3, brain_regions):
     ccfv3_corrected : np.ndarray
         The merged CCFv3 atlas.
     """
+    logger.info("Processing the region metadata")
     region_data = RegionData(brain_regions)
+    region_meta = RegionMeta.from_root_region(brain_regions)
 
+    logger.info("Computing unique regions")
     uniques = region_data.find_unique_regions(ccfv2, top_region_name="root")
     children, _ = region_data.find_children(uniques)
     uniques2 = region_data.find_unique_regions(ccfv3, top_region_name="root")
     children2, _ = region_data.find_children(uniques2)
 
+    logger.info("Creating new atlases")
     ccfv2_corrected = np.copy(ccfv2)
     ccfv3_corrected = np.copy(ccfv3)
     ids_v2 = np.unique(ccfv2_corrected)
     ids_v3 = np.unique(ccfv3_corrected)
     ids_to_correct = ids_v2[np.in1d(ids_v2, ids_v3, invert=True)]
 
+    logger.info("First for-loop correction")
     for id_reg in ids_to_correct:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if (
@@ -237,8 +248,10 @@ def merge(ccfv2, ccfv3, brain_regions):
         elif "Paraventricular hypothalamic nucleus" in allname:
             ccfv2_corrected[ccfv2_corrected == id_reg] = 38
 
+    logger.info("Manual relabeling #1")
     manual_relabel(ccfv2_corrected, ccfv3_corrected)
 
+    logger.info("Second for loop correction")
     for id_reg in np.unique(np.concatenate((ids_v2, ids_v3)))[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
@@ -261,6 +274,7 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 497
                 ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 497
 
+    logger.info("Manual relabeling #2")
     # subreg of Prosubiculum to subiculum
     ccfv3_corrected[np.where(ccfv3_corrected == 484682470)] = 502
     # Orbital area, medial part, layer 6b -> 6a
@@ -289,6 +303,7 @@ def merge(ccfv2, ccfv3, brain_regions):
     ccfv3_corrected[np.where(ccfv3_corrected == 655)] = 663
     ccfv3_corrected[np.where(ccfv3_corrected == 780)] = 663
 
+    logger.info("Some filter for-loops")
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
     # Correct annotation edge for ccfv2 and ccfv3
@@ -351,6 +366,7 @@ def merge(ccfv2, ccfv3, brain_regions):
             if id_reg in uniques2:
                 ccfv3_corrected[ccfv3_corrected == id_reg] = id_main
 
+    logger.info("More for-loop corrections")
     ids_v2 = np.unique(ccfv2_corrected)
     ids_v3 = np.unique(ccfv3_corrected)
     for id_reg in ids_v2[1:]:
@@ -372,6 +388,7 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     ids_to_correct = ids_v3[np.in1d(ids_v3, ids_v2, invert=True)]
 
+    logger.info("While-loop correction")
     while len(ids_to_correct) > 0:
         parent = ids_to_correct[0]
         while parent not in uniques:
