@@ -288,23 +288,23 @@ def merge(ccfv2, ccfv3, brain_regions):
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "Visual areas" in allname:
             if "ayer 1" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 801
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 801
+                replace(ccfv3_corrected, id_reg, 801)
+                replace(ccfv2_corrected, id_reg, 801)
             elif "ayer 2/3" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 561
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 561
+                replace(ccfv3_corrected, id_reg, 561)
+                replace(ccfv2_corrected, id_reg, 561)
             elif "ayer 4" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 913
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 913
+                replace(ccfv3_corrected, id_reg, 913)
+                replace(ccfv2_corrected, id_reg, 913)
             elif "ayer 5" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 937
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 937
+                replace(ccfv3_corrected, id_reg, 937)
+                replace(ccfv2_corrected, id_reg, 937)
             elif "ayer 6a" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 457
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 457
+                replace(ccfv3_corrected, id_reg, 457)
+                replace(ccfv2_corrected, id_reg, 457)
             elif "ayer 6b" in allname:
-                ccfv3_corrected[np.where(ccfv3_corrected == id_reg)] = 497
-                ccfv2_corrected[np.where(ccfv2_corrected == id_reg)] = 497
+                replace(ccfv3_corrected, id_reg, 497)
+                replace(ccfv2_corrected, id_reg, 497)
 
     logger.info("Manual relabeling #2")
     manual_relabel_2(ccfv2_corrected, ccfv3_corrected)
@@ -368,9 +368,9 @@ def merge(ccfv2, ccfv3, brain_regions):
     for id_main in [795]:
         for id_reg in children[region_data.id_to_region_dictionary_ALLNAME[id_main]]:
             if id_reg in uniques:
-                ccfv2_corrected[ccfv2_corrected == id_reg] = id_main
+                replace(ccfv2_corrected, id_reg, id_main)
             if id_reg in uniques2:
-                ccfv3_corrected[ccfv3_corrected == id_reg] = id_main
+                replace(ccfv3_corrected, id_reg, id_main)
 
     logger.info("More for-loop corrections")
     ids_v2 = np.unique(ccfv2_corrected)
@@ -378,15 +378,15 @@ def merge(ccfv2, ccfv3, brain_regions):
     for id_reg in ids_v2[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "fiber tracts" in allname:
-            ccfv2_corrected[ccfv2_corrected == id_reg] = 1009
+            replace(ccfv2_corrected, id_reg, 1009)
         elif "ventricular systems" in allname:
-            ccfv2_corrected[ccfv2_corrected == id_reg] = 997
+            replace(ccfv2_corrected, id_reg, 997)
     for id_reg in ids_v3[1:]:
         allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if "fiber tracts" in allname:
-            ccfv3_corrected[ccfv3_corrected == id_reg] = 1009
+            replace(ccfv3_corrected, id_reg, 1009)
         elif "ventricular systems" in allname:
-            ccfv3_corrected[ccfv3_corrected == id_reg] = 997
+            replace(ccfv3_corrected, id_reg, 997)
 
     ids_v2 = np.unique(ccfv2_corrected)
     ids_v3 = np.unique(ccfv3_corrected)
@@ -404,9 +404,9 @@ def merge(ccfv2, ccfv3, brain_regions):
                 ]
             ]
         for child in children2[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv3_corrected[np.where(ccfv3_corrected == child)] = parent
+            replace(ccfv3_corrected, child, parent)
         for child in children[region_data.id_to_region_dictionary_ALLNAME[parent]]:
-            ccfv2_corrected[np.where(ccfv2_corrected == child)] = parent
+            replace(ccfv2_corrected, child, parent)
         ids_v2 = np.unique(ccfv2_corrected)
         ids_v3 = np.unique(ccfv3_corrected)
         ids_to_correct = ids_v3[np.in1d(ids_v3, ids_v2, invert=True)]
