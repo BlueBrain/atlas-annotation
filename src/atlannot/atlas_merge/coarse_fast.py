@@ -207,47 +207,47 @@ def merge(ccfv2, ccfv3, brain_regions):
     v3_to = v3_from.copy()
 
     logger.info("First loop")
-    ids_v2 = set(v2_to)
-    ids_v3 = set(v3_to)
-    ids_to_correct = ids_v2 - ids_v3
-    for id_reg in ids_to_correct:
-        if is_leaf(id_reg) and id_reg not in ids_v3 and parent(id_reg) in ids_v3:
-            replace(v2_to, id_reg, parent(id_reg))
-        elif is_leaf(id_reg) and (
-            in_region_like("Medial amygdalar nucleus", id_reg)
-            or in_region_like("Subiculum", id_reg)
-            or in_region_like("Bed nuclei of the stria terminalis", id_reg)
+    unique_v2 = set(v2_to)
+    unique_v3 = set(v3_to)
+    ids_to_correct = unique_v2 - unique_v3
+    for id_ in ids_to_correct:
+        if is_leaf(id_) and id_ not in unique_v3 and parent(id_) in unique_v3:
+            replace(v2_to, id_, parent(id_))
+        elif is_leaf(id_) and (
+            in_region_like("Medial amygdalar nucleus", id_)
+            or in_region_like("Subiculum", id_)
+            or in_region_like("Bed nuclei of the stria terminalis", id_)
         ):
-            replace(v2_to, id_reg, parent(parent(id_reg)))
-        elif in_region_like("Paraventricular hypothalamic nucleus", id_reg):
-            replace(v3_to, id_reg, 38)
+            replace(v2_to, id_, parent(parent(id_)))
+        elif in_region_like("Paraventricular hypothalamic nucleus", id_):
+            replace(v3_to, id_, 38)
 
     logger.info("Manual replacements")
     manual_relabel(v2_to, v3_to)
 
     logger.info("Second loop")
-    for id_reg in (ids_v2 | ids_v3) - {0}:
-        if not in_region_like("Visual areas", id_reg):
+    for id_ in (unique_v2 | unique_v3) - {0}:
+        if not in_region_like("Visual areas", id_):
             continue
 
-        if in_region_like("ayer 1", id_reg):
-            replace(v3_to, id_reg, 801)
-            replace(v2_to, id_reg, 801)
-        elif in_region_like("ayer 2/3", id_reg):
-            replace(v3_to, id_reg, 561)
-            replace(v2_to, id_reg, 561)
-        elif in_region_like("ayer 4", id_reg):
-            replace(v3_to, id_reg, 913)
-            replace(v2_to, id_reg, 913)
-        elif in_region_like("ayer 5", id_reg):
-            replace(v3_to, id_reg, 937)
-            replace(v2_to, id_reg, 937)
-        elif in_region_like("ayer 6a", id_reg):
-            replace(v3_to, id_reg, 457)
-            replace(v2_to, id_reg, 457)
-        elif in_region_like("ayer 6b", id_reg):
-            replace(v3_to, id_reg, 497)
-            replace(v2_to, id_reg, 497)
+        if in_region_like("ayer 1", id_):
+            replace(v3_to, id_, 801)
+            replace(v2_to, id_, 801)
+        elif in_region_like("ayer 2/3", id_):
+            replace(v3_to, id_, 561)
+            replace(v2_to, id_, 561)
+        elif in_region_like("ayer 4", id_):
+            replace(v3_to, id_, 913)
+            replace(v2_to, id_, 913)
+        elif in_region_like("ayer 5", id_):
+            replace(v3_to, id_, 937)
+            replace(v2_to, id_, 937)
+        elif in_region_like("ayer 6a", id_):
+            replace(v3_to, id_, 457)
+            replace(v2_to, id_, 457)
+        elif in_region_like("ayer 6b", id_):
+            replace(v3_to, id_, 497)
+            replace(v2_to, id_, 497)
 
     logger.info("Manual replacements #2")
     # subreg of Prosubiculum to subiculum
@@ -257,55 +257,53 @@ def merge(ccfv2, ccfv3, brain_regions):
     replace(v3_to, 355, 314)
 
     logger.info("Third loop")
-    for id_reg in ids_v3 - {0}:
+    for id_ in unique_v3 - {0}:
         if (
             (
-                in_region_like("fiber tracts", id_reg)
-                or in_region_like("Interpeduncular nucleus", id_reg)
+                in_region_like("fiber tracts", id_)
+                or in_region_like("Interpeduncular nucleus", id_)
             )
-            and id_reg not in ids_v2
-            and parent(id_reg) in ids_v2
+            and id_ not in unique_v2
+            and parent(id_) in unique_v2
         ):
-            replace(v3_to, id_reg, parent(id_reg))
-        if in_region_like("Frontal pole, cerebral cortex", id_reg):
-            replace(v3_to, id_reg, 184)
-            replace(v2_to, id_reg, 184)
+            replace(v3_to, id_, parent(id_))
+        if in_region_like("Frontal pole, cerebral cortex", id_):
+            replace(v3_to, id_, 184)
+            replace(v2_to, id_, 184)
 
-    logger.info("Some manual stuff again")
-    ids_v2 = set(v2_to)
-    ids_v3 = set(v3_to)
-
-    logger.info("Computing unique region IDs")
-    uniques_v2 = region_meta.collect_ancestors(ids_v2)
-    uniques_v3 = region_meta.collect_ancestors(ids_v3)
+    logger.info("Preparing the while loops")
+    unique_v2 = set(v2_to)
+    unique_v3 = set(v3_to)
+    allowed_v2 = region_meta.collect_ancestors(unique_v2)
+    allowed_v3 = region_meta.collect_ancestors(unique_v3)
 
     logger.info("While loop 1")
-    ids_to_correct = ids_v3 - ids_v2 - {8, 997}
+    ids_to_correct = unique_v3 - unique_v2 - {8, 997}
     while len(ids_to_correct) > 0:
         id_ = ids_to_correct.pop()
-        while id_ not in uniques_v2:
+        while id_ not in allowed_v2:
             id_ = parent(id_)
-        for child in descendants(id_, uniques_v3):
+        for child in descendants(id_, allowed_v3):
             replace(v3_to, child, id_)
-        for child in descendants(id_, uniques_v2):
+        for child in descendants(id_, allowed_v2):
             replace(v2_to, child, id_)
-        ids_v2 = set(v2_to)
-        ids_v3 = set(v3_to)
-        ids_to_correct = ids_v3 - ids_v2 - {8, 997}
+        unique_v2 = set(v2_to)
+        unique_v3 = set(v3_to)
+        ids_to_correct = unique_v3 - unique_v2 - {8, 997}
 
     logger.info("While loop 2")
-    ids_to_correct = ids_v2 - ids_v3 - {8, 997}
+    ids_to_correct = unique_v2 - unique_v3 - {8, 997}
     while len(ids_to_correct) > 0:
         id_ = ids_to_correct.pop()
-        while id_ not in uniques_v3:
+        while id_ not in allowed_v3:
             id_ = parent(id_)
-        for child in descendants(id_, uniques_v3):
+        for child in descendants(id_, allowed_v3):
             replace(v3_to, child, id_)
-        for child in descendants(id_, uniques_v2):
+        for child in descendants(id_, allowed_v2):
             replace(v2_to, child, id_)
-        ids_v2 = set(v2_to)
-        ids_v3 = set(v3_to)
-        ids_to_correct = ids_v2 - ids_v3 - {8, 997}
+        unique_v2 = set(v2_to)
+        unique_v3 = set(v3_to)
+        ids_to_correct = unique_v2 - unique_v3 - {8, 997}
 
     logger.info("Applying replacements")
     ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
