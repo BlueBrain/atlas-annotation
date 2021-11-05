@@ -336,6 +336,10 @@ def merge(ccfv2, ccfv3, region_meta):
         masked_atlas = ma.masked_array(atlas, hide_mask)
 
         error_voxel = np.where(atlas == region_id)
+        if len(error_voxel) == 0:
+            logger.info(f"No voxels to explore", len(error_voxel[0]))
+            return
+        logger.info(f"Exploring %d voxels", len(error_voxel[0]))
         new_values = [
             explore_voxel(xyz, masked_atlas, count)
             for xyz in zip(*error_voxel)
