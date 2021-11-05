@@ -365,18 +365,12 @@ def merge(ccfv2, ccfv3, region_meta):
     v3_from = np.unique(ccfv3_corrected)
     v3_to = v3_from.copy()
 
-    # REMOVE THOSE LATER
-    ccfv2 = ccfv2_corrected.copy()
-    ccfv3 = ccfv3_corrected.copy()
-
     logger.info("Some more manual replacement of descendants")
     for id_main in [795]:
         for id_reg in descendants(id_main, allowed_v2):
             if id_reg in allowed_v2:
-                replace(ccfv2_corrected, id_reg, id_main)
                 replace(v2_to, id_reg, id_main)
             if id_reg in allowed_v3:
-                replace(ccfv3_corrected, id_reg, id_main)
                 replace(v3_to, id_reg, id_main)
 
     logger.info("More for-loop corrections")
@@ -384,17 +378,13 @@ def merge(ccfv2, ccfv3, region_meta):
     unique_v3 = set(v3_to)
     for id_reg in unique_v2 - {0}:
         if in_region_like("fiber tracts", id_reg):
-            replace(ccfv2_corrected, id_reg, 1009)
             replace(v2_to, id_reg, 1009)
         elif in_region_like("ventricular systems", id_reg):
-            replace(ccfv2_corrected, id_reg, 997)
             replace(v2_to, id_reg, 997)
     for id_reg in unique_v3 - {0}:
         if in_region_like("fiber tracts", id_reg):
-            replace(ccfv3_corrected, id_reg, 1009)
             replace(v3_to, id_reg, 1009)
         elif in_region_like("ventricular systems", id_reg):
-            replace(ccfv3_corrected, id_reg, 997)
             replace(v3_to, id_reg, 997)
 
     logger.info("While-loop correction")
@@ -406,17 +396,15 @@ def merge(ccfv2, ccfv3, region_meta):
         while id_ not in allowed_v2:
             id_ = parent(id_)
         for child in descendants(id_, allowed_v3):
-            replace(ccfv3_corrected, child, id_)
             replace(v3_to, child, id_)
         for child in descendants(id_, allowed_v2):
-            replace(ccfv2_corrected, child, id_)
             replace(v2_to, child, id_)
         unique_v2 = set(v2_to)
         unique_v3 = set(v3_to)
         ids_to_correct = unique_v3 - unique_v2
 
     logger.info("Ramapping atlases")
-    ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
-    ccfv3_new = atlas_remap(ccfv3, v3_from, v3_to)
+    ccfv2_new = atlas_remap(ccfv2_corrected, v2_from, v2_to)
+    ccfv3_new = atlas_remap(ccfv3_corrected, v3_from, v3_to)
 
     return ccfv2_new, ccfv3_new
