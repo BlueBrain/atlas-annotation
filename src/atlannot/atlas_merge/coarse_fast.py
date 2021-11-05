@@ -128,7 +128,7 @@ def manual_relabel(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
 
 
 def merge(
-    ccfv2: np.ndarray, ccfv3: np.ndarray, brain_regions: dict
+    ccfv2: np.ndarray, ccfv3: np.ndarray, region_meta: RegionMeta
 ) -> tuple[np.ndarray, np.ndarray]:
     """Perform the coarse atlas merging.
 
@@ -138,9 +138,11 @@ def merge(
         The first atlas to merge, usually CCFv2.
     ccfv3
         The second atlas to merge, usually CCFv3.
-    brain_regions
-        The brain regions dictionary. Can be obtained from the "msg" key of
-        the `brain_regions.json` (`1.json`) file.
+    region_meta
+        The brain region metadata. Usually constructed as follows:
+        ``RegionMeta.from_root_region(brain_regions)``, where ``brain_regions``
+        can be obtained from the "msg" key of the `brain_regions.json`
+        (`1.json`) file.
 
     Returns
     -------
@@ -150,7 +152,7 @@ def merge(
         The merged CCFv3 atlas.
     """
     logger.info("Preparing region metadata")
-    region_meta = RegionMeta.from_root_region(brain_regions)
+
 
     def is_leaf(region_id):
         # leaf = not parent of anyone
