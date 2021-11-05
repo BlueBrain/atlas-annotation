@@ -23,16 +23,16 @@ from atlannot.atlas_merge.common import atlas_remap, replace
 logger = logging.getLogger(__name__)
 
 
-def explore_voxel(origin, data, count=-1):
+def explore_voxel(start_pos, masked_atlas, count=-1):
     """Explore a given voxel.
 
     Ask Dimitri for more details.
 
     Parameters
     ----------
-    origin : tuple
+    start_pos : tuple
         A triplet with the (x, y, z) coordinates of the origin voxel.
-    data : np.ndarray
+    masked_atlas : ma.MaskedArray
         A 3D array with the volume data.
     count : int
         Maximal number of iterations.
@@ -42,16 +42,16 @@ def explore_voxel(origin, data, count=-1):
     value : int
         The value of some voxel in the data volume.
     """
-    logger.debug("exploring voxel %s", origin)
-    if not isinstance(origin, tuple):
+    logger.debug("exploring voxel %s", start_pos)
+    if not isinstance(start_pos, tuple):
         raise ValueError("The 'origin parameter must be a tuple (got {type(origin)})")
 
-    origin_value = data[origin]
-    explored = {origin}
-    to_explore = [origin]
+    origin_value = masked_atlas[start_pos]
+    explored = {start_pos}
+    to_explore = [start_pos]
     while len(to_explore) > 0 and count != 0:
         pos = to_explore.pop(0)
-        value = data[pos]
+        value = masked_atlas[pos]
         if value != origin_value and value:
             return value
         for dx, dy, dz in [
@@ -63,7 +63,7 @@ def explore_voxel(origin, data, count=-1):
             (0, 0, 1),
         ]:
             new_pos = (pos[0] + dx, pos[1] + dy, pos[2] + dz)
-            if (0, 0, 0) <= new_pos < data.shape and new_pos not in explored:
+            if (0, 0, 0) <= new_pos < masked_atlas.shape and new_pos not in explored:
                 explored.add(new_pos)
                 to_explore.append(new_pos)
         count -= 1
