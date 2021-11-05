@@ -29,6 +29,9 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
 
     Ask Dimitri for more details.
 
+    Seems like this is a BFS until a voxel with a different value is
+    found or the maximal number of new voxels were seen.
+
     Parameters
     ----------
     start_pos : tuple
@@ -47,24 +50,27 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
     if not isinstance(start_pos, tuple):
         raise ValueError("The 'origin parameter must be a tuple (got {type(origin)})")
 
+    def in_bounds(pos_):
+        """Check that the position is within the atlas bounds."""
+        return all(0 <= x < x_max for x, x_max in zip(pos_, masked_atlas.shape))
+
+    deltas = [(-1, 0, 0), (0, -1, 0), (1, 0, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
+
     start_value = masked_atlas[start_pos]
     seen = {start_pos}
     queue = deque([start_pos])
     while len(queue) > 0 and count != 0:
         pos = queue.popleft()
         value = masked_atlas[pos]
+
+        # Found a different value?
         if value != start_value and value:  # "and value" means not masked
             return value
-        for dx, dy, dz in [
-            (-1, 0, 0),
-            (0, -1, 0),
-            (1, 0, 0),
-            (0, 1, 0),
-            (0, 0, -1),
-            (0, 0, 1),
-        ]:
+
+        # BFS step
+        for dx, dy, dz in deltas:
             new_pos = (pos[0] + dx, pos[1] + dy, pos[2] + dz)
-            if (0, 0, 0) <= new_pos < masked_atlas.shape and new_pos not in seen:
+            if in_bounds(new_pos) and new_pos not in seen:
                 seen.add(new_pos)
                 queue.append(new_pos)
         count -= 1
