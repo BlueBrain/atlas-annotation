@@ -208,7 +208,7 @@ def manual_relabel_2(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
     replace(ids_v3, 780, 663)
 
 
-def merge(ccfv2, ccfv3, brain_regions):
+def merge(ccfv2, ccfv3, region_meta):
     """Perform the coarse atlas merging.
 
     Parameters
@@ -217,9 +217,11 @@ def merge(ccfv2, ccfv3, brain_regions):
         The first atlas to merge, usually CCFv2
     ccfv3 : np.ndarray
         The second atlas to merge, usually CCFv3
-    brain_regions : dict
-        The brain regions dictionary. Can be obtained from the "msg" key of
-        the `brain_regions.json` (`1.json`) file.
+    region_meta : RegionMeta
+        The brain region metadata. Usually constructed as follows:
+        ``RegionMeta.from_root_region(brain_regions)``, where ``brain_regions``
+        can be obtained from the "msg" key of the `brain_regions.json`
+        (`1.json`) file.
 
     Returns
     -------
@@ -228,9 +230,6 @@ def merge(ccfv2, ccfv3, brain_regions):
     ccfv3_corrected : np.ndarray
         The merged CCFv3 atlas.
     """
-    logger.info("Processing the region metadata")
-    region_meta = RegionMeta.from_root_region(brain_regions)
-
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2)
     v2_to = v2_from.copy()
