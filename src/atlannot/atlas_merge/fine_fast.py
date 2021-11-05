@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The fine merging of the annotation atlases."""
+from collections import deque
 import logging
 
 import numpy as np
@@ -48,9 +49,9 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
 
     start_value = masked_atlas[start_pos]
     seen = {start_pos}
-    queue = [start_pos]
+    queue = deque([start_pos])
     while len(queue) > 0 and count != 0:
-        pos = queue.pop(0)
+        pos = queue.popleft()
         value = masked_atlas[pos]
         if value != start_value and value:  # "and value" means not masked
             return value
@@ -336,9 +337,6 @@ def merge(ccfv2, ccfv3, region_meta):
         masked_atlas = ma.masked_array(atlas, hide_mask)
 
         error_voxel = np.where(atlas == region_id)
-        if len(error_voxel) == 0:
-            logger.info(f"No voxels to explore", len(error_voxel[0]))
-            return
         logger.info(f"Exploring %d voxels", len(error_voxel[0]))
         new_values = [
             explore_voxel(xyz, masked_atlas, count)
