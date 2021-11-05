@@ -272,25 +272,31 @@ def merge(ccfv2, ccfv3, brain_regions):
 
         return all_descendants
 
+    def in_region_like(name_part, region_id):
+        """Check if region belongs to a region with a given name part."""
+        while region_id != region_meta.background_id:
+            if name_part in region_meta.name[region_id]:
+                return True
+            region_id = parent(region_id)
+
     logger.info("First for-loop correction")
     unique_v2 = set(v2_to)
     unique_v3 = set(v3_to)
     ids_to_correct = unique_v2 - unique_v3
     for id_reg in ids_to_correct:
-        allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
         if (
-            region_data.is_leaf[allname]
+            is_leaf(id_reg)
             and id_reg not in unique_v3
             and parent(id_reg) in unique_v3
         ):
             replace(v2_to, id_reg, parent(id_reg))
-        elif region_data.is_leaf[allname] and (
-            "Medial amygdalar nucleus" in allname
-            or "Subiculum" in allname
-            or "Bed nuclei of the stria terminalis" in allname
+        elif is_leaf(id_reg) and (
+            in_region_like("Medial amygdalar nucleus", id_reg)
+            or in_region_like("Subiculum", id_reg)
+            or in_region_like("Bed nuclei of the stria terminalis", id_reg)
         ):
             replace(v2_to, id_reg, parent(parent(id_reg)))
-        elif "Paraventricular hypothalamic nucleus" in allname:
+        elif in_region_like("Paraventricular hypothalamic nucleus", id_reg):
             replace(v2_to, id_reg, 38)
 
     logger.info("Manual relabeling #1")
@@ -298,24 +304,23 @@ def merge(ccfv2, ccfv3, brain_regions):
 
     logger.info("Second for loop correction")
     for id_reg in (unique_v2 | unique_v3) - {0}:
-        allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
-        if "Visual areas" in allname:
-            if "ayer 1" in allname:
+        if in_region_like("Visual areas", id_reg):
+            if in_region_like("ayer 1", id_reg):
                 replace(v3_to, id_reg, 801)
                 replace(v2_to, id_reg, 801)
-            elif "ayer 2/3" in allname:
+            elif in_region_like("ayer 2/3", id_reg):
                 replace(v3_to, id_reg, 561)
                 replace(v2_to, id_reg, 561)
-            elif "ayer 4" in allname:
+            elif in_region_like("ayer 4", id_reg):
                 replace(v3_to, id_reg, 913)
                 replace(v2_to, id_reg, 913)
-            elif "ayer 5" in allname:
+            elif in_region_like("ayer 5", id_reg):
                 replace(v3_to, id_reg, 937)
                 replace(v2_to, id_reg, 937)
-            elif "ayer 6a" in allname:
+            elif in_region_like("ayer 6a", id_reg):
                 replace(v3_to, id_reg, 457)
                 replace(v2_to, id_reg, 457)
-            elif "ayer 6b" in allname:
+            elif in_region_like("ayer 6b", id_reg):
                 replace(v3_to, id_reg, 497)
                 replace(v2_to, id_reg, 497)
 
@@ -374,16 +379,14 @@ def merge(ccfv2, ccfv3, brain_regions):
     unique_v2 = set(np.unique(ccfv2_corrected))
     unique_v3 = set(np.unique(ccfv3_corrected))
     for id_reg in unique_v2 - {0}:
-        allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
-        if "fiber tracts" in allname:
+        if in_region_like("fiber tracts", id_reg):
             replace(ccfv2_corrected, id_reg, 1009)
-        elif "ventricular systems" in allname:
+        elif in_region_like("ventricular systems", id_reg):
             replace(ccfv2_corrected, id_reg, 997)
     for id_reg in unique_v3 - {0}:
-        allname = region_data.id_to_region_dictionary_ALLNAME[id_reg]
-        if "fiber tracts" in allname:
+        if in_region_like("fiber tracts", id_reg):
             replace(ccfv3_corrected, id_reg, 1009)
-        elif "ventricular systems" in allname:
+        elif in_region_like("ventricular systems", id_reg):
             replace(ccfv3_corrected, id_reg, 997)
 
     unique_v2 = set(np.unique(ccfv2_corrected))
