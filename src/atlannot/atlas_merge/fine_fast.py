@@ -48,7 +48,9 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
     """
     logger.debug("exploring voxel %s", start_pos)
     if not isinstance(start_pos, tuple):
-        raise ValueError("The 'origin parameter must be a tuple (got {type(origin)})")
+        raise ValueError(
+            f"The starting position must be a tuple (got {type(start_pos)})"
+        )
 
     def in_bounds(pos_):
         """Check that the position is within the atlas bounds."""
@@ -64,7 +66,7 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
         value = masked_atlas[pos]
 
         # Found a different value?
-        if value != start_value and value:  # "and value" means not masked
+        if value != start_value and value is not ma.masked:
             return value
 
         # BFS step
