@@ -35,11 +35,12 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
     Parameters
     ----------
     start_pos : tuple
-        A triplet with the (x, y, z) coordinates of the origin voxel.
+        A triplet with the (x, y, z) coordinates of the starting voxel.
     masked_atlas : ma.MaskedArray
-        A 3D array with the volume data.
+        A masked 3D array with the volume data.
     count : int
-        Maximal number of iterations.
+        Maximal number of iterations. A negative value means no limit on
+        the number of iterations.
 
     Returns
     -------
@@ -56,8 +57,8 @@ def explore_voxel(start_pos, masked_atlas, count=-1):
         """Check that the position is within the atlas bounds."""
         return all(0 <= x < x_max for x, x_max in zip(pos_, masked_atlas.shape))
 
+    # The order in which the neighbours are explored probably matters
     deltas = [(-1, 0, 0), (0, -1, 0), (1, 0, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
-
     start_value = masked_atlas[start_pos]
     seen = {start_pos}
     queue = deque([start_pos])
