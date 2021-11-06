@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Implementation of the RegionMeta class."""
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RegionMeta:
@@ -122,6 +125,31 @@ class RegionMeta:
         for child_id, parent_id in self.parent_id.items():
             if parent_id == region_id:
                 yield child_id
+
+    def in_region_like(self, name_part, region_id):
+        """Check if region belongs to a region with a given name part.
+
+        Parameters
+        ----------
+        name_part : str
+            Part of the name of a brain region.
+        region_id : int
+            A region ID.
+
+        Returns
+        -------
+        bool
+            Whether or not the region with the given ID is in a region with
+            the given name part. All parent regions are also checked.
+        """
+        if region_id not in self.name:
+            logger.warning("Invalid region ID: %d", region_id)
+            return False
+
+        while region_id != self.background_id:
+            if name_part in self.name[region_id]:
+                return True
+            region_id = self.parent(region_id)
 
     def collect_ancestors(self, leaf_ids, top_id=None, remove_background=True):
         """Collect all region IDs between the leaf regions and the top region.

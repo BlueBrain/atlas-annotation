@@ -30,7 +30,7 @@ import logging
 import numpy as np
 
 from atlannot.atlas.region_meta import RegionMeta
-from atlannot.atlas_merge.common import atlas_remap, replace
+from atlannot.atlas_merge.common import atlas_remap, descendants, replace
 
 logger = logging.getLogger(__name__)
 
@@ -153,31 +153,6 @@ def merge(
     ccfv3_new : np.ndarray
         The merged CCFv3 atlas.
     """
-
-    def descendants(region_id, allowed_ids):
-        """Get all filtered descendant IDs of a given region ID.
-
-        A descendant is only accepted if it's in ``allowed_ids`` or is a
-        leaf region.
-
-        This is mimicking Dimitri's algorithm, I'm not sure about why this must
-        be that way.
-        """
-        all_descendants = set()
-        for child_id in rm.children(region_id):
-            if child_id in allowed_ids or rm.is_leaf(child_id):
-                all_descendants.add(child_id)
-            all_descendants |= descendants(child_id, allowed_ids)
-
-        return all_descendants
-
-    def in_region_like(name_part, region_id):
-        """Check if region belongs to a region with a given name part."""
-        while region_id != rm.background_id:
-            if name_part in rm.name[region_id]:
-                return True
-            region_id = rm.parent(region_id)
-
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2)
     v2_to = v2_from.copy()
@@ -192,12 +167,12 @@ def merge(
         if rm.is_leaf(id_) and id_ not in unique_v3 and rm.parent(id_) in unique_v3:
             replace(v2_to, id_, rm.parent(id_))
         elif rm.is_leaf(id_) and (
-            in_region_like("Medial amygdalar nucleus", id_)
-            or in_region_like("Subiculum", id_)
-            or in_region_like("Bed nuclei of the stria terminalis", id_)
+            rm.in_region_like("Medial amygdalar nucleus", id_)
+            or rm.in_region_like("Subiculum", id_)
+            or rm.in_region_like("Bed nuclei of the stria terminalis", id_)
         ):
             replace(v2_to, id_, rm.parent(rm.parent(id_)))
-        elif in_region_like("Paraventricular hypothalamic nucleus", id_):
+        elif rm.in_region_like("Paraventricular hypothalamic nucleus", id_):
             replace(v3_to, id_, 38)
 
     logger.info("Manual replacements #1")
@@ -205,25 +180,25 @@ def merge(
 
     logger.info("Second loop")
     for id_ in (unique_v2 | unique_v3) - {0}:
-        if not in_region_like("Visual areas", id_):
+        if not rm.in_region_like("Visual areas", id_):
             continue
 
-        if in_region_like("ayer 1", id_):
+        if rm.in_region_like("ayer 1", id_):
             replace(v3_to, id_, 801)
             replace(v2_to, id_, 801)
-        elif in_region_like("ayer 2/3", id_):
+        elif rm.in_region_like("ayer 2/3", id_):
             replace(v3_to, id_, 561)
             replace(v2_to, id_, 561)
-        elif in_region_like("ayer 4", id_):
+        elif rm.in_region_like("ayer 4", id_):
             replace(v3_to, id_, 913)
             replace(v2_to, id_, 913)
-        elif in_region_like("ayer 5", id_):
+        elif rm.in_region_like("ayer 5", id_):
             replace(v3_to, id_, 937)
             replace(v2_to, id_, 937)
-        elif in_region_like("ayer 6a", id_):
+        elif rm.in_region_like("ayer 6a", id_):
             replace(v3_to, id_, 457)
             replace(v2_to, id_, 457)
-        elif in_region_like("ayer 6b", id_):
+        elif rm.in_region_like("ayer 6b", id_):
             replace(v3_to, id_, 497)
             replace(v2_to, id_, 497)
 
@@ -238,14 +213,14 @@ def merge(
     for id_ in unique_v3 - {0}:
         if (
             (
-                in_region_like("fiber tracts", id_)
-                or in_region_like("Interpeduncular nucleus", id_)
+                rm.in_region_like("fiber tracts", id_)
+                or rm.in_region_like("Interpeduncular nucleus", id_)
             )
             and id_ not in unique_v2
             and rm.parent(id_) in unique_v2
         ):
             replace(v3_to, id_, rm.parent(id_))
-        if in_region_like("Frontal pole, cerebral cortex", id_):
+        if rm.in_region_like("Frontal pole, cerebral cortex", id_):
             replace(v3_to, id_, 184)
             replace(v2_to, id_, 184)
 
@@ -257,9 +232,9 @@ def merge(
             id__ = ids_to_correct_.pop()
             while id__ not in allowed_v2:
                 id__ = rm.parent(id__)
-            for child in descendants(id__, allowed_1):
+            for child in descendants(id__, allowed_1, rm):
                 replace(ids_1, child, id__)
-            for child in descendants(id__, allowed_2):
+            for child in descendants(id__, allowed_2, rm):
                 replace(ids_2, child, id__)
             unique_2 = set(ids_2)
             unique_1 = set(ids_1)

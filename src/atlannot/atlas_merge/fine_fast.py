@@ -35,7 +35,7 @@ import numpy as np
 from numpy import ma
 
 from atlannot.atlas.region_meta import RegionMeta
-from atlannot.atlas_merge.common import atlas_remap, replace
+from atlannot.atlas_merge.common import atlas_remap, descendants, replace
 
 logger = logging.getLogger(__name__)
 
@@ -273,43 +273,6 @@ def merge(
     all_v2_region_ids: set = rm.collect_ancestors(v2_to)
     all_v3_region_ids: set = rm.collect_ancestors(v3_to)
 
-    def descendants(region_id: int, *, allowed_ids: set) -> set:
-        """Get all filtered descendant IDs of a given region ID.
-
-        A descendant is only accepted if it's in ``allowed_ids`` or is a
-        leaf region.
-
-        This is mimicking Dimitri's algorithm, I'm not sure about why this must
-        be that way.
-
-        Parameters
-        ----------
-        region_id
-            A region ID to find descendants of.
-        allowed_ids
-            A set of allowed region IDs.
-
-        Returns
-        -------
-        set
-            All descendants of the given region ID excluding those that are
-            neither leaf regions nor present in ``allowed_ids``.
-        """
-        all_descendants = set()
-        for child_id in rm.children(region_id):
-            if child_id in allowed_ids or rm.is_leaf(child_id):
-                all_descendants.add(child_id)
-            all_descendants |= descendants(child_id, allowed_ids=allowed_ids)
-
-        return all_descendants
-
-    def in_region_like(name_part: str, region_id: int) -> bool:
-        """Check if region belongs to a region with a given name part."""
-        while region_id != rm.background_id:
-            if name_part in rm.name[region_id]:
-                return True
-            region_id = rm.parent(region_id)
-
     logger.info("First for-loop correction")
     unique_v2 = set(v2_to)
     unique_v3 = set(v3_to)
@@ -318,12 +281,12 @@ def merge(
         if rm.is_leaf(id_) and id_ not in unique_v3 and rm.parent(id_) in unique_v3:
             replace(v2_to, id_, rm.parent(id_))
         elif rm.is_leaf(id_) and (
-            in_region_like("Medial amygdalar nucleus", id_)
-            or in_region_like("Subiculum", id_)
-            or in_region_like("Bed nuclei of the stria terminalis", id_)
+            rm.in_region_like("Medial amygdalar nucleus", id_)
+            or rm.in_region_like("Subiculum", id_)
+            or rm.in_region_like("Bed nuclei of the stria terminalis", id_)
         ):
             replace(v2_to, id_, rm.parent(rm.parent(id_)))
-        elif in_region_like("Paraventricular hypothalamic nucleus", id_):
+        elif rm.in_region_like("Paraventricular hypothalamic nucleus", id_):
             replace(v2_to, id_, 38)
 
     logger.info("Manual relabeling #1")
@@ -331,23 +294,23 @@ def merge(
 
     logger.info("Second for loop correction")
     for id_ in (unique_v2 | unique_v3) - {0}:
-        if in_region_like("Visual areas", id_):
-            if in_region_like("ayer 1", id_):
+        if rm.in_region_like("Visual areas", id_):
+            if rm.in_region_like("ayer 1", id_):
                 replace(v3_to, id_, 801)
                 replace(v2_to, id_, 801)
-            elif in_region_like("ayer 2/3", id_):
+            elif rm.in_region_like("ayer 2/3", id_):
                 replace(v3_to, id_, 561)
                 replace(v2_to, id_, 561)
-            elif in_region_like("ayer 4", id_):
+            elif rm.in_region_like("ayer 4", id_):
                 replace(v3_to, id_, 913)
                 replace(v2_to, id_, 913)
-            elif in_region_like("ayer 5", id_):
+            elif rm.in_region_like("ayer 5", id_):
                 replace(v3_to, id_, 937)
                 replace(v2_to, id_, 937)
-            elif in_region_like("ayer 6a", id_):
+            elif rm.in_region_like("ayer 6a", id_):
                 replace(v3_to, id_, 457)
                 replace(v2_to, id_, 457)
-            elif in_region_like("ayer 6b", id_):
+            elif rm.in_region_like("ayer 6b", id_):
                 replace(v3_to, id_, 497)
                 replace(v2_to, id_, 497)
 
@@ -361,7 +324,7 @@ def merge(
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
     def run_filter(region_id: int, atlas: np.ndarray, *, count: int) -> None:
-        keep_ids = [region_id, *descendants(region_id, allowed_ids=all_v2_region_ids)]
+        keep_ids = [region_id, *descendants(region_id, all_v2_region_ids, rm)]
         hide_mask = np.isin(atlas, keep_ids, invert=True)
         masked_atlas = ma.masked_array(atlas, hide_mask)
 
@@ -400,7 +363,7 @@ def merge(
 
     logger.info("Some more manual replacement of descendants")
     for id_main in [795]:
-        for id_ in descendants(id_main, allowed_ids=all_v2_region_ids):
+        for id_ in descendants(id_main, all_v2_region_ids, rm):
             if id_ in all_v2_region_ids:
                 replace(v2_to, id_, id_main)
             if id_ in all_v3_region_ids:
@@ -410,14 +373,14 @@ def merge(
     unique_v2 = set(v2_to)
     unique_v3 = set(v3_to)
     for id_ in unique_v2 - {0}:
-        if in_region_like("fiber tracts", id_):
+        if rm.in_region_like("fiber tracts", id_):
             replace(v2_to, id_, 1009)
-        elif in_region_like("ventricular systems", id_):
+        elif rm.in_region_like("ventricular systems", id_):
             replace(v2_to, id_, 997)
     for id_ in unique_v3 - {0}:
-        if in_region_like("fiber tracts", id_):
+        if rm.in_region_like("fiber tracts", id_):
             replace(v3_to, id_, 1009)
-        elif in_region_like("ventricular systems", id_):
+        elif rm.in_region_like("ventricular systems", id_):
             replace(v3_to, id_, 997)
 
     logger.info("While-loop correction")
@@ -428,9 +391,9 @@ def merge(
         id_ = ids_to_correct.pop()
         while id_ not in all_v2_region_ids:
             id_ = rm.parent(id_)
-        for child in descendants(id_, allowed_ids=all_v3_region_ids):
+        for child in descendants(id_, all_v3_region_ids, rm):
             replace(v3_to, child, id_)
-        for child in descendants(id_, allowed_ids=all_v2_region_ids):
+        for child in descendants(id_, all_v2_region_ids, rm):
             replace(v2_to, child, id_)
         unique_v2 = set(v2_to)
         unique_v3 = set(v3_to)

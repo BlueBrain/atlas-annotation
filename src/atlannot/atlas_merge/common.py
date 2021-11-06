@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from atlannot.atlas.region_meta import RegionMeta
+
 
 def replace(array: np.ndarray, old_value: int, new_value: int) -> None:
     """Replace integer values in a numpy array.
@@ -52,3 +54,21 @@ def atlas_remap(
     new_atlas = values_to[idx].reshape(atlas.shape)
 
     return new_atlas
+
+
+def descendants(region_id, allowed_ids, rm: RegionMeta):
+    """Get all filtered descendant IDs of a given region ID.
+
+    A descendant is only accepted if it's in ``allowed_ids`` or is a
+    leaf region.
+
+    This is mimicking Dimitri's algorithm, I'm not sure about why this must
+    be that way.
+    """
+    all_descendants = set()
+    for child_id in rm.children(region_id):
+        if child_id in allowed_ids or rm.is_leaf(child_id):
+            all_descendants.add(child_id)
+        all_descendants |= descendants(child_id, allowed_ids, rm)
+
+    return all_descendants
