@@ -26,6 +26,8 @@ using fast vectorized numpy operations, see ``atlas_remap``.
 Another important optimization was the use of masked numpy arrays instead of
 copying the entire volume.
 """
+from __future__ import annotations
+
 import logging
 from collections import deque
 
@@ -38,7 +40,12 @@ from atlannot.atlas_merge.common import atlas_remap, replace
 logger = logging.getLogger(__name__)
 
 
-def explore_voxel(start_pos, masked_atlas, *, count=-1):
+def explore_voxel(
+        start_pos: tuple,
+        masked_atlas: ma.MaskedArray,
+        *,
+        count: int = -1,
+) -> int:
     """Explore a given voxel.
 
     Ask Dimitri for more details.
@@ -48,17 +55,17 @@ def explore_voxel(start_pos, masked_atlas, *, count=-1):
 
     Parameters
     ----------
-    start_pos : tuple
+    start_pos
         A triplet with the (x, y, z) coordinates of the starting voxel.
-    masked_atlas : ma.MaskedArray
+    masked_atlas
         A masked 3D array with the volume data.
-    count : int
+    count
         Maximal number of iterations. A negative value means no limit on
         the number of iterations.
 
     Returns
     -------
-    value : int
+    int
         The value of some voxel in the data volume.
     """
     logger.debug("exploring voxel %s", start_pos)
@@ -232,7 +239,11 @@ def manual_relabel_2(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
     replace(ids_v3, 780, 663)
 
 
-def merge(ccfv2, ccfv3, region_meta):
+def merge(
+        ccfv2: np.ndarray,
+        ccfv3: np.ndarray,
+        region_meta: RegionMeta,
+) -> tuple[np.ndarray, np.ndarray]:
     """Perform the coarse atlas merging.
 
     Parameters
@@ -259,8 +270,8 @@ def merge(ccfv2, ccfv3, region_meta):
     v2_to = v2_from.copy()
     v3_from = np.unique(ccfv3)
     v3_to = v3_from.copy()
-    all_v2_region_ids = region_meta.collect_ancestors(v2_to)
-    all_v3_region_ids = region_meta.collect_ancestors(v3_to)
+    all_v2_region_ids: set = region_meta.collect_ancestors(v2_to)
+    all_v3_region_ids: set = region_meta.collect_ancestors(v3_to)
 
     def is_leaf(region_id):
         # leaf = not parent of anyone
@@ -276,7 +287,7 @@ def merge(ccfv2, ccfv3, region_meta):
             if parent_id == region_id:
                 yield child_id
 
-    def descendants(region_id, *, allowed_ids):
+    def descendants(region_id: int, *, allowed_ids: set) -> set:
         """Get all filtered descendant IDs of a given region ID.
 
         A descendant is only accepted if it's in ``allowed_ids`` or is a
@@ -284,6 +295,19 @@ def merge(ccfv2, ccfv3, region_meta):
 
         This is mimicking Dimitri's algorithm, I'm not sure about why this must
         be that way.
+
+        Parameters
+        ----------
+        region_id
+            A region ID to find descendants of.
+        allowed_ids
+            A set of allowed region IDs.
+
+        Returns
+        -------
+        set
+            All descendants of the given region ID excluding those that are
+            neither leaf regions nor present in ``allowed_ids``.
         """
         all_descendants = set()
         for child_id in children(region_id):
@@ -293,7 +317,7 @@ def merge(ccfv2, ccfv3, region_meta):
 
         return all_descendants
 
-    def in_region_like(name_part, region_id):
+    def in_region_like(name_part: str, region_id: int) -> bool:
         """Check if region belongs to a region with a given name part."""
         while region_id != region_meta.background_id:
             if name_part in region_meta.name[region_id]:
@@ -350,7 +374,7 @@ def merge(ccfv2, ccfv3, region_meta):
 
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
-    def run_filter(region_id, atlas, *, count):
+    def run_filter(region_id: int, atlas: np.ndarray, *, count: int) -> None:
         keep_ids = [region_id, *descendants(region_id, allowed_ids=all_v2_region_ids)]
         hide_mask = np.isin(atlas, keep_ids, invert=True)
         masked_atlas = ma.masked_array(atlas, hide_mask)
