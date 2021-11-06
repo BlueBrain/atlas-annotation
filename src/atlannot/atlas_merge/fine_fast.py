@@ -260,9 +260,9 @@ def merge(
 
     Returns
     -------
-    ccfv2_corrected : np.ndarray
+    ccfv2_new : np.ndarray
         The merged CCFv2 atlas.
-    ccfv3_corrected : np.ndarray
+    ccfv3_new : np.ndarray
         The merged CCFv3 atlas.
     """
     logger.info("Preparing region ID maps")
@@ -270,6 +270,8 @@ def merge(
     v2_to = v2_from.copy()
     v3_from = np.unique(ccfv3)
     v3_to = v3_from.copy()
+
+    logger.info("Collecting all CCFv2 and CCFv3 region IDs")
     all_v2_region_ids: set = rm.collect_ancestors(v2_to)
     all_v3_region_ids: set = rm.collect_ancestors(v3_to)
 
@@ -320,16 +322,22 @@ def merge(
     manual_relabel_2(v2_to, v3_to)
 
     logger.info("Ramapping atlases")
-    ccfv2_corrected = atlas_remap(ccfv2, v2_from, v2_to)
-    ccfv3_corrected = atlas_remap(ccfv3, v3_from, v3_to)
+    # Need to get the remapped atlases here because the edge correction happens
+    # directly on the atlases and not on the sets of region IDs. After the
+    # edge correction we'll switch to sets of region IDs again.
+    ccfv2_new = atlas_remap(ccfv2, v2_from, v2_to)
+    ccfv3_new = atlas_remap(ccfv3, v3_from, v3_to)
 
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
-    def run_filter(region_id: int, atlas: np.ndarray, *, count: int) -> None:
+    def correct_edge(region_id: int, atlas: np.ndarray, *, count: int) -> None:
+        """Correct annotation edge for CCFv2 and CCFv3."""
+        # Mask non-descendant regions
         keep_ids = [region_id, *descendants(region_id, all_v2_region_ids, rm)]
         hide_mask = np.isin(atlas, keep_ids, invert=True)
         masked_atlas = ma.masked_array(atlas, hide_mask)
 
+        # Get all voxels with the given region ID and run the correction on them
         error_voxel = np.where(atlas == region_id)
         logger.info("Exploring %d voxels", len(error_voxel[0]))
         new_values = [
@@ -340,27 +348,27 @@ def merge(
     # Correct annotation edge for CCFv2 and CCFv3
     # no limit for striatum
     logger.info("First filter")
-    run_filter(278, ccfv2_corrected, count=-1)
+    correct_edge(278, ccfv2_new, count=-1)
 
     logger.info("Second filter")
     for id_ in [803, 477]:
-        run_filter(id_, ccfv3_corrected, count=-1)
+        correct_edge(id_, ccfv3_new, count=-1)
 
     # Correct CCFv2 annotation edge Cerebral cortex, Basic Cell group and
     # regions and root  1089, 688, 8, 997
     logger.info("Third filter")
     for id_ in [688, 8, 997]:
-        run_filter(id_, ccfv2_corrected, count=3)
+        correct_edge(id_, ccfv2_new, count=3)
 
     # Correct CCFv3 annotation edge for Hippocampal formation, Cortical subplate
     logger.info("Fourth filter")
     for id_ in [1089, 703]:
-        run_filter(id_, ccfv3_corrected, count=3)
+        correct_edge(id_, ccfv3_new, count=3)
 
     logger.info("Preparing region ID maps")
-    v2_from = np.unique(ccfv2_corrected)
+    v2_from = np.unique(ccfv2_new)
     v2_to = v2_from.copy()
-    v3_from = np.unique(ccfv3_corrected)
+    v3_from = np.unique(ccfv3_new)
     v3_to = v3_from.copy()
 
     logger.info("Some more manual replacement of descendants")
@@ -402,7 +410,7 @@ def merge(
         ids_to_correct = unique_v3 - unique_v2
 
     logger.info("Ramapping atlases")
-    ccfv2_new = atlas_remap(ccfv2_corrected, v2_from, v2_to)
-    ccfv3_new = atlas_remap(ccfv3_corrected, v3_from, v3_to)
+    ccfv2_new = atlas_remap(ccfv2_new, v2_from, v2_to)
+    ccfv3_new = atlas_remap(ccfv3_new, v3_from, v3_to)
 
     return ccfv2_new, ccfv3_new
