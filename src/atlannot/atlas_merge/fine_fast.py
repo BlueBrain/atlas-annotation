@@ -294,25 +294,27 @@ def merge(
 
     logger.info("Second for loop correction")
     for id_ in (unique_v2 | unique_v3) - {0}:
-        if rm.in_region_like("Visual areas", id_):
-            if rm.in_region_like("ayer 1", id_):
-                replace(v3_to, id_, 801)
-                replace(v2_to, id_, 801)
-            elif rm.in_region_like("ayer 2/3", id_):
-                replace(v3_to, id_, 561)
-                replace(v2_to, id_, 561)
-            elif rm.in_region_like("ayer 4", id_):
-                replace(v3_to, id_, 913)
-                replace(v2_to, id_, 913)
-            elif rm.in_region_like("ayer 5", id_):
-                replace(v3_to, id_, 937)
-                replace(v2_to, id_, 937)
-            elif rm.in_region_like("ayer 6a", id_):
-                replace(v3_to, id_, 457)
-                replace(v2_to, id_, 457)
-            elif rm.in_region_like("ayer 6b", id_):
-                replace(v3_to, id_, 497)
-                replace(v2_to, id_, 497)
+        if not rm.in_region_like("Visual areas", id_):
+            continue
+
+        if rm.in_region_like("ayer 1", id_):
+            replace(v3_to, id_, 801)
+            replace(v2_to, id_, 801)
+        elif rm.in_region_like("ayer 2/3", id_):
+            replace(v3_to, id_, 561)
+            replace(v2_to, id_, 561)
+        elif rm.in_region_like("ayer 4", id_):
+            replace(v3_to, id_, 913)
+            replace(v2_to, id_, 913)
+        elif rm.in_region_like("ayer 5", id_):
+            replace(v3_to, id_, 937)
+            replace(v2_to, id_, 937)
+        elif rm.in_region_like("ayer 6a", id_):
+            replace(v3_to, id_, 457)
+            replace(v2_to, id_, 457)
+        elif rm.in_region_like("ayer 6b", id_):
+            replace(v3_to, id_, 497)
+            replace(v2_to, id_, 497)
 
     logger.info("Manual relabeling #2")
     manual_relabel_2(v2_to, v3_to)
