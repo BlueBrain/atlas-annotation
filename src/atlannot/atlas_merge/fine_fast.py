@@ -290,42 +290,42 @@ def merge(ccfv2, ccfv3, region_meta):
     unique_v2 = set(v2_to)
     unique_v3 = set(v3_to)
     ids_to_correct = unique_v2 - unique_v3
-    for id_reg in ids_to_correct:
-        if is_leaf(id_reg) and id_reg not in unique_v3 and parent(id_reg) in unique_v3:
-            replace(v2_to, id_reg, parent(id_reg))
-        elif is_leaf(id_reg) and (
-            in_region_like("Medial amygdalar nucleus", id_reg)
-            or in_region_like("Subiculum", id_reg)
-            or in_region_like("Bed nuclei of the stria terminalis", id_reg)
+    for id_ in ids_to_correct:
+        if is_leaf(id_) and id_ not in unique_v3 and parent(id_) in unique_v3:
+            replace(v2_to, id_, parent(id_))
+        elif is_leaf(id_) and (
+            in_region_like("Medial amygdalar nucleus", id_)
+            or in_region_like("Subiculum", id_)
+            or in_region_like("Bed nuclei of the stria terminalis", id_)
         ):
-            replace(v2_to, id_reg, parent(parent(id_reg)))
-        elif in_region_like("Paraventricular hypothalamic nucleus", id_reg):
-            replace(v2_to, id_reg, 38)
+            replace(v2_to, id_, parent(parent(id_)))
+        elif in_region_like("Paraventricular hypothalamic nucleus", id_):
+            replace(v2_to, id_, 38)
 
     logger.info("Manual relabeling #1")
     manual_relabel_1(v2_to, v3_to)
 
     logger.info("Second for loop correction")
-    for id_reg in (unique_v2 | unique_v3) - {0}:
-        if in_region_like("Visual areas", id_reg):
-            if in_region_like("ayer 1", id_reg):
-                replace(v3_to, id_reg, 801)
-                replace(v2_to, id_reg, 801)
-            elif in_region_like("ayer 2/3", id_reg):
-                replace(v3_to, id_reg, 561)
-                replace(v2_to, id_reg, 561)
-            elif in_region_like("ayer 4", id_reg):
-                replace(v3_to, id_reg, 913)
-                replace(v2_to, id_reg, 913)
-            elif in_region_like("ayer 5", id_reg):
-                replace(v3_to, id_reg, 937)
-                replace(v2_to, id_reg, 937)
-            elif in_region_like("ayer 6a", id_reg):
-                replace(v3_to, id_reg, 457)
-                replace(v2_to, id_reg, 457)
-            elif in_region_like("ayer 6b", id_reg):
-                replace(v3_to, id_reg, 497)
-                replace(v2_to, id_reg, 497)
+    for id_ in (unique_v2 | unique_v3) - {0}:
+        if in_region_like("Visual areas", id_):
+            if in_region_like("ayer 1", id_):
+                replace(v3_to, id_, 801)
+                replace(v2_to, id_, 801)
+            elif in_region_like("ayer 2/3", id_):
+                replace(v3_to, id_, 561)
+                replace(v2_to, id_, 561)
+            elif in_region_like("ayer 4", id_):
+                replace(v3_to, id_, 913)
+                replace(v2_to, id_, 913)
+            elif in_region_like("ayer 5", id_):
+                replace(v3_to, id_, 937)
+                replace(v2_to, id_, 937)
+            elif in_region_like("ayer 6a", id_):
+                replace(v3_to, id_, 457)
+                replace(v2_to, id_, 457)
+            elif in_region_like("ayer 6b", id_):
+                replace(v3_to, id_, 497)
+                replace(v2_to, id_, 497)
 
     logger.info("Manual relabeling #2")
     manual_relabel_2(v2_to, v3_to)
@@ -354,19 +354,19 @@ def merge(ccfv2, ccfv3, region_meta):
     run_filter(ccfv2_corrected, 278, -1)
 
     logger.info("Second filter")
-    for id_reg in [803, 477]:
-        run_filter(ccfv3_corrected, id_reg, -1)
+    for id_ in [803, 477]:
+        run_filter(ccfv3_corrected, id_, -1)
 
     # Correct CCFv2 annotation edge Cerebral cortex, Basic Cell group and
     # regions and root  1089, 688, 8, 997
     logger.info("Third filter")
-    for id_reg in [688, 8, 997]:
-        run_filter(ccfv2_corrected, id_reg, 3)
+    for id_ in [688, 8, 997]:
+        run_filter(ccfv2_corrected, id_, 3)
 
     # Correct CCFv3 annotation edge for Hippocampal formation, Cortical subplate
     logger.info("Fourth filter")
-    for id_reg in [1089, 703]:
-        run_filter(ccfv3_corrected, id_reg, 3)
+    for id_ in [1089, 703]:
+        run_filter(ccfv3_corrected, id_, 3)
 
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2_corrected)
@@ -376,25 +376,25 @@ def merge(ccfv2, ccfv3, region_meta):
 
     logger.info("Some more manual replacement of descendants")
     for id_main in [795]:
-        for id_reg in descendants(id_main, allowed_v2):
-            if id_reg in allowed_v2:
-                replace(v2_to, id_reg, id_main)
-            if id_reg in allowed_v3:
-                replace(v3_to, id_reg, id_main)
+        for id_ in descendants(id_main, allowed_v2):
+            if id_ in allowed_v2:
+                replace(v2_to, id_, id_main)
+            if id_ in allowed_v3:
+                replace(v3_to, id_, id_main)
 
     logger.info("More for-loop corrections")
     unique_v2 = set(v2_to)
     unique_v3 = set(v3_to)
-    for id_reg in unique_v2 - {0}:
-        if in_region_like("fiber tracts", id_reg):
-            replace(v2_to, id_reg, 1009)
-        elif in_region_like("ventricular systems", id_reg):
-            replace(v2_to, id_reg, 997)
-    for id_reg in unique_v3 - {0}:
-        if in_region_like("fiber tracts", id_reg):
-            replace(v3_to, id_reg, 1009)
-        elif in_region_like("ventricular systems", id_reg):
-            replace(v3_to, id_reg, 997)
+    for id_ in unique_v2 - {0}:
+        if in_region_like("fiber tracts", id_):
+            replace(v2_to, id_, 1009)
+        elif in_region_like("ventricular systems", id_):
+            replace(v2_to, id_, 997)
+    for id_ in unique_v3 - {0}:
+        if in_region_like("fiber tracts", id_):
+            replace(v3_to, id_, 1009)
+        elif in_region_like("ventricular systems", id_):
+            replace(v3_to, id_, 997)
 
     logger.info("While-loop correction")
     unique_v2 = set(v2_to)
