@@ -11,7 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The fine merging of the annotation atlases."""
+"""The fine merging of the annotation atlases.
+
+This is the refactored and optimized version of ``fine::fine_merge``. It
+uses ``RegionMeta`` instead of ``JSONread`` and greatly speeds up the merging
+by optimizing a number of steps. The original logic was designed by
+Dimitri Rodarie.
+
+The biggest optimization is to not do label replacements directly on the atlases
+but on the set of unique labels, which is much smaller than the atlas volume.
+The labels in the atlases are remapped at the very end of the whole procedure
+using fast vectorized numpy operations, see ``atlas_remap``.
+
+Another important optimization was the use of masked numpy arrays instead of
+copying the entire volume.
+"""
 import logging
 from collections import deque
 
@@ -24,7 +38,7 @@ from atlannot.atlas_merge.common import atlas_remap, replace
 logger = logging.getLogger(__name__)
 
 
-def explore_voxel(start_pos, masked_atlas, count=-1):
+def explore_voxel(start_pos, masked_atlas, *, count=-1):
     """Explore a given voxel.
 
     Ask Dimitri for more details.
@@ -245,8 +259,8 @@ def merge(ccfv2, ccfv3, region_meta):
     v2_to = v2_from.copy()
     v3_from = np.unique(ccfv3)
     v3_to = v3_from.copy()
-    allowed_v2 = region_meta.collect_ancestors(v2_to)
-    allowed_v3 = region_meta.collect_ancestors(v3_to)
+    all_v2_region_ids = region_meta.collect_ancestors(v2_to)
+    all_v3_region_ids = region_meta.collect_ancestors(v3_to)
 
     def is_leaf(region_id):
         # leaf = not parent of anyone
@@ -262,7 +276,7 @@ def merge(ccfv2, ccfv3, region_meta):
             if parent_id == region_id:
                 yield child_id
 
-    def descendants(region_id, allowed_ids):
+    def descendants(region_id, *, allowed_ids):
         """Get all filtered descendant IDs of a given region ID.
 
         A descendant is only accepted if it's in ``allowed_ids`` or is a
@@ -275,7 +289,7 @@ def merge(ccfv2, ccfv3, region_meta):
         for child_id in children(region_id):
             if child_id in allowed_ids or is_leaf(child_id):
                 all_descendants.add(child_id)
-            all_descendants |= descendants(child_id, allowed_ids)
+            all_descendants |= descendants(child_id, allowed_ids=allowed_ids)
 
         return all_descendants
 
@@ -336,37 +350,37 @@ def merge(ccfv2, ccfv3, region_meta):
 
     # Medial terminal nucleus of the accessory optic tract -> Ventral tegmental area
 
-    def run_filter(atlas, region_id, count):
-        keep_ids = [region_id, *descendants(region_id, allowed_v2)]
+    def run_filter(region_id, atlas, *, count):
+        keep_ids = [region_id, *descendants(region_id, allowed_ids=all_v2_region_ids)]
         hide_mask = np.isin(atlas, keep_ids, invert=True)
         masked_atlas = ma.masked_array(atlas, hide_mask)
 
         error_voxel = np.where(atlas == region_id)
         logger.info(f"Exploring %d voxels", len(error_voxel[0]))
         new_values = [
-            explore_voxel(xyz, masked_atlas, count) for xyz in zip(*error_voxel)
+            explore_voxel(xyz, masked_atlas, count=count) for xyz in zip(*error_voxel)
         ]
         atlas[error_voxel] = new_values
 
     # Correct annotation edge for CCFv2 and CCFv3
     # no limit for striatum
     logger.info("First filter")
-    run_filter(ccfv2_corrected, 278, -1)
+    run_filter(278, ccfv2_corrected, count=-1)
 
     logger.info("Second filter")
     for id_ in [803, 477]:
-        run_filter(ccfv3_corrected, id_, -1)
+        run_filter(id_, ccfv3_corrected, count=-1)
 
     # Correct CCFv2 annotation edge Cerebral cortex, Basic Cell group and
     # regions and root  1089, 688, 8, 997
     logger.info("Third filter")
     for id_ in [688, 8, 997]:
-        run_filter(ccfv2_corrected, id_, 3)
+        run_filter(id_, ccfv2_corrected, count=3)
 
     # Correct CCFv3 annotation edge for Hippocampal formation, Cortical subplate
     logger.info("Fourth filter")
     for id_ in [1089, 703]:
-        run_filter(ccfv3_corrected, id_, 3)
+        run_filter(id_, ccfv3_corrected, count=3)
 
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2_corrected)
@@ -376,10 +390,10 @@ def merge(ccfv2, ccfv3, region_meta):
 
     logger.info("Some more manual replacement of descendants")
     for id_main in [795]:
-        for id_ in descendants(id_main, allowed_v2):
-            if id_ in allowed_v2:
+        for id_ in descendants(id_main, allowed_ids=all_v2_region_ids):
+            if id_ in all_v2_region_ids:
                 replace(v2_to, id_, id_main)
-            if id_ in allowed_v3:
+            if id_ in all_v3_region_ids:
                 replace(v3_to, id_, id_main)
 
     logger.info("More for-loop corrections")
@@ -402,11 +416,11 @@ def merge(ccfv2, ccfv3, region_meta):
     ids_to_correct = unique_v3 - unique_v2
     while len(ids_to_correct) > 0:
         id_ = ids_to_correct.pop()
-        while id_ not in allowed_v2:
+        while id_ not in all_v2_region_ids:
             id_ = parent(id_)
-        for child in descendants(id_, allowed_v3):
+        for child in descendants(id_, allowed_ids=all_v3_region_ids):
             replace(v3_to, child, id_)
-        for child in descendants(id_, allowed_v2):
+        for child in descendants(id_, allowed_ids=all_v2_region_ids):
             replace(v2_to, child, id_)
         unique_v2 = set(v2_to)
         unique_v3 = set(v3_to)
