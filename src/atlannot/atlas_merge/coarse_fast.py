@@ -128,7 +128,9 @@ def manual_relabel(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
 
 
 def merge(
-    ccfv2: np.ndarray, ccfv3: np.ndarray, region_meta: RegionMeta
+    ccfv2: np.ndarray,
+    ccfv3: np.ndarray,
+    rm: RegionMeta,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Perform the coarse atlas merging.
 
@@ -138,7 +140,7 @@ def merge(
         The first atlas to merge, usually CCFv2.
     ccfv3
         The second atlas to merge, usually CCFv3.
-    region_meta
+    rm
         The brain region metadata. Usually constructed as follows:
         ``RegionMeta.from_root_region(brain_regions)``, where ``brain_regions``
         can be obtained from the "msg" key of the `brain_regions.json`
@@ -152,20 +154,6 @@ def merge(
         The merged CCFv3 atlas.
     """
 
-    def is_leaf(region_id):
-        # leaf = not parent of anyone
-        return region_id not in region_meta.parent_id.values()
-
-    def parent(region_id):
-        """Get the parent region ID of a region."""
-        return region_meta.parent_id.get(region_id)
-
-    def children(region_id):
-        """Get all child region IDs of a given region."""
-        for child_id, parent_id in region_meta.parent_id.items():
-            if parent_id == region_id:
-                yield child_id
-
     def descendants(region_id, allowed_ids):
         """Get all filtered descendant IDs of a given region ID.
 
@@ -176,8 +164,8 @@ def merge(
         be that way.
         """
         all_descendants = set()
-        for child_id in children(region_id):
-            if child_id in allowed_ids or is_leaf(child_id):
+        for child_id in rm.children(region_id):
+            if child_id in allowed_ids or rm.is_leaf(child_id):
                 all_descendants.add(child_id)
             all_descendants |= descendants(child_id, allowed_ids)
 
@@ -185,10 +173,10 @@ def merge(
 
     def in_region_like(name_part, region_id):
         """Check if region belongs to a region with a given name part."""
-        while region_id != region_meta.background_id:
-            if name_part in region_meta.name[region_id]:
+        while region_id != rm.background_id:
+            if name_part in rm.name[region_id]:
                 return True
-            region_id = parent(region_id)
+            region_id = rm.parent(region_id)
 
     logger.info("Preparing region ID maps")
     v2_from = np.unique(ccfv2)
@@ -201,14 +189,14 @@ def merge(
     unique_v3 = set(v3_to)
     ids_to_correct = unique_v2 - unique_v3
     for id_ in ids_to_correct:
-        if is_leaf(id_) and id_ not in unique_v3 and parent(id_) in unique_v3:
-            replace(v2_to, id_, parent(id_))
-        elif is_leaf(id_) and (
+        if rm.is_leaf(id_) and id_ not in unique_v3 and rm.parent(id_) in unique_v3:
+            replace(v2_to, id_, rm.parent(id_))
+        elif rm.is_leaf(id_) and (
             in_region_like("Medial amygdalar nucleus", id_)
             or in_region_like("Subiculum", id_)
             or in_region_like("Bed nuclei of the stria terminalis", id_)
         ):
-            replace(v2_to, id_, parent(parent(id_)))
+            replace(v2_to, id_, rm.parent(rm.parent(id_)))
         elif in_region_like("Paraventricular hypothalamic nucleus", id_):
             replace(v3_to, id_, 38)
 
@@ -254,9 +242,9 @@ def merge(
                 or in_region_like("Interpeduncular nucleus", id_)
             )
             and id_ not in unique_v2
-            and parent(id_) in unique_v2
+            and rm.parent(id_) in unique_v2
         ):
-            replace(v3_to, id_, parent(id_))
+            replace(v3_to, id_, rm.parent(id_))
         if in_region_like("Frontal pole, cerebral cortex", id_):
             replace(v3_to, id_, 184)
             replace(v2_to, id_, 184)
@@ -268,7 +256,7 @@ def merge(
         while len(ids_to_correct_) > 0:
             id__ = ids_to_correct_.pop()
             while id__ not in allowed_v2:
-                id__ = parent(id__)
+                id__ = rm.parent(id__)
             for child in descendants(id__, allowed_1):
                 replace(ids_1, child, id__)
             for child in descendants(id__, allowed_2):
@@ -278,8 +266,8 @@ def merge(
             ids_to_correct_ = unique_1 - unique_2 - {8, 997}
 
     logger.info("While loop corrections")
-    allowed_v2 = region_meta.collect_ancestors(v2_to)
-    allowed_v3 = region_meta.collect_ancestors(v3_to)
+    allowed_v2 = rm.collect_ancestors(v2_to)
+    allowed_v3 = rm.collect_ancestors(v3_to)
     while_correct(v3_to, v2_to, allowed_v3, allowed_v2)
     while_correct(v2_to, v3_to, allowed_v2, allowed_v3)
 

@@ -75,6 +75,54 @@ class RegionMeta:
             if region_level == level:
                 yield region_id
 
+    def is_leaf(self, region_id):
+        """Check if the given region is a leaf region.
+
+        Parameters
+        ----------
+        region_id : int
+            The region ID in question.
+
+        Returns
+        -------
+        bool
+            Whether or not the given region is a leaf region.
+        """
+        # leaf = not parent of anyone
+        return region_id not in self.parent_id.values()
+
+    def parent(self, region_id):
+        """Get the parent region ID of a region.
+
+        Parameters
+        ----------
+        region_id
+            The region ID in question.
+
+        Returns
+        -------
+        int
+            The region ID of the parent.
+        """
+        return self.parent_id.get(region_id)
+
+    def children(self, region_id):
+        """Get all child region IDs of a given region.
+
+        Parameters
+        ----------
+        region_id : int
+            The region ID in question.
+
+        Yields
+        ------
+        int
+            The region ID of a child region.
+        """
+        for child_id, parent_id in self.parent_id.items():
+            if parent_id == region_id:
+                yield child_id
+
     def collect_ancestors(self, leaf_ids, top_id=None, remove_background=True):
         """Collect all region IDs between the leaf regions and the top region.
 

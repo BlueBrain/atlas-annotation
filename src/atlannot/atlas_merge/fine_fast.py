@@ -41,10 +41,10 @@ logger = logging.getLogger(__name__)
 
 
 def explore_voxel(
-        start_pos: tuple,
-        masked_atlas: ma.MaskedArray,
-        *,
-        count: int = -1,
+    start_pos: tuple,
+    masked_atlas: ma.MaskedArray,
+    *,
+    count: int = -1,
 ) -> int:
     """Explore a given voxel.
 
@@ -240,9 +240,9 @@ def manual_relabel_2(ids_v2: np.ndarray, ids_v3: np.ndarray) -> None:
 
 
 def merge(
-        ccfv2: np.ndarray,
-        ccfv3: np.ndarray,
-        region_meta: RegionMeta,
+    ccfv2: np.ndarray,
+    ccfv3: np.ndarray,
+    rm: RegionMeta,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Perform the coarse atlas merging.
 
@@ -252,11 +252,11 @@ def merge(
         The first atlas to merge, usually CCFv2
     ccfv3 : np.ndarray
         The second atlas to merge, usually CCFv3
-    region_meta : RegionMeta
+    rm : RegionMeta
         The brain region metadata. Usually constructed as follows:
         ``RegionMeta.from_root_region(brain_regions)``, where ``brain_regions``
-        can be obtained from the "msg" key of the `brain_regions.json`
-        (`1.json`) file.
+        can be obtained from the "msg" key of the ``brain_regions.json``
+        (``1.json``) file.
 
     Returns
     -------
@@ -270,22 +270,8 @@ def merge(
     v2_to = v2_from.copy()
     v3_from = np.unique(ccfv3)
     v3_to = v3_from.copy()
-    all_v2_region_ids: set = region_meta.collect_ancestors(v2_to)
-    all_v3_region_ids: set = region_meta.collect_ancestors(v3_to)
-
-    def is_leaf(region_id):
-        # leaf = not parent of anyone
-        return region_id not in region_meta.parent_id.values()
-
-    def parent(region_id):
-        """Get the parent region ID of a region."""
-        return region_meta.parent_id.get(region_id)
-
-    def children(region_id):
-        """Get all child region IDs of a given region."""
-        for child_id, parent_id in region_meta.parent_id.items():
-            if parent_id == region_id:
-                yield child_id
+    all_v2_region_ids: set = rm.collect_ancestors(v2_to)
+    all_v3_region_ids: set = rm.collect_ancestors(v3_to)
 
     def descendants(region_id: int, *, allowed_ids: set) -> set:
         """Get all filtered descendant IDs of a given region ID.
@@ -310,8 +296,8 @@ def merge(
             neither leaf regions nor present in ``allowed_ids``.
         """
         all_descendants = set()
-        for child_id in children(region_id):
-            if child_id in allowed_ids or is_leaf(child_id):
+        for child_id in rm.children(region_id):
+            if child_id in allowed_ids or rm.is_leaf(child_id):
                 all_descendants.add(child_id)
             all_descendants |= descendants(child_id, allowed_ids=allowed_ids)
 
@@ -319,24 +305,24 @@ def merge(
 
     def in_region_like(name_part: str, region_id: int) -> bool:
         """Check if region belongs to a region with a given name part."""
-        while region_id != region_meta.background_id:
-            if name_part in region_meta.name[region_id]:
+        while region_id != rm.background_id:
+            if name_part in rm.name[region_id]:
                 return True
-            region_id = parent(region_id)
+            region_id = rm.parent(region_id)
 
     logger.info("First for-loop correction")
     unique_v2 = set(v2_to)
     unique_v3 = set(v3_to)
     ids_to_correct = unique_v2 - unique_v3
     for id_ in ids_to_correct:
-        if is_leaf(id_) and id_ not in unique_v3 and parent(id_) in unique_v3:
-            replace(v2_to, id_, parent(id_))
-        elif is_leaf(id_) and (
+        if rm.is_leaf(id_) and id_ not in unique_v3 and rm.parent(id_) in unique_v3:
+            replace(v2_to, id_, rm.parent(id_))
+        elif rm.is_leaf(id_) and (
             in_region_like("Medial amygdalar nucleus", id_)
             or in_region_like("Subiculum", id_)
             or in_region_like("Bed nuclei of the stria terminalis", id_)
         ):
-            replace(v2_to, id_, parent(parent(id_)))
+            replace(v2_to, id_, rm.parent(rm.parent(id_)))
         elif in_region_like("Paraventricular hypothalamic nucleus", id_):
             replace(v2_to, id_, 38)
 
@@ -380,7 +366,7 @@ def merge(
         masked_atlas = ma.masked_array(atlas, hide_mask)
 
         error_voxel = np.where(atlas == region_id)
-        logger.info(f"Exploring %d voxels", len(error_voxel[0]))
+        logger.info("Exploring %d voxels", len(error_voxel[0]))
         new_values = [
             explore_voxel(xyz, masked_atlas, count=count) for xyz in zip(*error_voxel)
         ]
@@ -441,7 +427,7 @@ def merge(
     while len(ids_to_correct) > 0:
         id_ = ids_to_correct.pop()
         while id_ not in all_v2_region_ids:
-            id_ = parent(id_)
+            id_ = rm.parent(id_)
         for child in descendants(id_, allowed_ids=all_v3_region_ids):
             replace(v3_to, child, id_)
         for child in descendants(id_, allowed_ids=all_v2_region_ids):
