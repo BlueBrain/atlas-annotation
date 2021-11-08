@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Dimitri's annotation atlas merging scripts."""
+"""Dimitri's annotation atlas merging scripts.
+
+See https://bbpteam.epfl.ch/project/issues/browse/DEAL-20
+"""
 from .coarse import coarse_merge
 from .fine import fine_merge
 
