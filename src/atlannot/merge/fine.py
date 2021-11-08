@@ -240,11 +240,11 @@ def merge(
 
     Parameters
     ----------
-    ccfv2 : np.ndarray
+    ccfv2
         The first atlas to merge, usually CCFv2
-    ccfv3 : np.ndarray
+    ccfv3
         The second atlas to merge, usually CCFv3
-    rm : RegionMeta
+    rm
         The brain region metadata. Usually constructed as follows:
         ``RegionMeta.from_root_region(brain_regions)``, where ``brain_regions``
         can be obtained from the "msg" key of the ``brain_regions.json``
