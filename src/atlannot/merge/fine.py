@@ -13,18 +13,10 @@
 # limitations under the License.
 """The fine merging of the annotation atlases.
 
-This is the refactored and optimized version of ``fine::fine_merge``. It
+This is the refactored and optimized version of ``atlas_merge.fine``. It
 uses ``RegionMeta`` instead of ``JSONread`` and greatly speeds up the merging
 by optimizing a number of steps. The original logic was designed by
 Dimitri Rodarie.
-
-The biggest optimization is to not do label replacements directly on the atlases
-but on the set of unique labels, which is much smaller than the atlas volume.
-The labels in the atlases are remapped at the very end of the whole procedure
-using fast vectorized numpy operations, see ``atlas_remap``.
-
-Another important optimization was the use of masked numpy arrays instead of
-copying the entire volume.
 """
 from __future__ import annotations
 
@@ -35,7 +27,7 @@ import numpy as np
 from numpy import ma
 
 from atlannot.atlas.region_meta import RegionMeta
-from atlannot.atlas_merge.common import atlas_remap, descendants, replace
+from atlannot.merge.common import atlas_remap, descendants, replace
 
 logger = logging.getLogger(__name__)
 
