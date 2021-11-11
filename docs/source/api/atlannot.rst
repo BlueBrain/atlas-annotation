@@ -9,7 +9,8 @@ Subpackages
 
    atlannot.ants
    atlannot.atlas
-   atlannot.atlas_merge
+   atlannot.merge
+   atlannot.merge_original
    atlannot.notebook
 
 Submodules

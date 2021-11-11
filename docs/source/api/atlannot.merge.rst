@@ -1,4 +1,4 @@
-atlannot.atlas package
+atlannot.merge package
 ======================
 
 Submodules
@@ -7,13 +7,14 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   atlannot.atlas.align
-   atlannot.atlas.region_meta
+   atlannot.merge.coarse
+   atlannot.merge.common
+   atlannot.merge.fine
 
 Module contents
 ---------------
 
-.. automodule:: atlannot.atlas
+.. automodule:: atlannot.merge
    :members:
    :undoc-members:
    :show-inheritance:

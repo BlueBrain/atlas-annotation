@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Implementation of the RegionMeta class."""
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RegionMeta:
@@ -74,6 +77,137 @@ class RegionMeta:
         for region_id, region_level in self.level.items():
             if region_level == level:
                 yield region_id
+
+    def is_leaf(self, region_id):
+        """Check if the given region is a leaf region.
+
+        Parameters
+        ----------
+        region_id : int
+            The region ID in question.
+
+        Returns
+        -------
+        bool
+            Whether or not the given region is a leaf region.
+        """
+        # leaf = not parent of anyone
+        return region_id not in self.parent_id.values()
+
+    def parent(self, region_id):
+        """Get the parent region ID of a region.
+
+        Parameters
+        ----------
+        region_id
+            The region ID in question.
+
+        Returns
+        -------
+        int or None
+            The region ID of the parent. If there's no parent then None is
+            returned.
+        """
+        return self.parent_id.get(region_id)
+
+    def children(self, region_id):
+        """Get all child region IDs of a given region.
+
+        Note that by children we mean only the direct children, much like
+        by parent we only mean the direct parent. The cumulative quantities
+        that span all generations are called ancestors and descendants.
+
+        Parameters
+        ----------
+        region_id : int
+            The region ID in question.
+
+        Yields
+        ------
+        int
+            The region ID of a child region.
+        """
+        for child_id, parent_id in self.parent_id.items():
+            if parent_id == region_id:
+                yield child_id
+
+    def in_region_like(self, name_part, region_id):
+        """Check if region belongs to a region with a given name part.
+
+        Parameters
+        ----------
+        name_part : str
+            Part of the name of a brain region.
+        region_id : int
+            A region ID.
+
+        Returns
+        -------
+        bool
+            Whether or not the region with the given ID is in a region with
+            the given name part. All parent regions are also checked.
+        """
+        if region_id not in self.name:
+            logger.warning("Invalid region ID: %d", region_id)
+            return False
+
+        while region_id != self.background_id:
+            if name_part in self.name[region_id]:
+                return True
+            region_id = self.parent(region_id)
+
+    def collect_ancestors(self, leaf_ids, top_id=None, remove_background=True):
+        """Collect all region IDs between the leaf regions and the top region.
+
+        Leaf regions that don't descent from the given top region are ignored.
+        The collection is inclusive, i.e. both the leaf region IDs and the
+        top region ID will be collected along with all intermediate regions.
+
+        If the top region is not provided it will default to the background.
+        This will effectively collect all parents of all leaves up to the top
+        since the background is at the top of the hierarchy.
+
+        Parameters
+        ----------
+        leaf_ids : iterable of int
+            The IDs of the leaf regions
+        top_id : int
+            The ID of the top region up to which to collect the parents.
+        remove_background : bool
+            If True it will be guaranteed that the background region ID is
+            not included in the result.
+
+        Returns
+        -------
+        set
+            All leaf IDs, the top region ID, and all the intermediate region IDs
+            between the leaf and the top regions.
+        """
+        if top_id is None:
+            top_id = self.background_id
+
+        def descends_from_top_id(child_id):
+            """Check if the given ID is a descendant of top_id."""
+            if child_id == top_id:
+                return True
+            if child_id is None:
+                return False
+
+            return descends_from_top_id(self.parent_id[child_id])
+
+        # The actual work - collect all ancestors up to the top_id
+        ids = {top_id}
+        for id_ in set(leaf_ids):
+            if not descends_from_top_id(id_):
+                continue
+            while id_ != top_id:
+                ids.add(id_)
+                id_ = self.parent_id[id_]
+
+        if remove_background:
+            ids -= {self.background_id}
+
+        return ids
 
     def _parse_region_hierarchy(self, region, parent_id=None):
         """Parse and save a region and its children.
