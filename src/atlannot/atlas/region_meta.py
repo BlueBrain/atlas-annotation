@@ -113,6 +113,10 @@ class RegionMeta:
     def children(self, region_id):
         """Get all child region IDs of a given region.
 
+        Note that by children we mean only the direct children, much like
+        by parent we only mean the direct parent. The cumulative quantities
+        that span all generations are called ancestors and descendants.
+
         Parameters
         ----------
         region_id : int
