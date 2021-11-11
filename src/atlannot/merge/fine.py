@@ -272,7 +272,7 @@ def merge(
     unique_v3 = set(v3_to)
     ids_to_correct = unique_v2 - unique_v3
     for id_ in ids_to_correct:
-        if rm.is_leaf(id_) and id_ not in unique_v3 and rm.parent(id_) in unique_v3:
+        if rm.is_leaf(id_) and rm.parent(id_) in unique_v3:
             replace(v2_to, id_, rm.parent(id_))
         elif rm.is_leaf(id_) and (
             rm.in_region_like("Medial amygdalar nucleus", id_)
