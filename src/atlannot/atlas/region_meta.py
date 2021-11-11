@@ -104,8 +104,9 @@ class RegionMeta:
 
         Returns
         -------
-        int
-            The region ID of the parent.
+        int or None
+            The region ID of the parent. If there's no parent then None is
+            returned.
         """
         return self.parent_id.get(region_id)
 
