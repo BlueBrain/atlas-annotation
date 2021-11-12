@@ -132,7 +132,7 @@ def preprocess_atlases(*atlases, region_meta=None, hierarchy_level=10):
     ----------
     atlases : Iterable of np.ndarray
         All atlases to preprocess.
-    region_meta : atlannot.RegionMeta
+    region_meta : atlannot.region_meta.RegionMeta
         Object containing brain regions hierarchy.
     hierarchy_level: int
         Hierarchy level to keep for the registration

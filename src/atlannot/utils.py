@@ -26,8 +26,8 @@ import numpy as np
 from scipy import ndimage
 from skimage.metrics import structural_similarity as ssim
 
-from atlannot.atlas import RegionMeta, get_misalignment
-
+from atlannot.atlas import get_misalignment
+from atlannot.region_meta import RegionMeta
 
 # LOADING PART
 def load_region_meta(filename="data/annotation_atlas/brain_regions.json"):
@@ -41,7 +41,7 @@ def load_region_meta(filename="data/annotation_atlas/brain_regions.json"):
 
     Returns
     -------
-    region_meta : atlannot.atlas.RegionMeta
+    region_meta : atlannot.region_meta.RegionMeta
         Object holding the hierarchical region metadata
     """
     with open(filename) as f:

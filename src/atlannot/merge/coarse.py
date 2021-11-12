@@ -24,7 +24,7 @@ import logging
 
 import numpy as np
 
-from atlannot.atlas.region_meta import RegionMeta
+from atlannot.region_meta import RegionMeta
 from atlannot.merge.common import atlas_remap, descendants, replace
 
 logger = logging.getLogger(__name__)

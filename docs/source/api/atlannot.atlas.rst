@@ -8,7 +8,6 @@ Submodules
    :maxdepth: 4
 
    atlannot.atlas.align
-   atlannot.atlas.region_meta
 
 Module contents
 ---------------

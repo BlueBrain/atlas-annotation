@@ -16,8 +16,8 @@ import matplotlib.patches as patches
 import numpy as np
 import pytest
 
-from atlannot.atlas import RegionMeta
 from atlannot.notebook import create_legend_handles
+from atlannot.region_meta import RegionMeta
 
 
 class TestNotebook:
