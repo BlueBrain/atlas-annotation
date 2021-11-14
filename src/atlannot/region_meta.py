@@ -234,6 +234,31 @@ class RegionMeta:
 
         return descendants
 
+    @property
+    def depth(self):
+        """Find the depth of the region hierarchy.
+
+        The background region is not taken into account.
+
+        Returns
+        -------
+        int
+            The depth of the region hierarchy.
+        """
+        return max(self.level.values())
+
+    @property
+    def size(self):
+        """Find the number of regions in the structure graph.
+
+        Returns
+        -------
+        int
+            The number of regions in the structure graph
+        """
+        # Remove the background from the count
+        return len(self.name) - 1
+
     def _parse_region_hierarchy(self, region, is_root=False):
         """Parse and save a region and its children.
 
@@ -316,6 +341,7 @@ class RegionMeta:
             serialised structure graph. If none is provided then to real
             root region is used and as a consequence the complete structure
             graph is serialised.
+
         Returns
         -------
         dict
@@ -371,3 +397,7 @@ class RegionMeta:
         # raw response.
 
         return cls.from_dict(structure_graph, warn_raw_response=False)
+
+    def __repr__(self):
+        """Create the repr of the instance."""
+        return f"{self.__class__.__qualname__}, {self.size} regions, depth {self.depth}"

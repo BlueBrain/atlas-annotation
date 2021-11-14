@@ -230,6 +230,24 @@ def test_descendants(structure_graph):
     assert rm.descendants([1, 2]) == {1, 2, 3, 4, 5}
 
 
+def test_depth(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    assert rm.depth == 3
+
+
+def test_size(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    assert rm.size == 5
+
+
+def test_repr(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    assert str(rm) == repr(rm)
+    assert "RegionMeta" in str(rm)
+    assert str(rm.size) in str(rm)
+    assert str(rm.depth) in str(rm)
+
+
 # Write rm.prune_to_root(new_root) -> RegionMeta
 # Write ancestors_up_to(ancestor_id, leaves)
 #   = rm.prune_to_root(ancestor_id).ancestors(leaves)
