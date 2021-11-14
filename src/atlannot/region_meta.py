@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Implementation of the RegionMeta class."""
+import json
 import logging
 import numbers
 import re
@@ -342,3 +343,26 @@ class RegionMeta:
         result["parent_structure_id"] = None
 
         return result
+
+    @classmethod
+    def load_json(cls, json_path):
+        """Load the structure graph from a JSON file and create an instance.
+
+        Parameters
+        ----------
+        json_path : str or pathlib.Path
+
+        Returns
+        -------
+        RegionMeta
+            The initialized instance of this class.
+        """
+        with open(json_path) as fh:
+            structure_graph = json.load(fh)
+
+        # The JSON file could be either a raw response with the AIBS headers
+        # or just the bare structure graph. We don't make any assumptions and
+        # support both. No need to warn the user at this point if it's the
+        # raw response.
+
+        return cls.from_dict(structure_graph, warn_raw_response=False)

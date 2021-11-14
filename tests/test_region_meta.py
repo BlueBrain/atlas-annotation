@@ -20,6 +20,19 @@ def structure_graph():
     return structure_graph
 
 
+def as_aibs_response(structure_graph):
+    response = {
+        "success": True,
+        "id": 0,
+        "start_row": 0,
+        "num_rows": 1,
+        "total_rows": 1,
+        "msg": [structure_graph],
+    }
+
+    return response
+
+
 def test_from_dict(structure_graph):
     rm = RegionMeta.from_dict(structure_graph)
 
@@ -52,14 +65,7 @@ def test_from_dict(structure_graph):
 
 def test_from_dict_raw_response(structure_graph, caplog):
     rm_ref = RegionMeta.from_dict(structure_graph)
-    raw_response = {
-        "success": True,
-        "id": 0,
-        "start_row": 0,
-        "num_rows": 1,
-        "total_rows": 1,
-        "msg": [structure_graph],
-    }
+    raw_response = as_aibs_response(structure_graph)
 
     # Test parsing the raw AIBS response
     caplog.clear()
@@ -77,6 +83,23 @@ def test_from_dict_raw_response(structure_graph, caplog):
         # Check the parsing still worked
         assert rm.parent_id == rm_ref.parent_id
     assert len(caplog.records) == 0
+
+
+def test_load_json(structure_graph, tmp_path):
+    json_path = tmp_path / "structure_graph.json"
+
+    # Test loading a bare structure graph
+    with json_path.open("w") as fh:
+        json.dump(structure_graph, fh)
+    rm = RegionMeta.load_json(json_path)
+    assert rm.to_dict() == structure_graph
+
+    # Test loading a raw AIBS response
+    structure_graph_raw = as_aibs_response(structure_graph)
+    with json_path.open("w") as fh:
+        json.dump(structure_graph_raw, fh)
+    rm = RegionMeta.load_json(json_path)
+    assert rm.to_dict() == structure_graph
 
 
 def test_to_dict(structure_graph):
@@ -215,3 +238,4 @@ def test_descendants(structure_graph):
 # Write ancestors_up_to(ancestor_id, leaves)
 #   = rm.prune_to_root(ancestor_id).ancestors(leaves)
 # Write properties for name, acronym, etc...
+# Write __str__ and __repr__
