@@ -52,6 +52,10 @@ class RegionMeta:
 
         self.level = {self.background_id: 0}
 
+    def __repr__(self):
+        """Create the repr of the instance."""
+        return f"{self.__class__.__qualname__}, {self.size} regions, depth {self.depth}"
+
     @property
     def color_map(self):
         """Map region IDs to RGB colors.
@@ -132,36 +136,6 @@ class RegionMeta:
             The region ID of a child region.
         """
         return tuple(self.children_ids[region_id])
-
-    def in_region_like(self, region_name_regex, region_id):
-        """Check if region belongs to a region with a given name pattern.
-
-        Note that providing a simple string without any special characters
-        is equivalent to a substring test.
-
-        Parameters
-        ----------
-        region_name_regex : str
-            A regex to match the region name.
-        region_id : int
-            A region ID.
-
-        Returns
-        -------
-        bool
-            Whether or not the region with the given ID is in a region with
-            the given name part. All parent regions are also checked.
-        """
-        if region_id not in self.name:
-            logger.warning("Invalid region ID: %d", region_id)
-            return False
-
-        while region_id != self.background_id:
-            if re.search(region_name_regex, self.name[region_id]):
-                return True
-            region_id = self.parent(region_id)
-
-        return False
 
     def ancestors(self, ids, include_background=False):
         """Find all ancestors of given regions.
@@ -258,6 +232,36 @@ class RegionMeta:
         """
         # Remove the background from the count
         return len(self.name) - 1
+
+    def in_region_like(self, region_name_regex, region_id):
+        """Check if region belongs to a region with a given name pattern.
+
+        Note that providing a simple string without any special characters
+        is equivalent to a substring test.
+
+        Parameters
+        ----------
+        region_name_regex : str
+            A regex to match the region name.
+        region_id : int
+            A region ID.
+
+        Returns
+        -------
+        bool
+            Whether or not the region with the given ID is in a region with
+            the given name part. All parent regions are also checked.
+        """
+        if region_id not in self.name:
+            logger.warning("Invalid region ID: %d", region_id)
+            return False
+
+        while region_id != self.background_id:
+            if re.search(region_name_regex, self.name[region_id]):
+                return True
+            region_id = self.parent(region_id)
+
+        return False
 
     def _parse_region_hierarchy(self, region, is_root=False):
         """Parse and save a region and its children.
@@ -397,7 +401,3 @@ class RegionMeta:
         # raw response.
 
         return cls.from_dict(structure_graph, warn_raw_response=False)
-
-    def __repr__(self):
-        """Create the repr of the instance."""
-        return f"{self.__class__.__qualname__}, {self.size} regions, depth {self.depth}"
