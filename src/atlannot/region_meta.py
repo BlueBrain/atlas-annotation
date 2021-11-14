@@ -45,6 +45,7 @@ class RegionMeta:
         self.st_level = {self.background_id: None}
         self.hemisphere_id = {self.background_id: None}
         self.parent_id = {self.background_id: None}
+        self.children_ids = {self.background_id: []}
 
         self.level = {self.background_id: 0}
 
@@ -92,8 +93,7 @@ class RegionMeta:
         bool
             Whether or not the given region is a leaf region.
         """
-        # leaf = not parent of anyone
-        return region_id not in self.parent_id.values()
+        return len(self.children_ids[region_id]) == 0
 
     def parent(self, region_id):
         """Get the parent region ID of a region.
@@ -128,9 +128,7 @@ class RegionMeta:
         int
             The region ID of a child region.
         """
-        for child_id, parent_id in self.parent_id.items():
-            if parent_id == region_id:
-                yield child_id
+        return tuple(self.children_ids[region_id])
 
     def in_region_like(self, name_part, region_id):
         """Check if region belongs to a region with a given name part.
@@ -247,6 +245,7 @@ class RegionMeta:
         region_id = region["id"]
         if parent_id is None:
             parent_id = region["parent_structure_id"]
+        self.children_ids[parent_id].append(region_id)
 
         self.atlas_id[region_id] = region["atlas_id"]
         self.ontology_id[region_id] = region["ontology_id"]
@@ -259,6 +258,7 @@ class RegionMeta:
         self.parent_id[region_id] = parent_id
 
         self.level[region_id] = self.level[parent_id] + 1
+        self.children_ids[region_id] = []
 
         for child in region["children"]:
             self._parse_region_hierarchy(child)
