@@ -194,6 +194,42 @@ class RegionMeta:
 
         return ancestors
 
+    def descendants(self, ids):
+        """Find all descendants of given regions.
+
+        The result is inclusive, i.e. the input region IDs will be
+        included in the result.
+
+        Parameters
+        ----------
+        ids : int or iterable of int
+            A region ID or a collection of region IDs to collect
+            descendants for.
+
+        Returns
+        -------
+        set
+            All descendant region IDs of the given regions, including the input
+            regions themselves.
+        """
+        if isinstance(ids, numbers.Integral):
+            unique_ids = {ids}
+        else:
+            unique_ids = set(ids)
+
+        def iter_descendants(region_id):
+            """Iterate over all descendants of a given region ID."""
+            yield region_id
+            for child in self.children(region_id):
+                yield child
+                yield from iter_descendants(child)
+
+        descendants = set()
+        for id_ in unique_ids:
+            descendants |= set(iter_descendants(id_))
+
+        return descendants
+
     def _parse_region_hierarchy(self, region, parent_id=None):
         """Parse and save a region and its children.
 
