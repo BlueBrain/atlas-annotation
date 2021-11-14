@@ -296,3 +296,45 @@ class RegionMeta:
         )
 
         return self
+
+    def to_dict(self):
+        """Serialise the region structure data to a dictionary.
+
+        This is exactly the inverse of the ``from_dict`` method.
+
+        Returns
+        -------
+        dict
+            The serialised region structure data.
+        """
+
+        def region_to_dict(id_):
+            result = {
+                "id": id_,
+                "atlas_id": self.atlas_id[id_],
+                "ontology_id": self.ontology_id[id_],
+                "acronym": self.acronym[id_],
+                "name": self.name[id_],
+                "color_hex_triplet": self.color_hex_triplet[id_],
+                "graph_order": self.graph_order[id_],
+                "st_level": self.st_level[id_],
+                "hemisphere_id": self.hemisphere_id[id_],
+                "parent_structure_id": self.parent_id[id_],
+                "children": [],
+            }
+            for child_id in self.children_ids[id_]:
+                result["children"].append(region_to_dict(child_id))
+
+            return result
+
+        if not len(self.children_ids[self.background_id]) == 1:
+            raise RuntimeError(
+                f"Expected to have exactly one root region, but got "
+                f"{len(self.children_ids[self.background_id])}"
+            )
+        root_region_id = self.children_ids[self.background_id][0]
+        result = region_to_dict(root_region_id)
+        # Detach the root region from the background
+        result["parent_structure_id"] = None
+
+        return result

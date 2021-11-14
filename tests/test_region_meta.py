@@ -79,6 +79,27 @@ def test_from_dict_raw_response(structure_graph, caplog):
     assert len(caplog.records) == 0
 
 
+def test_to_dict(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    assert rm.to_dict() == structure_graph
+
+
+def test_to_dict_bad_root_region():
+    # Test that if there's not exactly one root region then an error is raised
+    rm = RegionMeta()
+
+    # Test the case where there's no root region
+    with pytest.raises(RuntimeError, match=r"exactly one root region"):
+        rm.to_dict()
+
+    # Test the case where there's more than one root region
+    rm.children_ids[rm.background_id] = [1, 2]
+    rm.parent_id[1] = rm.background_id
+    rm.parent_id[2] = rm.background_id
+    with pytest.raises(RuntimeError, match=r"exactly one root region"):
+        rm.to_dict()
+
+
 def test_color_map(structure_graph):
     rm = RegionMeta.from_dict(structure_graph)
     assert rm.color_map == {
