@@ -181,11 +181,19 @@ def test_children(structure_graph, id_, children_expect):
 
 def test_in_region_like(structure_graph):
     rm = RegionMeta.from_dict(structure_graph)
+
+    # Simple regex, equivalent to simple substring tests
     assert rm.in_region_like("root", 1)
     assert rm.in_region_like("child", 4)
     assert not rm.in_region_like("child 3", 2)
 
+    # Invalid region ID
     assert not rm.in_region_like("some region", 999)
+
+    # More complicated regex
+    assert rm.in_region_like(r"[c|C]hild", 2)
+    assert rm.in_region_like(r"[c|C]hild", 4)
+    assert rm.in_region_like(r"\w \d", 5)
 
 
 def test_ancestors(structure_graph):
@@ -207,5 +215,3 @@ def test_descendants(structure_graph):
 # Write ancestors_up_to(ancestor_id, leaves)
 #   = rm.prune_to_root(ancestor_id).ancestors(leaves)
 # Write properties for name, acronym, etc...
-# Keep a list of children
-# in_region_like: accept regex

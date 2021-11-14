@@ -14,6 +14,7 @@
 """Implementation of the RegionMeta class."""
 import logging
 import numbers
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -130,13 +131,16 @@ class RegionMeta:
         """
         return tuple(self.children_ids[region_id])
 
-    def in_region_like(self, name_part, region_id):
-        """Check if region belongs to a region with a given name part.
+    def in_region_like(self, region_name_regex, region_id):
+        """Check if region belongs to a region with a given name pattern.
+
+        Note that providing a simple string without any special characters
+        is equivalent to a substring test.
 
         Parameters
         ----------
-        name_part : str
-            Part of the name of a brain region.
+        region_name_regex : str
+            A regex to match the region name.
         region_id : int
             A region ID.
 
@@ -151,7 +155,7 @@ class RegionMeta:
             return False
 
         while region_id != self.background_id:
-            if name_part in self.name[region_id]:
+            if re.search(region_name_regex, self.name[region_id]):
                 return True
             region_id = self.parent(region_id)
 
