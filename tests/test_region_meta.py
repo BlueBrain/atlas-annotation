@@ -1,5 +1,6 @@
 import json
 import logging
+import textwrap
 
 import pytest
 
@@ -299,6 +300,50 @@ def test_find_by_acronym(structure_graph):
     assert rm.find_by_acronym("Gc1") == 4
     assert rm.find_by_acronym("Gc2") == 5
     assert rm.find_by_acronym("Non-existing") is None
+
+
+def test_print_regions(structure_graph, capsys):
+    rm = RegionMeta.from_dict(structure_graph)
+
+    rm.print_regions()
+    stdout, stderr = capsys.readouterr()
+    expect_stdout = """\
+    root (1)
+    ├── Child 1 (2)
+    |   ├── Grandchild 1 (4)
+    |   └── Grandchild 2 (5)
+    └── Child 2 (3)
+    """
+    assert stdout == textwrap.dedent(expect_stdout)
+    assert stderr == ""
+
+    rm.print_regions(max_depth=1)
+    stdout, stderr = capsys.readouterr()
+    expect_stdout = """\
+    root (1)
+    ├── Child 1 (2)
+    └── Child 2 (3)
+    """
+    assert stdout == textwrap.dedent(expect_stdout)
+    assert stderr == ""
+
+    rm.print_regions(2)
+    stdout, stderr = capsys.readouterr()
+    expect_stdout = """\
+    Child 1 (2)
+    ├── Grandchild 1 (4)
+    └── Grandchild 2 (5)
+    """
+    assert stdout == textwrap.dedent(expect_stdout)
+    assert stderr == ""
+
+    rm.print_regions(3, max_depth=0)
+    stdout, stderr = capsys.readouterr()
+    expect_stdout = """\
+    Child 2 (3)
+    """
+    assert stdout == textwrap.dedent(expect_stdout)
+    assert stderr == ""
 
 
 # Write rm.prune_to_root(new_root) -> RegionMeta

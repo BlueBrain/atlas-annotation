@@ -355,6 +355,52 @@ class RegionMeta:
 
         return False
 
+    def print_regions(self, root_id=None, max_depth=-1, acronym=False):
+        """Print the region hierarchy tree to stdout.
+
+        Parameters
+        ----------
+        root_id : int, optional
+            The ID that shall be at the top of the printed hierarchy tree.
+            Defaults to the true hierarchy root region if none is provided.
+        max_depth : int, default -1
+            If a non-negative integer then the hierarchy will be printed only
+            up to the given depth. Otherwise the whole hierarchy will be
+            printed.
+        acronym : bool, default False
+            If true then instead of the full region name its acronym will
+            be used.
+        """
+        if root_id is None:
+            root_id = self.root_id
+        # Tracks which parent region guide lines should be printed.
+        guides = []
+
+        def handle_region(id_, level=0, is_last=False):
+            # Print the region name line
+            name = self.acronym(id_) if acronym else self.name(id_)
+            indents = ["|   " if is_active else "    " for is_active in guides]
+            if indents:
+                indents[-1] = "└── " if is_last else "├── "
+            print(f'{"".join(indents)}{name} ({id_})')
+
+            # Stop recursion at max depth
+            if level == max_depth:
+                return
+
+            # Recurse to the children
+            children = self.children(id_)
+            if not children:
+                return
+            guides.append(True)
+            for child in children[:-1]:
+                handle_region(child, level + 1)
+            guides[-1] = False
+            handle_region(children[-1], level + 1, is_last=True)
+            guides.pop()
+
+        handle_region(root_id)
+
     def _parse_region_hierarchy(self, region, is_root=False):
         """Parse and save a region and its children.
 
