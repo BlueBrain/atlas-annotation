@@ -37,6 +37,7 @@ class RegionMeta:
 
     def __init__(self, background_id=0, background_color="000000"):
         self.background_id = background_id
+        self.root_id = None
 
         self.atlas_id = {self.background_id: None}
         self.ontology_id = {self.background_id: None}
@@ -233,7 +234,7 @@ class RegionMeta:
 
         return descendants
 
-    def _parse_region_hierarchy(self, region, parent_id=None):
+    def _parse_region_hierarchy(self, region, is_root=False):
         """Parse and save a region and its children.
 
         This helper method is usually used to initialize the class
@@ -243,12 +244,16 @@ class RegionMeta:
         ----------
         region : dict
             Metadata for a region and its children.
-        parent_id : int or None, optional
-            Override the region parent. Typically used to set the background
-            as the parent region of the top-level region (e. g. root).
+        is_root : bool, default False
+            If True then it will be assumed that this region is the root
+            region. As a consequence it will be attached as the child of
+            the background.
         """
         region_id = region["id"]
-        if parent_id is None:
+        if is_root:
+            self.root_id = region_id
+            parent_id = self.background_id
+        else:
             parent_id = region["parent_structure_id"]
         self.children_ids[parent_id].append(region_id)
 
@@ -295,10 +300,7 @@ class RegionMeta:
             region_hierarchy = region_hierarchy["msg"][0]
 
         self = cls()
-        self._parse_region_hierarchy(
-            region_hierarchy,
-            parent_id=self.background_id,
-        )
+        self._parse_region_hierarchy(region_hierarchy, is_root=True)
 
         return self
 
@@ -314,7 +316,7 @@ class RegionMeta:
         """
 
         def region_to_dict(id_):
-            result = {
+            region_dict = {
                 "id": id_,
                 "atlas_id": self.atlas_id[id_],
                 "ontology_id": self.ontology_id[id_],
@@ -328,17 +330,11 @@ class RegionMeta:
                 "children": [],
             }
             for child_id in self.children_ids[id_]:
-                result["children"].append(region_to_dict(child_id))
+                region_dict["children"].append(region_to_dict(child_id))
 
-            return result
+            return region_dict
 
-        if not len(self.children_ids[self.background_id]) == 1:
-            raise RuntimeError(
-                f"Expected to have exactly one root region, but got "
-                f"{len(self.children_ids[self.background_id])}"
-            )
-        root_region_id = self.children_ids[self.background_id][0]
-        result = region_to_dict(root_region_id)
+        result = region_to_dict(self.root_id)
         # Detach the root region from the background
         result["parent_structure_id"] = None
 
