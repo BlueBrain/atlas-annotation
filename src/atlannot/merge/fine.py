@@ -26,8 +26,8 @@ from collections import deque
 import numpy as np
 from numpy import ma
 
-from atlannot.region_meta import RegionMeta
 from atlannot.merge.common import atlas_remap, descendants, replace
+from atlannot.region_meta import RegionMeta
 
 logger = logging.getLogger(__name__)
 
@@ -264,8 +264,8 @@ def merge(
     v3_to = v3_from.copy()
 
     logger.info("Collecting all CCFv2 and CCFv3 region IDs")
-    all_v2_region_ids: set = rm.collect_ancestors(v2_to)
-    all_v3_region_ids: set = rm.collect_ancestors(v3_to)
+    all_v2_region_ids: set = rm.ancestors(v2_to)
+    all_v3_region_ids: set = rm.ancestors(v3_to)
 
     logger.info("First for-loop correction")
     unique_v2 = set(v2_to)

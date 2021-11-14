@@ -13,6 +13,7 @@
 # limitations under the License.
 """Implementation of the RegionMeta class."""
 import logging
+import numbers
 
 logger = logging.getLogger(__name__)
 
@@ -156,58 +157,42 @@ class RegionMeta:
                 return True
             region_id = self.parent(region_id)
 
-    def collect_ancestors(self, leaf_ids, top_id=None, remove_background=True):
-        """Collect all region IDs between the leaf regions and the top region.
+        return False
 
-        Leaf regions that don't descent from the given top region are ignored.
-        The collection is inclusive, i.e. both the leaf region IDs and the
-        top region ID will be collected along with all intermediate regions.
+    def ancestors(self, ids, include_background=False):
+        """Find all ancestors of given regions.
 
-        If the top region is not provided it will default to the background.
-        This will effectively collect all parents of all leaves up to the top
-        since the background is at the top of the hierarchy.
+        The result is inclusive, i.e. the input region IDs will be
+        included in the result.
 
         Parameters
         ----------
-        leaf_ids : iterable of int
-            The IDs of the leaf regions
-        top_id : int
-            The ID of the top region up to which to collect the parents.
-        remove_background : bool
-            If True it will be guaranteed that the background region ID is
-            not included in the result.
+        ids : int or iterable of int
+            A region ID or a collection of region IDs to collect ancestors for.
+        include_background : bool
+            If True the background region ID will be included in the result.
 
         Returns
         -------
         set
-            All leaf IDs, the top region ID, and all the intermediate region IDs
-            between the leaf and the top regions.
+            All ancestor region IDs of the given regions, including the input
+            regions themselves.
         """
-        if top_id is None:
-            top_id = self.background_id
+        if isinstance(ids, numbers.Integral):
+            unique_ids = {ids}
+        else:
+            unique_ids = set(ids)
 
-        def descends_from_top_id(child_id):
-            """Check if the given ID is a descendant of top_id."""
-            if child_id == top_id:
-                return True
-            if child_id is None:
-                return False
+        ancestors = set()
+        for id_ in unique_ids:
+            while id_ is not None:
+                ancestors.add(id_)
+                id_ = self.parent(id_)
 
-            return descends_from_top_id(self.parent_id[child_id])
+        if not include_background:
+            ancestors.remove(self.background_id)
 
-        # The actual work - collect all ancestors up to the top_id
-        ids = {top_id}
-        for id_ in set(leaf_ids):
-            if not descends_from_top_id(id_):
-                continue
-            while id_ != top_id:
-                ids.add(id_)
-                id_ = self.parent_id[id_]
-
-        if remove_background:
-            ids -= {self.background_id}
-
-        return ids
+        return ancestors
 
     def _parse_region_hierarchy(self, region, parent_id=None):
         """Parse and save a region and its children.

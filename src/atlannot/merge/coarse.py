@@ -24,8 +24,8 @@ import logging
 
 import numpy as np
 
-from atlannot.region_meta import RegionMeta
 from atlannot.merge.common import atlas_remap, descendants, replace
+from atlannot.region_meta import RegionMeta
 
 logger = logging.getLogger(__name__)
 
@@ -236,8 +236,8 @@ def merge(
             ids_to_correct_ = unique_1 - unique_2 - {8, 997}
 
     logger.info("While loop corrections")
-    allowed_v2 = rm.collect_ancestors(v2_to)
-    allowed_v3 = rm.collect_ancestors(v3_to)
+    allowed_v2 = rm.ancestors(v2_to)
+    allowed_v3 = rm.ancestors(v3_to)
     while_correct(v3_to, v2_to, allowed_v3, allowed_v2)
     while_correct(v2_to, v3_to, allowed_v2, allowed_v3)
 
