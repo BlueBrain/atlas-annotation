@@ -6,7 +6,7 @@ import pytest
 from atlannot.region_meta import RegionMeta
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def structure_graph():
     # The mini structure graph has the following simple structure:
     # 1 (root)
@@ -105,6 +105,18 @@ def test_load_json(structure_graph, tmp_path):
 def test_to_dict(structure_graph):
     rm = RegionMeta.from_dict(structure_graph)
     assert rm.to_dict() == structure_graph
+
+
+def test_to_dict_truncated(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+
+    # Find and extract the child region with ID=2
+    id_ = 2
+    idx = [c["id"] for c in structure_graph["children"]].index(id_)
+    truncated_graph = structure_graph["children"][idx]
+    truncated_graph["parent_structure_id"] = None
+
+    assert rm.to_dict(id_) == truncated_graph
 
 
 def test_color_map(structure_graph):

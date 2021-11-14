@@ -304,11 +304,18 @@ class RegionMeta:
 
         return self
 
-    def to_dict(self):
+    def to_dict(self, root_id=None):
         """Serialise the region structure data to a dictionary.
 
         This is exactly the inverse of the ``from_dict`` method.
 
+        Parameters
+        ----------
+        root_id : int or None, optional
+            Which region ID to start with. This will be the new top of the
+            serialised structure graph. If none is provided then to real
+            root region is used and as a consequence the complete structure
+            graph is serialised.
         Returns
         -------
         dict
@@ -334,8 +341,10 @@ class RegionMeta:
 
             return region_dict
 
-        result = region_to_dict(self.root_id)
-        # Detach the root region from the background
+        if root_id is None:
+            root_id = self.root_id
+        result = region_to_dict(root_id)
+        # Detach the root region rest of the rest of structure graph
         result["parent_structure_id"] = None
 
         return result
