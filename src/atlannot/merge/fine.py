@@ -246,7 +246,7 @@ def merge(
         The second atlas to merge, usually CCFv3
     rm
         The brain region metadata. Usually constructed as follows:
-        ``RegionMeta.from_root_region(brain_regions)``, where ``brain_regions``
+        ``RegionMeta.from_dict(brain_regions)``, where ``brain_regions``
         can be obtained from the "msg" key of the ``brain_regions.json``
         (``1.json``) file.
 

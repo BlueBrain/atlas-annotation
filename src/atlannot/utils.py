@@ -29,6 +29,7 @@ from skimage.metrics import structural_similarity as ssim
 from atlannot.atlas import get_misalignment
 from atlannot.region_meta import RegionMeta
 
+
 # LOADING PART
 def load_region_meta(filename="data/annotation_atlas/brain_regions.json"):
     """Load region meta.
@@ -46,7 +47,7 @@ def load_region_meta(filename="data/annotation_atlas/brain_regions.json"):
     """
     with open(filename) as f:
         brain_regions = json.load(f)
-    region_meta = RegionMeta.from_root_region(brain_regions["msg"][0])
+    region_meta = RegionMeta.from_dict(brain_regions["msg"][0])
 
     return region_meta
 

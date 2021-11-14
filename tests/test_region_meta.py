@@ -1,4 +1,5 @@
 import json
+import logging
 
 import pytest
 
@@ -19,8 +20,8 @@ def structure_graph():
     return structure_graph
 
 
-def test_from_root_region(structure_graph):
-    rm = RegionMeta.from_root_region(structure_graph)
+def test_from_dict(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
 
     assert rm.background_id == 0
     assert rm.atlas_id == {0: None, 1: -1, 2: -1, 3: -1, 4: -1, 5: -1}
@@ -49,8 +50,37 @@ def test_from_root_region(structure_graph):
     assert rm.level == {0: 0, 1: 1, 2: 2, 3: 2, 4: 3, 5: 3}
 
 
+def test_from_dict_raw_response(structure_graph, caplog):
+    rm_ref = RegionMeta.from_dict(structure_graph)
+    raw_response = {
+        "success": True,
+        "id": 0,
+        "start_row": 0,
+        "num_rows": 1,
+        "total_rows": 1,
+        "msg": [structure_graph],
+    }
+
+    # Test parsing the raw AIBS response
+    caplog.clear()
+    with caplog.at_level(logging.WARNING, logger="atlannot.region_meta"):
+        rm = RegionMeta.from_dict(raw_response)
+        # Check the parsing still worked
+        assert rm.parent_id == rm_ref.parent_id
+    assert len(caplog.records) == 1
+    assert "raw AIBS response" in caplog.records[0].message
+
+    # Same, but with suppressed warnings
+    caplog.clear()
+    with caplog.at_level(logging.WARNING, logger="atlannot.region_meta"):
+        rm = RegionMeta.from_dict(raw_response, warn_raw_response=False)
+        # Check the parsing still worked
+        assert rm.parent_id == rm_ref.parent_id
+    assert len(caplog.records) == 0
+
+
 def test_color_map(structure_graph):
-    rm = RegionMeta.from_root_region(structure_graph)
+    rm = RegionMeta.from_dict(structure_graph)
     assert rm.color_map == {
         0: (0, 0, 0),
         1: (255, 255, 255),
@@ -72,7 +102,7 @@ def test_color_map(structure_graph):
     ),
 )
 def test_ids_at_level(structure_graph, level, ids_expect):
-    rm = RegionMeta.from_root_region(structure_graph)
+    rm = RegionMeta.from_dict(structure_graph)
     ids = list(rm.ids_at_level(level))
     assert len(ids) == len(ids_expect)
     assert set(ids) == ids_expect
@@ -90,7 +120,7 @@ def test_ids_at_level(structure_graph, level, ids_expect):
     ),
 )
 def test_is_leaf(structure_graph, id_, is_leaf):
-    rm = RegionMeta.from_root_region(structure_graph)
+    rm = RegionMeta.from_dict(structure_graph)
     assert rm.is_leaf(id_) is is_leaf
 
 
@@ -106,7 +136,7 @@ def test_is_leaf(structure_graph, id_, is_leaf):
     ),
 )
 def test_parent(structure_graph, id_, parent_id):
-    rm = RegionMeta.from_root_region(structure_graph)
+    rm = RegionMeta.from_dict(structure_graph)
     assert rm.parent(id_) == parent_id
 
 
@@ -122,14 +152,14 @@ def test_parent(structure_graph, id_, parent_id):
     ),
 )
 def test_children(structure_graph, id_, children_expect):
-    rm = RegionMeta.from_root_region(structure_graph)
+    rm = RegionMeta.from_dict(structure_graph)
     children = list(rm.children(id_))
     assert len(children) == len(children_expect)
     assert set(children) == children_expect
 
 
 def test_in_region_like(structure_graph):
-    rm = RegionMeta.from_root_region(structure_graph)
+    rm = RegionMeta.from_dict(structure_graph)
     assert rm.in_region_like("root", 1)
     assert rm.in_region_like("child", 4)
     assert not rm.in_region_like("child 3", 2)
@@ -138,18 +168,19 @@ def test_in_region_like(structure_graph):
 
 
 def test_ancestors(structure_graph):
-    rm = RegionMeta.from_root_region(structure_graph)
+    rm = RegionMeta.from_dict(structure_graph)
     assert rm.ancestors([4, 5]) == {5, 4, 2, 1}
     assert rm.ancestors(4) == {4, 2, 1}
     assert rm.ancestors(4, include_background=True) == {4, 2, 1, 0}
 
 
 def test_descendants(structure_graph):
-    rm = RegionMeta.from_root_region(structure_graph)
+    rm = RegionMeta.from_dict(structure_graph)
     assert rm.descendants(5) == {5}
     assert rm.descendants(2) == {2, 4, 5}
     assert rm.descendants([2, 3]) == {2, 3, 4, 5}
     assert rm.descendants([1, 2]) == {1, 2, 3, 4, 5}
+
 
 # Write rm.prune_to_root(new_root) -> RegionMeta
 # Write ancestors_up_to(ancestor_id, leaves)

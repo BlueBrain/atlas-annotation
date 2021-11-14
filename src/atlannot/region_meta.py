@@ -264,20 +264,35 @@ class RegionMeta:
             self._parse_region_hierarchy(child)
 
     @classmethod
-    def from_root_region(cls, root_region):
-        """Construct and instance from the top-level region.
+    def from_dict(cls, region_hierarchy, warn_raw_response=True):
+        """Construct an instance from the region hierarchy.
 
         Parameters
         ----------
-        root_region : dict
-            The metadata of the top-level region.
+        region_hierarchy : dict
+            The dictionary of the region hierarchy. Should have the format
+            as usually provided by the AIBS.
+        warn_raw_response: bool
+            If True and a raw AIBS response (containing the "msg" key) is used,
+            then a warning will be logged.
 
         Returns
         -------
-        meta : RegionMeta
-            The initialized instance of this class
+        region_meta : RegionMeta
+            The initialized instance of this class.
         """
-        meta = cls()
-        meta._parse_region_hierarchy(root_region, parent_id=meta.background_id)
+        if "msg" in region_hierarchy:
+            if warn_raw_response:
+                logger.warning(
+                    "Seems like you're trying to use the raw AIBS response as "
+                    'input, I gotcha. Next time please use response["msg"][0].'
+                )
+            region_hierarchy = region_hierarchy["msg"][0]
 
-        return meta
+        self = cls()
+        self._parse_region_hierarchy(
+            region_hierarchy,
+            parent_id=self.background_id,
+        )
+
+        return self
