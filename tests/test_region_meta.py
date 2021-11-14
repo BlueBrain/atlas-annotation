@@ -39,7 +39,7 @@ def test_from_dict(structure_graph):
     assert rm.background_id == 0
     assert rm.atlas_id == {0: None, 1: -1, 2: -1, 3: -1, 4: -1, 5: -1}
     assert rm.ontology_id == {0: None, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1}
-    assert rm.name == {
+    assert rm.name_ == {
         0: "background",
         1: "root",
         2: "Child 1",
@@ -47,7 +47,7 @@ def test_from_dict(structure_graph):
         4: "Grandchild 1",
         5: "Grandchild 2",
     }
-    assert rm.acronym == {0: "bg", 1: "root", 2: "C1", 3: "C2", 4: "Gc1", 5: "Gc2"}
+    assert rm.acronym_ == {0: "bg", 1: "root", 2: "C1", 3: "C2", 4: "Gc1", 5: "Gc2"}
     assert rm.color_hex_triplet == {
         0: "000000",
         1: "FFFFFF",
@@ -248,9 +248,60 @@ def test_repr(structure_graph):
     assert str(rm.depth) in str(rm)
 
 
+def test_is_valid_id(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    for id_ in (0, 1, 2, 3, 4, 5):
+        assert rm.is_valid_id(id_)
+    for id_ in (6, 7, 8, 9, 10):
+        assert not rm.is_valid_id(id_)
+
+
+def test_name(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    assert rm.name(0) == "background"
+    assert rm.name(1) == "root"
+    assert rm.name(2) == "Child 1"
+    assert rm.name(3) == "Child 2"
+    assert rm.name(4) == "Grandchild 1"
+    assert rm.name(5) == "Grandchild 2"
+    assert rm.name(999) == ""
+
+
+def test_acronym(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    assert rm.acronym(0) == "bg"
+    assert rm.acronym(1) == "root"
+    assert rm.acronym(2) == "C1"
+    assert rm.acronym(3) == "C2"
+    assert rm.acronym(4) == "Gc1"
+    assert rm.acronym(5) == "Gc2"
+    assert rm.acronym(999) == ""
+
+
+def test_find_by_name(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    assert rm.find_by_name("background") == 0
+    assert rm.find_by_name("root") == 1
+    assert rm.find_by_name("Child 1") == 2
+    assert rm.find_by_name("Child 2") == 3
+    assert rm.find_by_name("Grandchild 1") == 4
+    assert rm.find_by_name("Grandchild 2") == 5
+    assert rm.find_by_name("Non-existing") is None
+    rm.name("asdf")
+
+
+def test_find_by_acronym(structure_graph):
+    rm = RegionMeta.from_dict(structure_graph)
+    assert rm.find_by_acronym("bg") == 0
+    assert rm.find_by_acronym("root") == 1
+    assert rm.find_by_acronym("C1") == 2
+    assert rm.find_by_acronym("C2") == 3
+    assert rm.find_by_acronym("Gc1") == 4
+    assert rm.find_by_acronym("Gc2") == 5
+    assert rm.find_by_acronym("Non-existing") is None
+
+
 # Write rm.prune_to_root(new_root) -> RegionMeta
 # Write ancestors_up_to(ancestor_id, leaves)
 #   = rm.prune_to_root(ancestor_id).ancestors(leaves)
-# Write properties for name, acronym, etc...
-# Write __str__ and __repr__
 # Add typing

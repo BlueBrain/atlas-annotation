@@ -145,7 +145,8 @@ def create_legend_handles(imgs, region_meta, color_map):
     handles = []
     for label in union_list:
         patch = patches.Patch(
-            color=(color_map[label] / 255), label=f"{label} - {region_meta.name[label]}"
+            color=(color_map[label] / 255),
+            label=f"{label} - {region_meta.name(label)}",
         )
         handles.append(patch)
 

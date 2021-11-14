@@ -28,7 +28,7 @@ class TestNotebook:
         # Create region meta
         region_meta = RegionMeta()
         for i in range(max_value):
-            region_meta.name[i] = f"name_{i}"
+            region_meta.name_[i] = f"name_{i}"
         # Create color map
         color_map = {i: np.array([0, 0, 0]) for i in range(max_value)}
         handles = create_legend_handles([data], region_meta, color_map)

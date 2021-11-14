@@ -41,8 +41,8 @@ class RegionMeta:
 
         self.atlas_id = {self.background_id: None}
         self.ontology_id = {self.background_id: None}
-        self.acronym = {self.background_id: "bg"}
-        self.name = {self.background_id: "background"}
+        self.acronym_ = {self.background_id: "bg"}
+        self.name_ = {self.background_id: "background"}
         self.color_hex_triplet = {self.background_id: background_color}
         self.graph_order = {self.background_id: None}
         self.st_level = {self.background_id: None}
@@ -86,6 +86,22 @@ class RegionMeta:
         for region_id, region_level in self.level.items():
             if region_level == level:
                 yield region_id
+
+    def is_valid_id(self, id_):
+        """Check whether the given region ID is part of the structure graph.
+
+        Parameters
+        ----------
+        id_ : int
+            The region ID in question.
+
+        Returns
+        -------
+        bool
+            Whether the given region ID is part of the structure graph
+        """
+        # The parent_id dictionary should have all region IDs as keys
+        return id_ in self.parent_id
 
     def is_leaf(self, region_id):
         """Check if the given region is a leaf region.
@@ -136,6 +152,81 @@ class RegionMeta:
             The region ID of a child region.
         """
         return tuple(self.children_ids[region_id])
+
+    def name(self, id_):
+        """Get the name of a region.
+
+        Parameters
+        ----------
+        id_
+            A region ID.
+
+        Returns
+        -------
+        str
+            The name of the given region.
+        """
+        if not self.is_valid_id(id_):
+            logger.warning(f"Unknown region ID: {id_!r}; no name available.")
+            return ""
+        else:
+            return self.name_[id_]
+
+    def acronym(self, id_):
+        """Get the acronym of a region.
+
+        Parameters
+        ----------
+        id_
+            A region ID.
+
+        Returns
+        -------
+        The acronym a the given region.
+        """
+        if not self.is_valid_id(id_):
+            logger.warning(f"Unknown region ID: {id_!r}; no acronym available.")
+            return ""
+        else:
+            return self.acronym_[id_]
+
+    def find_by_name(self, name):
+        """Find the region ID given its name.
+
+        Parameters
+        ----------
+        name : str
+            The name of a region ID
+
+        Returns
+        -------
+        int or None
+            The region ID if a region is found, otherwise None
+        """
+        for id_, region_name in self.name_.items():
+            if name == region_name:
+                return id_
+
+        return None
+
+    def find_by_acronym(self, acronym):
+        """Find the region ID given its acronym.
+
+        Parameters
+        ----------
+        acronym : str
+            The acronym of a region ID
+
+        Returns
+        -------
+        int or None
+            The region ID if a region is found, otherwise None
+        """
+        for id_, region_acronym in self.acronym_.items():
+            if acronym == region_acronym:
+                return id_
+
+        return None
 
     def ancestors(self, ids, include_background=False):
         """Find all ancestors of given regions.
@@ -230,8 +321,9 @@ class RegionMeta:
         int
             The number of regions in the structure graph
         """
-        # Remove the background from the count
-        return len(self.name) - 1
+        # parent_id should have all region IDs as keys. Subtract one to remove
+        # the background from the count
+        return len(self.parent_id) - 1
 
     def in_region_like(self, region_name_regex, region_id):
         """Check if region belongs to a region with a given name pattern.
@@ -252,12 +344,12 @@ class RegionMeta:
             Whether or not the region with the given ID is in a region with
             the given name part. All parent regions are also checked.
         """
-        if region_id not in self.name:
+        if not self.is_valid_id(region_id):
             logger.warning("Invalid region ID: %d", region_id)
             return False
 
         while region_id != self.background_id:
-            if re.search(region_name_regex, self.name[region_id]):
+            if re.search(region_name_regex, self.name(region_id)):
                 return True
             region_id = self.parent(region_id)
 
@@ -288,8 +380,8 @@ class RegionMeta:
 
         self.atlas_id[region_id] = region["atlas_id"]
         self.ontology_id[region_id] = region["ontology_id"]
-        self.acronym[region_id] = region["acronym"]
-        self.name[region_id] = region["name"]
+        self.acronym_[region_id] = region["acronym"]
+        self.name_[region_id] = region["name"]
         self.color_hex_triplet[region_id] = region["color_hex_triplet"]
         self.graph_order[region_id] = region["graph_order"]
         self.st_level[region_id] = region["st_level"]
@@ -357,8 +449,8 @@ class RegionMeta:
                 "id": id_,
                 "atlas_id": self.atlas_id[id_],
                 "ontology_id": self.ontology_id[id_],
-                "acronym": self.acronym[id_],
-                "name": self.name[id_],
+                "acronym": self.acronym_[id_],
+                "name": self.name_[id_],
                 "color_hex_triplet": self.color_hex_triplet[id_],
                 "graph_order": self.graph_order[id_],
                 "st_level": self.st_level[id_],
