@@ -254,12 +254,12 @@ def test_size(structure_graph):
     assert rm.size == 5
 
 
-def test_repr(structure_graph):
+def test_str_repr(structure_graph):
     rm = RegionMeta.from_dict(structure_graph)
-    assert str(rm) == repr(rm)
     assert "RegionMeta" in str(rm)
     assert str(rm.size) in str(rm)
     assert str(rm.depth) in str(rm)
+    assert repr(rm) == f"<{str(rm)}>"
 
 
 def test_is_valid_id(structure_graph):
@@ -357,9 +357,3 @@ def test_print_regions(structure_graph, capsys):
     """
     assert stdout == textwrap.dedent(expect_stdout)
     assert stderr == ""
-
-
-# Write rm.prune_to_root(new_root) -> RegionMeta
-# Write ancestors_up_to(ancestor_id, leaves)
-#   = rm.prune_to_root(ancestor_id).ancestors(leaves)
-# Add typing

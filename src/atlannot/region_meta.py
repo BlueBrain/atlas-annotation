@@ -54,6 +54,10 @@ class RegionMeta:
 
     def __repr__(self):
         """Create the repr of the instance."""
+        return f"<{str(self)}>"
+
+    def __str__(self):
+        """Create a string representation of the instance."""
         return f"{self.__class__.__qualname__}, {self.size} regions, depth {self.depth}"
 
     @property
