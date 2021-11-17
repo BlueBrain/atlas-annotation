@@ -19,7 +19,7 @@ with open("README.md", encoding="utf-8") as fh:
 
 install_requires = [
     "antspyx==0.2.4",
-    "atldld==0.2.2",
+    "atldld>=0.2.2",
     "matplotlib",
     "numpy",
     "pynrrd",
