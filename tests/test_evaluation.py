@@ -13,10 +13,57 @@
 # limitations under the License.
 import numpy as np
 
-from atlannot.evaluation import compute_jaggedness
+from atlannot.evaluation import (
+    compute_entropies,
+    compute_iou,
+    compute_jaggedness,
+    compute_region_entropy,
+)
 
 
 def test_compute_jaggedness():
-    volume = np.arange(10) * np.ones((10, 10, 10))
+    labels = np.arange(10)
+    volume = labels * np.ones((10, 10, 10))
     results = compute_jaggedness(volume)
     assert isinstance(results, dict)
+    for label in labels:
+        if label != 0:
+            assert label in list(results.keys())
+
+    results = compute_jaggedness(volume, region_ids=[1, 2, 3])
+    assert isinstance(results, dict)
+    for label in [1, 2, 3]:
+        assert label in list(results.keys())
+
+
+def test_compute_iou():
+    labels = np.arange(10)
+    volume = labels * np.ones((10, 10, 10))
+    results = compute_iou(volume, volume)
+    assert isinstance(results, dict)
+    for label in labels:
+        if label != 0:
+            assert label in list(results.keys())
+
+
+def test_compute_region_entropy():
+    volume = np.ones((10, 10, 10))
+    entropy = compute_region_entropy(volume, volume, label_value=1)
+    assert isinstance(entropy, float)
+    assert entropy == 0
+
+    nissl = np.random.random((10, 10, 10))
+    entropy = compute_region_entropy(nissl, volume, label_value=1)
+    assert isinstance(entropy, float)
+    assert entropy > 0
+
+
+def test_compute_entropies():
+    labels = np.arange(10)
+    atlas = labels * np.ones((10, 10, 10))
+    nissl = np.random.random((10, 10, 10))
+    brain_entropy, conditional_entropy = compute_entropies(nissl, atlas)
+    assert isinstance(brain_entropy, float)
+    assert brain_entropy > 0
+    assert isinstance(conditional_entropy, float)
+    assert conditional_entropy > 0

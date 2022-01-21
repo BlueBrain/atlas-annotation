@@ -86,6 +86,7 @@ def compute_iou(vol_true, vol_pred, region_ids=None):
         labels = np.unique(vol_true)
         for label in labels:
             results[label] = iou_score(vol_true, vol_pred, k=label)[0]
+        return results
 
     for region_id in region_ids:
         results[region_id] = iou_score(vol_true, vol_pred, k=region_id)[0]
