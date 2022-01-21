@@ -199,7 +199,7 @@ def evaluate(atlas, nissl, reference):
     brain_entropy, conditional_entropy = compute_entropies(nissl, atlas)
     results["global"] = {
         "brain_entropy": brain_entropy,
-        "cnoditional_entropy": conditional_entropy,
+        "conditional_entropy": conditional_entropy,
     }
 
     return results
