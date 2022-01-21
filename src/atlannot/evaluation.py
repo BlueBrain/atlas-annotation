@@ -14,8 +14,10 @@
 """Evaluation."""
 import numpy as np
 from atlalign.metrics import iou_score
-from atlannot.merge.common import atlas_remap
 from atlas_alignment_meter import core
+from scipy.stats import entropy
+
+from atlannot.merge.common import atlas_remap
 
 REGIONS_TO_EVALUATE = {
     "Somatosensory Cortex": [453],
@@ -49,7 +51,10 @@ def compute_jaggedness(volume, region_ids=None, axis=0):
     """
     metrics = core.compute(volume, coronal_axis_index=axis, regions=region_ids)
     if region_ids is None:
-        return {region_id: values["mean"] for region_id, values in metrics["perRegion"].items()}
+        return {
+            region_id: values["mean"]
+            for region_id, values in metrics["perRegion"].items()
+        }
 
     results = {}
     for region_id in region_ids:
@@ -138,14 +143,14 @@ def compute_entropies(nissl, atlas):
     n_pixels = (atlas != 0).sum()
     label_values, count_values = np.unique(atlas, return_counts=True)
     all_region_entropy = []
-    for label, count in tqdm(zip(label_values, count_values)):
-        all_region_entropy.append(region_entropy(nissl, atlas, label) * count)
+    for label, count in zip(label_values, count_values):
+        all_region_entropy.append(compute_region_entropy(nissl, atlas, label) * count)
 
     conditional_entropy = np.sum(all_region_entropy) / n_pixels
     return brain_entropy, conditional_entropy
 
 
-def evaluate(atlas, nissl, reference):
+def evaluate(atlas, nissl, reference, region_meta):
     """Evaluate the atlas.
 
     Parameters
@@ -156,6 +161,8 @@ def evaluate(atlas, nissl, reference):
         Corresponding Nissl Volume.
     reference: np.ndarray
         Reference atlas.
+    region_meta: atlannot.atlas.RegionMeta
+        Region Meta containing all the information concerning the labels.
 
     Returns
     -------
@@ -164,7 +171,7 @@ def evaluate(atlas, nissl, reference):
     """
     results = {}
     for name, region_ids in REGIONS_TO_EVALUATE.items():
-        desc = [d for d in descendants(region_meta, region_ids)]
+        desc = list(region_meta.descendants(region_ids))
 
         # Put some metadata about the region
         results[name] = {
