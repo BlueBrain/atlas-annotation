@@ -20,6 +20,7 @@ Submodules
    :maxdepth: 4
 
    atlannot.region_meta
+   atlannot.evaluation
    atlannot.utils
 
 Module contents
