@@ -22,6 +22,8 @@ install_requires = [
     "atlalign>=0.6.0",
     "atlas-alignment-meter@git+https://github.com/BlueBrain/atlas-alignment-meter.git",
     "atldld>=0.2.2",
+    # lpips_tf is needed because of atlalign
+    "lpips_tf@git+http://github.com/alexlee-gk/lpips-tensorflow.git#egg=lpips_tf",
     "matplotlib",
     "numpy",
     "pynrrd",
@@ -44,8 +46,6 @@ extras_require = {
         "dvc[ssh]>=2",
     ],
     "docs": [
-        # lpips_tf is needed because of atlalign
-        "lpips_tf@git+http://github.com/alexlee-gk/lpips-tensorflow.git#egg=lpips_tf",
         "sphinx>=1.3",
         "sphinx-bluebrain-theme",
     ],
