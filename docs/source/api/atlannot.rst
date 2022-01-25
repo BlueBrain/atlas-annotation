@@ -19,8 +19,8 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   atlannot.region_meta
    atlannot.evaluation
+   atlannot.region_meta
    atlannot.utils
 
 Module contents
