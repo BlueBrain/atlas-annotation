@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Various utilities. (Refactoring in the near future)."""
-import json
 import math
 import os
 import pathlib
@@ -26,31 +25,10 @@ import numpy as np
 from scipy import ndimage
 from skimage.metrics import structural_similarity as ssim
 
-from atlannot.atlas import RegionMeta, get_misalignment
+from atlannot.atlas import get_misalignment
 
 
 # LOADING PART
-def load_region_meta(filename="data/annotation_atlas/brain_regions.json"):
-    """Load region meta.
-
-    Parameters
-    ----------
-    filename : pathlib.Path or str
-        Filename of the file containing brain regions hierarchy,
-        often called `brain_regions.json`
-
-    Returns
-    -------
-    region_meta : atlannot.atlas.RegionMeta
-        Object holding the hierarchical region metadata
-    """
-    with open(filename) as f:
-        brain_regions = json.load(f)
-    region_meta = RegionMeta.from_root_region(brain_regions["msg"][0])
-
-    return region_meta
-
-
 def load_nrrd(path, norm=True):
     """Load nrrd file.
 

@@ -1,0 +1,67 @@
+{
+  "id": 1,
+  "atlas_id": -1,
+  "ontology_id": 1,
+  "acronym": "root",
+  "name": "root",
+  "color_hex_triplet": "FFFFFF",
+  "graph_order": 0,
+  "st_level": 0,
+  "hemisphere_id": 3,
+  "parent_structure_id": null,
+  "children": [
+    {
+      "id": 2,
+      "atlas_id": -1,
+      "ontology_id": 1,
+      "acronym": "C1",
+      "name": "Child 1",
+      "color_hex_triplet": "FFF000",
+      "graph_order": 0,
+      "st_level": 0,
+      "hemisphere_id": 3,
+      "parent_structure_id": 1,
+      "children": [
+        {
+          "id": 4,
+          "atlas_id": -1,
+          "ontology_id": 1,
+          "acronym": "Gc1",
+          "name": "Grandchild 1",
+          "color_hex_triplet": "0F0F0F",
+          "graph_order": 0,
+          "st_level": 0,
+          "hemisphere_id": 3,
+          "parent_structure_id": 2,
+          "children": []
+        },
+        {
+          "id": 5,
+          "atlas_id": -1,
+          "ontology_id": 1,
+          "acronym": "Gc2",
+          "name": "Grandchild 2",
+          "color_hex_triplet": "F0F0F0",
+          "graph_order": 0,
+          "st_level": 0,
+          "hemisphere_id": 3,
+          "parent_structure_id": 2,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "atlas_id": -1,
+      "ontology_id": 1,
+      "acronym": "C2",
+      "name": "Child 2",
+      "color_hex_triplet": "000FFF",
+      "graph_order": 0,
+      "st_level": 0,
+      "hemisphere_id": 3,
+      "parent_structure_id": 1,
+      "children": []
+    }
+  ]
+}

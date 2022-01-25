@@ -18,8 +18,7 @@ import numpy as np
 from atldld.base import DisplacementField
 
 from atlannot.utils import load_nrrd
-
-from .version import __version__  # noqa: F401
+from atlannot.version import __version__  # noqa: F401
 
 
 def dfs_to_deltas(dfs):

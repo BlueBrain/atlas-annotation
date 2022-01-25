@@ -22,7 +22,7 @@ import utils
 from atlannot import load_volume
 from atlannot.ants import register, stack_2d_transforms, transform
 from atlannot.atlas import unfurl_regions
-from atlannot.utils import load_region_meta
+from atlannot.region_meta import RegionMeta
 
 # Parameters
 description = """\
@@ -81,7 +81,7 @@ def main():
     v2_atlas = load_volume(v2_atlas_path, normalize=False)
     v3_atlas = load_volume(v3_atlas_path, normalize=False)
     nissl_volume = load_volume(nissl_path)
-    region_meta = load_region_meta(brain_region_path)
+    region_meta = RegionMeta.load_json(brain_region_path)
 
     # Preprocess data
     logger.info("Preprocessing data")
@@ -132,7 +132,7 @@ def preprocess_atlases(*atlases, region_meta=None, hierarchy_level=10):
     ----------
     atlases : Iterable of np.ndarray
         All atlases to preprocess.
-    region_meta : atlannot.RegionMeta
+    region_meta : atlannot.region_meta.RegionMeta
         Object containing brain regions hierarchy.
     hierarchy_level: int
         Hierarchy level to keep for the registration

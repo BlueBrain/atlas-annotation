@@ -126,7 +126,7 @@ def create_legend_handles(imgs, region_meta, color_map):
     ----------
     imgs: list of np.ndarray
         List of all the images containing the labels to legend.
-    region_meta: atlannot.atlas.RegionMeta
+    region_meta: atlannot.region_meta.RegionMeta
         Region Meta containing all the information concerning the labels.
     color_map: dict
         Conversion between region labels and the color in the image.
@@ -145,7 +145,8 @@ def create_legend_handles(imgs, region_meta, color_map):
     handles = []
     for label in union_list:
         patch = patches.Patch(
-            color=(color_map[label] / 255), label=f"{label} - {region_meta.name[label]}"
+            color=(color_map[label] / 255),
+            label=f"{label} - {region_meta.name(label)}",
         )
         handles.append(patch)
 

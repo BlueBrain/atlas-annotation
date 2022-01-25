@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from atlannot.atlas.region_meta import RegionMeta
+from atlannot.region_meta import RegionMeta
 
 
 def replace(array: np.ndarray, old_value: int, new_value: int) -> None:
