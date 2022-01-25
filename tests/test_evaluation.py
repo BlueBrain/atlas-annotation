@@ -15,7 +15,6 @@ import json
 
 import numpy as np
 
-from atlannot.region_meta import RegionMeta
 from atlannot.evaluation import (
     compute_entropies,
     compute_iou,
@@ -23,6 +22,7 @@ from atlannot.evaluation import (
     compute_region_entropy,
     evaluate,
 )
+from atlannot.region_meta import RegionMeta
 
 
 def test_compute_jaggedness():
