@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         python-version: [3.7, 3.8, 3.9]
           include:
             - python-version: 3.7
@@ -39,12 +39,13 @@ jobs:
         with: {"fetch-depth": 0}  # fetch all history with version tags
       - name: Set up python
         uses: actions/setup-python@v2
-        with: {"python-version": "3.7"}
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Set up pip cache
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: unit-${{ runner.os }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-interactive.txt') }}
+          key: unit-${{ matrix.os }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-interactive.txt') }}
       - name: Set up the environment
         run: |
           # apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
