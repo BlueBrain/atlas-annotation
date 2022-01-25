@@ -18,7 +18,7 @@ with open("README.md", encoding="utf-8") as fh:
     long_description = fh.read()
 
 install_requires = [
-    "antspyx>=0.2.9",
+    "antspyx>=0.2.7",
     "atldld>=0.2.2",
     "matplotlib",
     "numpy",
