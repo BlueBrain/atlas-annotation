@@ -20,12 +20,6 @@ them to CCFv3.
 
 ## Installation
 ### Python Version and Environment
-Note that due to some of our dependencies we're currently limited to python
-version `3.7`. Please make sure you set up a virtual environment with that
-version before trying to install this library. If you're unsure how to do that
-please have a look at [conda](https://docs.conda.io) or
-[pyenv](https://github.com/pyenv/pyenv).
-
 If you are part of the Blue Brain Project and are working on the BB5 you can
 find the correct python version in the archive modules between `archive/2020-02`
 and `archive/2020-12` (inclusive). Here's an example of a set of commands
