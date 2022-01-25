@@ -11,18 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unittest import mock
-
 import numpy as np
 
-from atlannot.region_meta import RegionMeta
 from atlannot.evaluation import (
-    REGIONS_TO_EVALUATE,
     compute_entropies,
     compute_iou,
     compute_jaggedness,
     compute_region_entropy,
-    evaluate,
 )
 
 
@@ -74,26 +69,17 @@ def test_compute_entropies():
     assert conditional_entropy > 0
 
 
-def test_evaluate():
-    labels = np.arange(10)
-    volume = labels * np.ones((10, 10, 10))
-    nissl = np.random.random((10, 10, 10))
-
-    # Create fake Region Meta
-    with mock.patch.object(RegionMeta, "descendants") as descendants_mocked:
-        descendants_mocked.return_value = [2, 3]
-        region_meta = RegionMeta()
-        for _, id_list in REGIONS_TO_EVALUATE.items():
-            for id_ in id_list:
-                region_meta.level[id_] = 2
-
-        results = evaluate(volume, nissl, volume, region_meta)
-        print(results)
-        assert False
-
-
-
-
-
-    print(results)
-    assert False
+# def test_evaluate():
+#     labels = np.arange(10)
+#     volume = labels * np.ones((10, 10, 10))
+#     nissl = np.random.random((10, 10, 10))
+#
+#     # Create fake Region Meta
+#     with mock.patch.object(RegionMeta, "descendants") as descendants_mocked:
+#         descendants_mocked.return_value = [2, 3]
+#         region_meta = RegionMeta()
+#         for _, id_list in REGIONS_TO_EVALUATE.items():
+#             for id_ in id_list:
+#                 region_meta.level[id_] = 2
+#
+#         results = evaluate(volume, nissl, volume, region_meta)
