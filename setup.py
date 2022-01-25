@@ -18,7 +18,7 @@ with open("README.md", encoding="utf-8") as fh:
     long_description = fh.read()
 
 install_requires = [
-    "antspyx==0.3.1",
+    "antspyx>=0.2.7",
     "atlalign>=0.6.1",
     "atlas-alignment-meter@git+https://github.com/BlueBrain/atlas-alignment-meter.git",
     "atldld>=0.2.2",
