@@ -11,13 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
+
 import numpy as np
 
+from atlannot.region_meta import RegionMeta
 from atlannot.evaluation import (
     compute_entropies,
     compute_iou,
     compute_jaggedness,
     compute_region_entropy,
+    evaluate,
 )
 
 
@@ -69,17 +73,24 @@ def test_compute_entropies():
     assert conditional_entropy > 0
 
 
-# def test_evaluate():
-#     labels = np.arange(10)
-#     volume = labels * np.ones((10, 10, 10))
-#     nissl = np.random.random((10, 10, 10))
-#
-#     # Create fake Region Meta
-#     with mock.patch.object(RegionMeta, "descendants") as descendants_mocked:
-#         descendants_mocked.return_value = [2, 3]
-#         region_meta = RegionMeta()
-#         for _, id_list in REGIONS_TO_EVALUATE.items():
-#             for id_ in id_list:
-#                 region_meta.level[id_] = 2
-#
-#         results = evaluate(volume, nissl, volume, region_meta)
+def test_evaluate():
+    labels = np.arange(10)
+    volume = labels * np.ones((10, 10, 10))
+    nissl = np.random.random((10, 10, 10))
+
+    # Create fake Region Meta
+    with open("tests/data/structure_graph_mini.json") as fh:
+        structure_graph = json.load(fh)
+        rm = RegionMeta.from_dict(structure_graph)
+    fake_regions_to_evaluate = {
+        "Child 1": [2],
+        "Child 2": [3],
+    }
+    results = evaluate(volume, nissl, volume, rm, fake_regions_to_evaluate)
+    assert isinstance(results, dict)
+    for name in fake_regions_to_evaluate:
+        assert name in results.keys()
+        assert "jaggedness" in results[name].keys()
+        assert "iou" in results[name].keys()
+    assert "global" in results.keys()
+    assert ["brain_entropy", "conditional_entropy"] == list(results["global"].keys())

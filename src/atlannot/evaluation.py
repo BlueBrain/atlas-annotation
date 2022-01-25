@@ -151,7 +151,13 @@ def compute_entropies(nissl, atlas):
     return brain_entropy, conditional_entropy
 
 
-def evaluate(atlas, nissl, reference, region_meta):
+def evaluate(
+    atlas,
+    nissl,
+    reference,
+    region_meta,
+    regions_to_evaluate=REGIONS_TO_EVALUATE,
+):
     """Evaluate the atlas.
 
     Parameters
@@ -164,6 +170,8 @@ def evaluate(atlas, nissl, reference, region_meta):
         Reference atlas.
     region_meta: atlannot.atlas.RegionMeta
         Region Meta containing all the information concerning the labels.
+    regions_to_evaluate: dict[str, list[int]]
+        Regions to evaluate.
 
     Returns
     -------
@@ -171,7 +179,7 @@ def evaluate(atlas, nissl, reference, region_meta):
         Dictionary containing the results of the evaluation.
     """
     results = {}
-    for name, region_ids in REGIONS_TO_EVALUATE.items():
+    for name, region_ids in regions_to_evaluate.items():
         desc = list(region_meta.descendants(region_ids))
 
         # Put some metadata about the region
@@ -186,7 +194,7 @@ def evaluate(atlas, nissl, reference, region_meta):
         values_to = np.array([1 if value in desc else 0 for value in values_from])
         mask = atlas_remap(atlas, values_from, values_to)
         global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
-        per_region_jaggedness = compute_jaggedness(mask, region_ids=desc)
+        per_region_jaggedness = compute_jaggedness(atlas, region_ids=desc)
 
         results[name]["jaggedness"] = {
             "global": global_jaggedness,
