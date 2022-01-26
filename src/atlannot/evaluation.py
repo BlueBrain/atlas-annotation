@@ -17,8 +17,6 @@ from atlalign.metrics import iou_score
 from atlas_alignment_meter import core
 from scipy import stats
 
-from atlannot.merge.common import atlas_remap
-
 REGIONS_TO_EVALUATE = {
     "Somatosensory Cortex": [453],
     "Visual Cortex": [669],
@@ -182,8 +180,6 @@ def evaluate(
         }
 
         # Jaggedness
-        values_from = np.unique(atlas)
-        values_to = np.array([1 if value in desc else 0 for value in values_from])
         mask = np.isin(atlas, desc)
         global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
         per_region_jaggedness = compute_jaggedness(atlas, region_ids=desc)
@@ -194,7 +190,7 @@ def evaluate(
         }
 
         # Intersection Over Union
-        mask_ref = atlas_remap(reference, values_from, values_to)
+        mask_ref = np.isin(reference, desc)
         global_iou = compute_iou(mask_ref, mask, region_ids=[1])[1]
         per_region_iou = compute_iou(reference, atlas, region_ids=desc)
 
