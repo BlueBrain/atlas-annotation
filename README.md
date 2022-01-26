@@ -20,10 +20,16 @@ them to CCFv3.
 
 ## Installation
 ### Python Version and Environment
+The currently python versions supported by `atlannot` package 
+are `3.7`, `3.8`, and `3.9`.
+
 If you are part of the Blue Brain Project and are working on the BB5 you can
-find the correct python version in the archive modules between `archive/2020-02`
-and `archive/2020-12` (inclusive). Here's an example of a set of commands
-that will set up your environment on the BB5:
+find the correct python version in the archive modules:
+- `python3.7`: `archive/2020-02` - `archive/2020-12`
+- `python3.8`: `archive/2021-01` - `archive/2021-12`
+- `python3.9`: `archive/2022-01` - `unstable`.
+  Here's an example of a set of commands that will set up your environment on the BB5:
+
 ```shell
 module purge
 module load archive/2020-12
