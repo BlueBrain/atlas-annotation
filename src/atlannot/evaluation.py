@@ -51,10 +51,7 @@ def compute_jaggedness(volume, region_ids=None, axis=0):
     """
     metrics = core.compute(volume, coronal_axis_index=axis, regions=region_ids)
     if region_ids is None:
-        return {
-            region_id: values["mean"]
-            for region_id, values in metrics["perRegion"].items()
-        }
+        region_ids = sorted(metrics["perRegion"].keys())
 
     results = {}
     for region_id in region_ids:
@@ -83,10 +80,7 @@ def compute_iou(vol_true, vol_pred, region_ids=None):
     """
     results = {}
     if region_ids is None:
-        labels = np.unique(vol_true)
-        for label in labels:
-            results[label] = iou_score(vol_true, vol_pred, k=label)[0]
-        return results
+        region_ids = np.unique(vol_true)
 
     for region_id in region_ids:
         results[region_id] = iou_score(vol_true, vol_pred, k=region_id)[0]
