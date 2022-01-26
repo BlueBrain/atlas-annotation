@@ -130,6 +130,61 @@ def compute_conditional_entropy(nissl, atlas):
     return conditional_entropy
 
 
+def evaluate_region(
+    region_ids,
+    atlas,
+    reference,
+    region_meta,
+):
+    """Evaluate the atlas.
+
+    Parameters
+    ----------
+    region_ids: list[int]
+        Region IDs to evaluate.
+    atlas: np.ndarray
+        Atlas to evaluate.
+    reference: np.ndarray
+        Reference atlas.
+    region_meta: atlannot.atlas.RegionMeta
+        Region Meta containing all the information concerning the labels.
+
+    Returns
+    -------
+    results: dict[str, Any]
+        Dictionary containing the results of the region evaluation.
+    """
+    desc = list(region_meta.descendants(region_ids))
+
+    # Put some metadata about the region
+    results = {
+        "region_ids": region_ids,
+        "level": [region_meta.level[id_] for id_ in region_ids],
+        "descendants": desc,
+    }
+
+    # Jaggedness
+    mask = np.isin(atlas, desc)
+    global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
+    per_region_jaggedness = compute_jaggedness(atlas, region_ids=desc)
+
+    results["jaggedness"] = {
+        "global": global_jaggedness,
+        "per_region": per_region_jaggedness,
+    }
+
+    # Intersection Over Union
+    mask_ref = np.isin(reference, desc)
+    global_iou = compute_iou(mask_ref, mask, region_ids=[1])[1]
+    per_region_iou = compute_iou(reference, atlas, region_ids=desc)
+
+    results["iou"] = {
+        "global": global_iou,
+        "per_region": per_region_iou,
+    }
+    return results
+
+
 def evaluate(
     atlas,
     nissl,
@@ -170,34 +225,7 @@ def evaluate(
         regions_to_evaluate = REGIONS_TO_EVALUATE
 
     for name, region_ids in regions_to_evaluate.items():
-        desc = list(region_meta.descendants(region_ids))
-
-        # Put some metadata about the region
-        results[name] = {
-            "region_ids": region_ids,
-            "level": [region_meta.level[id_] for id_ in region_ids],
-            "descendants": desc,
-        }
-
-        # Jaggedness
-        mask = np.isin(atlas, desc)
-        global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
-        per_region_jaggedness = compute_jaggedness(atlas, region_ids=desc)
-
-        results[name]["jaggedness"] = {
-            "global": global_jaggedness,
-            "per_region": per_region_jaggedness,
-        }
-
-        # Intersection Over Union
-        mask_ref = np.isin(reference, desc)
-        global_iou = compute_iou(mask_ref, mask, region_ids=[1])[1]
-        per_region_iou = compute_iou(reference, atlas, region_ids=desc)
-
-        results[name]["iou"] = {
-            "global": global_iou,
-            "per_region": per_region_iou,
-        }
+        results[name] = evaluate_region(region_ids, atlas, reference, region_meta)
 
     # Entropies
     brain_entropy = dist_entropy(nissl[atlas != 0])

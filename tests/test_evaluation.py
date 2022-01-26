@@ -19,6 +19,7 @@ from atlannot.evaluation import (
     compute_jaggedness,
     dist_entropy,
     evaluate,
+    evaluate_region,
 )
 from atlannot.region_meta import RegionMeta
 
@@ -67,6 +68,16 @@ def test_compute_conditional_entropy():
     conditional_entropy = compute_conditional_entropy(nissl, atlas)
     assert isinstance(conditional_entropy, float)
     assert conditional_entropy > 0
+
+
+def test_evaluate_region():
+    labels = np.arange(10)
+    volume = labels * np.ones((10, 10, 10))
+    rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
+    results = evaluate_region([2, 3], volume, volume, rm)
+    assert isinstance(results, dict)
+    assert "jaggedness" in results.keys()
+    assert "iou" in results.keys()
 
 
 def test_evaluate():
