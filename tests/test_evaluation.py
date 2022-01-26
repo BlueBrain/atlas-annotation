@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
-
 import numpy as np
 
 from atlannot.evaluation import (
@@ -79,9 +77,7 @@ def test_evaluate():
     nissl = np.random.random((10, 10, 10))
 
     # Create fake Region Meta
-    with open("tests/data/structure_graph_mini.json") as fh:
-        structure_graph = json.load(fh)
-        rm = RegionMeta.from_dict(structure_graph)
+    rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
     fake_regions_to_evaluate = {
         "Child 1": [2],
         "Child 2": [3],
