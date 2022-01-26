@@ -153,7 +153,7 @@ def evaluate_region(
     atlas: np.ndarray,
     reference: np.ndarray,
     region_meta: RegionMeta,
-) -> dict[str, list[int] | dict[str, float | list[float]]]:
+) -> dict[str, Any]:
     """Evaluate the atlas.
 
     Parameters
@@ -169,7 +169,7 @@ def evaluate_region(
 
     Returns
     -------
-    results: dict[str, list[int] | dict[str, float | list[float]]]
+    results: dict[str, Any]
         Dictionary containing the results of the region evaluation.
     """
     desc = list(region_meta.descendants(region_ids))
