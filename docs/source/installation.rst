@@ -3,8 +3,7 @@ Installation
 
 Python Version and Environment
 ------------------------------
-The currently supported python versions by ``atlannot`` package
-are ``3.7``, ``3.8``, and ``3.9``.
+The currently supported python versions are ``3.7``, ``3.8``, and ``3.9``.
 
 If you are part of the Blue Brain Project and are working on the BB5 you can
 find the correct python version in the archive modules:
