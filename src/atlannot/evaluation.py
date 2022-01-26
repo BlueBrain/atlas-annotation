@@ -12,10 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Evaluation."""
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 from atlalign.metrics import iou_score
 from atlas_alignment_meter import core
 from scipy import stats
+
+from atlannot.region_meta import RegionMeta
 
 REGIONS_TO_EVALUATE = {
     "Somatosensory Cortex": [453],
@@ -28,17 +34,19 @@ REGIONS_TO_EVALUATE = {
 }
 
 
-def compute_jaggedness(volume, region_ids=None, axis=0):
+def compute_jaggedness(
+    volume: np.ndarray, region_ids: list[int] | None = None, axis: int = 0
+) -> dict[int, float]:
     """Compute the jaggedness of given region IDs for the specified volume.
 
     Parameters
     ----------
-    volume: np.ndarray
+    volume
         Input volume.
-    region_ids: list[int] | None
+    region_ids
         List of region IDs to compute the jaggedness. If None, the jaggedness
         is computed for all the region IDs present in the volume.
-    axis: int
+    axis
         Axis along which to compute the jaggedness.
 
     Returns
@@ -57,16 +65,20 @@ def compute_jaggedness(volume, region_ids=None, axis=0):
     return results
 
 
-def compute_iou(vol_true, vol_pred, region_ids=None):
+def compute_iou(
+    vol_true: np.ndarray,
+    vol_pred: np.ndarray,
+    region_ids: list[int] | None = None,
+) -> dict[int, float]:
     """Compute the intersection over union of given region IDs.
 
     Parameters
     ----------
-    vol_true: np.ndarray
+    vol_true
         Input volume considered as ground truth.
-    vol_pred: np.ndarray
+    vol_pred
         Input volume considered as prediction.
-    region_ids: list[int] | None
+    region_ids
         List of region IDs to compute the intersection over union.
         If None, the IoU is computed for all the region IDs present in the volume.
 
@@ -86,14 +98,17 @@ def compute_iou(vol_true, vol_pred, region_ids=None):
     return results
 
 
-def dist_entropy(data, bins=100):
+def dist_entropy(
+    data: np.ndarray,
+    bins: int = 100,
+) -> float:
     """Compute the entropy of the value distribution of data.
 
     Parameters
     ----------
-    data: np.ndarray
+    data
         Data for which to compute the entropy.
-    bins: int
+    bins
         Number of bins used to compute the histogram of the densities.
 
     Returns
@@ -105,14 +120,17 @@ def dist_entropy(data, bins=100):
     return stats.entropy(hist)
 
 
-def compute_conditional_entropy(nissl, atlas):
+def compute_conditional_entropy(
+    nissl: np.ndarray,
+    atlas: np.ndarray,
+) -> float:
     """Compute entropies of Nissl densities.
 
     Parameters
     ----------
-    nissl: np.ndarray
+    nissl
         Nissl volume.
-    atlas: np.ndarray
+    atlas
         Annotation atlas.
 
     Returns
@@ -131,27 +149,27 @@ def compute_conditional_entropy(nissl, atlas):
 
 
 def evaluate_region(
-    region_ids,
-    atlas,
-    reference,
-    region_meta,
-):
+    region_ids: list[int],
+    atlas: np.ndarray,
+    reference: np.ndarray,
+    region_meta: RegionMeta,
+) -> dict[str, list[int] | dict[str, float | list[float]]]:
     """Evaluate the atlas.
 
     Parameters
     ----------
-    region_ids: list[int]
+    region_ids
         Region IDs to evaluate.
-    atlas: np.ndarray
+    atlas
         Atlas to evaluate.
-    reference: np.ndarray
+    reference
         Reference atlas.
-    region_meta: atlannot.atlas.RegionMeta
+    region_meta
         Region Meta containing all the information concerning the labels.
 
     Returns
     -------
-    results: dict[str, Any]
+    results: dict[str, list[int] | dict[str, float | list[float]]]
         Dictionary containing the results of the region evaluation.
     """
     desc = list(region_meta.descendants(region_ids))
@@ -186,25 +204,25 @@ def evaluate_region(
 
 
 def evaluate(
-    atlas,
-    nissl,
-    reference,
-    region_meta,
-    regions_to_evaluate=None,
-):
+    atlas: np.ndarray,
+    nissl: np.ndarray,
+    reference: np.ndarray,
+    region_meta: RegionMeta,
+    regions_to_evaluate: dict[str, list[int]] | None = None,
+) -> dict[str, Any]:
     """Evaluate the atlas.
 
     Parameters
     ----------
-    atlas: np.ndarray
+    atlas
         Atlas to evaluate.
-    nissl: np.ndarray
+    nissl
         Corresponding Nissl Volume.
-    reference: np.ndarray
+    reference
         Reference atlas.
-    region_meta: atlannot.atlas.RegionMeta
+    region_meta
         Region Meta containing all the information concerning the labels.
-    regions_to_evaluate: dict[str, list[int]] | None
+    regions_to_evaluate
         Regions to evaluate. If None, regions to evaluation considered are
         REGIONS_TO_EVALUATE = {
         "Somatosensory Cortex": [453],
