@@ -80,7 +80,7 @@ setup(
     ],
     package_dir={"": "src"},
     packages=find_packages("src"),
-    python_requires=">=3.7.0",
+    python_requires=">=3.7",
     install_requires=install_requires,
     extras_require=extras_require,
 )
