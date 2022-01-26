@@ -14,10 +14,10 @@
 import numpy as np
 
 from atlannot.evaluation import (
-    compute_entropies,
+    compute_conditional_entropy,
     compute_iou,
     compute_jaggedness,
-    compute_region_entropy,
+    dist_entropy,
     evaluate,
 )
 from atlannot.region_meta import RegionMeta
@@ -50,23 +50,21 @@ def test_compute_iou():
 
 def test_compute_region_entropy():
     volume = np.ones((10, 10, 10))
-    entropy = compute_region_entropy(volume, volume, label_value=1)
+    entropy = dist_entropy(volume)
     assert isinstance(entropy, float)
     assert entropy == 0
 
     nissl = np.random.random((10, 10, 10))
-    entropy = compute_region_entropy(nissl, volume, label_value=1)
+    entropy = dist_entropy(nissl[volume == 1])
     assert isinstance(entropy, float)
     assert entropy > 0
 
 
-def test_compute_entropies():
+def test_compute_conditional_entropy():
     labels = np.arange(10)
     atlas = labels * np.ones((10, 10, 10))
     nissl = np.random.random((10, 10, 10))
-    brain_entropy, conditional_entropy = compute_entropies(nissl, atlas)
-    assert isinstance(brain_entropy, float)
-    assert brain_entropy > 0
+    conditional_entropy = compute_conditional_entropy(nissl, atlas)
     assert isinstance(conditional_entropy, float)
     assert conditional_entropy > 0
 

@@ -15,7 +15,7 @@
 import numpy as np
 from atlalign.metrics import iou_score
 from atlas_alignment_meter import core
-from scipy.stats import entropy
+from scipy import stats
 
 from atlannot.merge.common import atlas_remap
 
@@ -88,31 +88,26 @@ def compute_iou(vol_true, vol_pred, region_ids=None):
     return results
 
 
-def compute_region_entropy(nissl, atlas, label_value, bins=100):
-    """Compute the entropy of densities of Nissl for a given label value in the atlas.
+def dist_entropy(data, bins=100):
+    """Compute the entropy of the value distribution of data.
 
     Parameters
     ----------
-    nissl: np.ndarray
-        Nissl volume.
-    atlas: np.ndarray
-        Annotation atlas.
-    label_value: int
-        Label Value to consider.
+    data: np.ndarray
+        Data for which to compute the entropy.
     bins: int
         Number of bins used to compute the histogram of the densities.
 
     Returns
     -------
-    region_entropy: float
+    float
         Entropy of the densities of Nissl at a given region value.
     """
-    prob_region, _ = np.histogram(nissl[atlas == label_value], bins=bins)
-    region_entropy = entropy(prob_region)
-    return region_entropy
+    hist, _ = np.histogram(data, bins=bins)
+    return stats.entropy(hist)
 
 
-def compute_entropies(nissl, atlas):
+def compute_conditional_entropy(nissl, atlas):
     """Compute entropies of Nissl densities.
 
     Parameters
@@ -124,25 +119,17 @@ def compute_entropies(nissl, atlas):
 
     Returns
     -------
-    brain_entropy: float
-        Entropy of the densities of Nissl for the entire brain.
-
     conditional_entropy: float
         Conditional entropy of the densities of Nissl depending on the brain regions.
     """
-    # 1: For the entire brain
-    prob_entire_brain, _ = np.histogram(nissl[atlas != 0], bins=100)
-    brain_entropy = entropy(prob_entire_brain)
-
-    # 2. Computation of the conditional entropy
     n_pixels = (atlas != 0).sum()
     label_values, count_values = np.unique(atlas, return_counts=True)
     all_region_entropy = []
     for label, count in zip(label_values, count_values):
-        all_region_entropy.append(compute_region_entropy(nissl, atlas, label) * count)
+        all_region_entropy.append(dist_entropy(nissl[atlas == label]) * count)
 
     conditional_entropy = np.sum(all_region_entropy) / n_pixels
-    return brain_entropy, conditional_entropy
+    return conditional_entropy
 
 
 def evaluate(
@@ -217,7 +204,8 @@ def evaluate(
         }
 
     # Entropies
-    brain_entropy, conditional_entropy = compute_entropies(nissl, atlas)
+    brain_entropy = dist_entropy(nissl[atlas != 0])
+    conditional_entropy = compute_conditional_entropy(nissl, atlas)
     results["global"] = {
         "brain_entropy": brain_entropy,
         "conditional_entropy": conditional_entropy,
