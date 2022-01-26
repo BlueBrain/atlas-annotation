@@ -150,7 +150,7 @@ def evaluate(
     nissl,
     reference,
     region_meta,
-    regions_to_evaluate=REGIONS_TO_EVALUATE,
+    regions_to_evaluate=None,
 ):
     """Evaluate the atlas.
 
@@ -164,8 +164,16 @@ def evaluate(
         Reference atlas.
     region_meta: atlannot.atlas.RegionMeta
         Region Meta containing all the information concerning the labels.
-    regions_to_evaluate: dict[str, list[int]]
-        Regions to evaluate.
+    regions_to_evaluate: dict[str, list[int]] | None
+        Regions to evaluate. If None, regions to evaluation considered are
+        REGIONS_TO_EVALUATE = {
+        "Somatosensory Cortex": [453],
+        "Visual Cortex": [669],
+        "Rest of Cortex": [315],
+        "Thalamus": [549],
+        "Hippocampus": [1080],
+        "Cerebullum": [512],
+        "Basal Ganglia": [477, 1022, 470, 381],}
 
     Returns
     -------
@@ -173,6 +181,9 @@ def evaluate(
         Dictionary containing the results of the evaluation.
     """
     results = {}
+    if regions_to_evaluate is None:
+        regions_to_evaluate = REGIONS_TO_EVALUATE
+
     for name, region_ids in regions_to_evaluate.items():
         desc = list(region_meta.descendants(region_ids))
 
