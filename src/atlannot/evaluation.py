@@ -121,7 +121,7 @@ def compute_conditional_entropy(nissl, atlas):
         Conditional entropy of the densities of Nissl depending on the brain regions.
     """
     n_pixels = (atlas != 0).sum()
-    label_values, count_values = np.unique(atlas, return_counts=True)
+    label_values, count_values = np.unique(atlas[atlas != 0], return_counts=True)
     all_region_entropy = []
     for label, count in zip(label_values, count_values):
         all_region_entropy.append(dist_entropy(nissl[atlas == label]) * count)
