@@ -186,7 +186,7 @@ def evaluate(
         # Jaggedness
         values_from = np.unique(atlas)
         values_to = np.array([1 if value in desc else 0 for value in values_from])
-        mask = atlas_remap(atlas, values_from, values_to)
+        mask = np.isin(atlas, desc)
         global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
         per_region_jaggedness = compute_jaggedness(atlas, region_ids=desc)
 
