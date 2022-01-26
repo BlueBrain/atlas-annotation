@@ -18,8 +18,12 @@ with open("README.md", encoding="utf-8") as fh:
     long_description = fh.read()
 
 install_requires = [
-    "antspyx==0.2.4",
+    "antspyx>=0.2.7",
+    "atlalign>=0.6.1",
+    "atlas-alignment-meter@git+https://github.com/BlueBrain/atlas-alignment-meter.git",
     "atldld>=0.2.2",
+    # lpips_tf is needed because of atlalign
+    "lpips_tf@git+http://github.com/alexlee-gk/lpips-tensorflow.git#egg=lpips_tf",
     "matplotlib",
     "numpy",
     "pynrrd",
