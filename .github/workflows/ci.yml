@@ -21,19 +21,32 @@ jobs:
       - name: Run linting
         run: tox -e lint
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.7, 3.8, 3.9]
+        include:
+          - python-version: 3.7
+            tox-env: py37
+          - python-version: 3.8
+            tox-env: py38
+          - python-version: 3.9
+            tox-env: py39
     steps:
       - name: Checkout latest commit
         uses: actions/checkout@v2
         with: {"fetch-depth": 0}  # fetch all history with version tags
       - name: Set up python
         uses: actions/setup-python@v2
-        with: {"python-version": "3.7"}
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Set up pip cache
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: unit-${{ runner.os }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-interactive.txt') }}
+          key: unit-${{ matrix.os }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-interactive.txt') }}
       - name: Set up the environment
         run: |
           # apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
