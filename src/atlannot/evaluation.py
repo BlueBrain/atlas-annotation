@@ -61,7 +61,8 @@ def compute_jaggedness(
 
     results = {}
     for region_id in region_ids:
-        results[region_id] = metrics["perRegion"][region_id]["mean"]
+        results[region_id] = metrics["perRegion"][region_id]["mean"] \
+            if region_id in metrics["perRegion"] else None
     return results
 
 
@@ -92,8 +93,10 @@ def compute_iou(
     if region_ids is None:
         region_ids = np.unique(vol_true)
 
+    label_vol_true = np.unique(vol_true)
     for region_id in region_ids:
-        results[region_id] = iou_score(vol_true, vol_pred, k=region_id)[0]
+        if region_id in label_vol_true:
+            results[region_id] = iou_score(vol_true, vol_pred, k=region_id)[0]
 
     return results
 
@@ -181,10 +184,14 @@ def evaluate_region(
         "descendants": desc,
     }
 
+    # Check which desc are present in atlas
+    label_atlas = np.unique(atlas)
+    present_desc = [d for d in desc if d in label_atlas]
+
     # Jaggedness
     mask = np.isin(atlas, desc)
     global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
-    per_region_jaggedness = compute_jaggedness(atlas, region_ids=desc)
+    per_region_jaggedness = compute_jaggedness(atlas, region_ids=present_desc)
 
     results["jaggedness"] = {
         "global": global_jaggedness,
@@ -194,7 +201,7 @@ def evaluate_region(
     # Intersection Over Union
     mask_ref = np.isin(reference, desc)
     global_iou = compute_iou(mask_ref, mask, region_ids=[1])[1]
-    per_region_iou = compute_iou(reference, atlas, region_ids=desc)
+    per_region_iou = compute_iou(reference, atlas, region_ids=present_desc)
 
     results["iou"] = {
         "global": global_iou,
