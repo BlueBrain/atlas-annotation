@@ -14,7 +14,6 @@
 """Evaluation."""
 from __future__ import annotations
 
-from collections import defaultdict
 from typing import Any
 
 import numpy as np
@@ -265,9 +264,7 @@ def evaluate_region(
     mask = np.isin(atlas, desc)
     global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
     per_region_jaggedness = compute_jaggedness_per_region(
-        region_ids,
-        atlas,
-        region_meta
+        region_ids, atlas, region_meta
     )
 
     results["jaggedness"] = {
