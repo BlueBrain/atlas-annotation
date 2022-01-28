@@ -186,7 +186,8 @@ def compute_jaggedness_per_region(
             children = list(region_meta.descendants(d))
             mask = np.isin(atlas, children)
             if np.sum(mask) > 0:
-                results[d] = compute_jaggedness(mask, region_ids=[1])[1]
+                jaggedness = compute_jaggedness(mask, region_ids=[1])
+                results[d] = jaggedness[1] if 1 in jaggedness else None
     return results
 
 
@@ -223,7 +224,8 @@ def compute_iou_per_region(
             mask = np.isin(atlas, children)
             mask_ref = np.isin(reference, children)
             if np.sum(mask_ref) > 0:
-                results[d] = compute_iou(mask, mask_ref, region_ids=[1])[1]
+                iou = compute_iou(mask, mask_ref, region_ids=[1])
+                results[d] = iou[1] if 1 in iou else None
     return results
 
 
