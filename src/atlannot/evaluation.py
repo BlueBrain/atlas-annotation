@@ -14,6 +14,7 @@
 """Evaluation."""
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Any
 
 import numpy as np
@@ -55,14 +56,21 @@ def compute_jaggedness(
         Dictionary containing the region id as keys and the mean of the
         jaggedness of that given region id as values.
     """
-    metrics = core.compute(volume, coronal_axis_index=axis, regions=region_ids)
+    try:
+        metrics = core.compute(volume, coronal_axis_index=axis, regions=region_ids)
+    except Exception:
+        return {}
+
     if region_ids is None:
         region_ids = sorted(metrics["perRegion"].keys())
 
     results = {}
     for region_id in region_ids:
-        results[region_id] = metrics["perRegion"][region_id]["mean"] \
-            if region_id in metrics["perRegion"] else None
+        results[region_id] = (
+            metrics["perRegion"][region_id]["mean"]
+            if region_id in metrics["perRegion"]
+            else None
+        )
     return results
 
 
@@ -151,6 +159,75 @@ def compute_conditional_entropy(
     return conditional_entropy
 
 
+def compute_jaggedness_per_region(
+    region_ids: list[int],
+    atlas: np.ndarray,
+    region_meta: RegionMeta,
+):
+    """Compute Jaggedness for each level of the region ID.
+
+    Parameters
+    ----------
+    region_ids
+        Region IDs to evaluate.
+    atlas
+        Atlas to evaluate.
+    region_meta
+        Region Meta containing all the information concerning the labels.
+
+    Returns
+    -------
+    results: dict[str, Any]
+        Dictionary containing the results of the jaggedness.
+    """
+    results = {}
+    for region_id in region_ids:
+        desc = list(region_meta.descendants(region_id))
+        for d in desc:
+            children = list(region_meta.descendants(d))
+            mask = np.isin(atlas, children)
+            if np.sum(mask) > 0:
+                results[d] = compute_jaggedness(mask, region_ids=[1])[1]
+    return results
+
+
+def compute_iou_per_region(
+    region_ids: list[int],
+    atlas: np.ndarray,
+    reference: np.ndarray,
+    region_meta: RegionMeta,
+):
+    """Compute Jaggedness for each level of the region ID.
+
+    Parameters
+    ----------
+    region_ids
+        Region IDs to evaluate.
+    atlas
+        Atlas to evaluate.
+    reference
+        Reference atlas.
+    region_meta
+        Region Meta containing all the information concerning the labels.
+
+    Returns
+    -------
+    results: dict[str, Any]
+        Dictionary containing the results of the jaggedness.
+    """
+    results = {}
+
+    for region_id in region_ids:
+        desc = list(region_meta.descendants(region_id))
+        for d in desc:
+            children = list(region_meta.descendants(d))
+            mask = np.isin(atlas, children)
+            mask_ref = np.isin(reference, children)
+            if np.sum(mask_ref) > 0:
+                results[d] = compute_iou(mask, mask_ref, region_ids=[1])[1]
+    return results
+
+
 def evaluate_region(
     region_ids: list[int],
     atlas: np.ndarray,
@@ -184,14 +261,14 @@ def evaluate_region(
         "descendants": desc,
     }
 
-    # Check which desc are present in atlas
-    label_atlas = np.unique(atlas)
-    present_desc = [d for d in desc if d in label_atlas]
-
     # Jaggedness
     mask = np.isin(atlas, desc)
     global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
-    per_region_jaggedness = compute_jaggedness(atlas, region_ids=present_desc)
+    per_region_jaggedness = compute_jaggedness_per_region(
+        region_ids,
+        atlas,
+        region_meta
+    )
 
     results["jaggedness"] = {
         "global": global_jaggedness,
@@ -201,7 +278,12 @@ def evaluate_region(
     # Intersection Over Union
     mask_ref = np.isin(reference, desc)
     global_iou = compute_iou(mask_ref, mask, region_ids=[1])[1]
-    per_region_iou = compute_iou(reference, atlas, region_ids=present_desc)
+    per_region_iou = compute_iou_per_region(
+        region_ids,
+        atlas,
+        reference,
+        region_meta,
+    )
 
     results["iou"] = {
         "global": global_iou,

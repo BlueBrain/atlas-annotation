@@ -16,7 +16,9 @@ import numpy as np
 from atlannot.evaluation import (
     compute_conditional_entropy,
     compute_iou,
+    compute_iou_per_region,
     compute_jaggedness,
+    compute_jaggedness_per_region,
     dist_entropy,
     evaluate,
     evaluate_region,
@@ -38,6 +40,11 @@ def test_compute_jaggedness():
     for label in [1, 2, 3]:
         assert label in list(results.keys())
 
+    # If label not present in the volume, then skipped
+    absent_label = [11, ]
+    results = compute_jaggedness(volume, region_ids=absent_label)
+    assert results == dict()
+
 
 def test_compute_iou():
     labels = np.arange(10)
@@ -47,6 +54,11 @@ def test_compute_iou():
     for label in labels:
         if label != 0:
             assert label in list(results.keys())
+
+    # If label not present in the volume, then skipped
+    absent_label = [11, ]
+    results = compute_iou(volume, volume, region_ids=absent_label)
+    assert results == dict()
 
 
 def test_compute_region_entropy():
@@ -68,6 +80,38 @@ def test_compute_conditional_entropy():
     conditional_entropy = compute_conditional_entropy(nissl, atlas)
     assert isinstance(conditional_entropy, float)
     assert conditional_entropy > 0
+
+
+def test_compute_jaggedness_per_region():
+    labels = np.arange(10)
+    volume = labels * np.ones((10, 10, 10))
+    rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
+    results = compute_jaggedness_per_region([2, 3], volume, rm)
+    assert isinstance(results, dict)
+    all_expected_descendants = {2, 3, 4, 5}
+    assert set(results.keys()) == all_expected_descendants
+
+    volume = 2 * np.ones((10, 10, 10))
+    results = compute_jaggedness_per_region([2, 3], volume, rm)
+    assert isinstance(results, dict)
+    all_expected_descendants = [2]
+    assert list(results.keys()) == all_expected_descendants
+
+
+def test_compute_iou_per_region():
+    labels = np.arange(10)
+    volume = labels * np.ones((10, 10, 10))
+    rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
+    results = compute_iou_per_region([2, 3], volume, volume, rm)
+    assert isinstance(results, dict)
+    all_expected_descendants = {2, 3, 4, 5}
+    assert set(results.keys()) == all_expected_descendants
+
+    volume = 2 * np.ones((10, 10, 10))
+    results = compute_iou_per_region([2, 3], volume, volume, rm)
+    assert isinstance(results, dict)
+    all_expected_descendants = [2]
+    assert list(results.keys()) == all_expected_descendants
 
 
 def test_evaluate_region():
