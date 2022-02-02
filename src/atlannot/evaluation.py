@@ -201,9 +201,7 @@ def compute_jaggedness_per_region(
                 ]
 
             new_atlas = atlas_remap(atlas, values_from, np.array(values_to))
-            regions_to_consider = list(np.unique(values_to))
-            if 0 in regions_to_consider:
-                regions_to_consider = regions_to_consider.remove(0)
+            regions_to_consider = list(np.unique(new_atlas[new_atlas != 0]))
             results.update(
                 compute_jaggedness(new_atlas, region_ids=regions_to_consider)
             )
@@ -256,9 +254,7 @@ def compute_iou_per_region(
 
             new_atlas = atlas_remap(atlas, values_from, np.array(values_to))
             new_reference = atlas_remap(reference, values_from, np.array(values_to))
-            regions_to_consider = list(np.unique(new_atlas))
-            if 0 in regions_to_consider:
-                regions_to_consider = regions_to_consider.remove(0)
+            regions_to_consider = list(np.unique(new_atlas[new_atlas != 0]))
             results.update(
                 compute_iou(new_reference, new_atlas, region_ids=regions_to_consider)
             )
