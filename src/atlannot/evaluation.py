@@ -14,6 +14,7 @@
 """Evaluation."""
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Any
 
 import numpy as np
@@ -21,6 +22,7 @@ from atlalign.metrics import iou_score
 from atlas_alignment_meter import core
 from scipy import stats
 
+from atlannot.merge.common import atlas_remap
 from atlannot.region_meta import RegionMeta
 
 REGIONS_TO_EVALUATE = {
@@ -180,14 +182,27 @@ def compute_jaggedness_per_region(
         Dictionary containing the results of the jaggedness.
     """
     results = {}
+
     for region_id in region_ids:
         desc = list(region_meta.descendants(region_id))
+        ids_per_level = defaultdict(list)
         for d in desc:
-            children = list(region_meta.descendants(d))
-            mask = np.isin(atlas, children)
-            if np.sum(mask) > 0:
-                jaggedness = compute_jaggedness(mask, region_ids=[1])
-                results[d] = jaggedness[1] if 1 in jaggedness else None
+            ids_per_level[region_meta.level[d]].append(d)
+
+        values_from = np.unique(atlas)
+        values_to = np.zeros_like(values_from)
+
+        for _, children in ids_per_level.items():
+            for child in children:
+                desc = list(region_meta.descendants(child))
+                values_to = [
+                    child if value_from in desc else value_to
+                    for value_from, value_to in zip(values_from, values_to)
+                ]
+
+            new_atlas = atlas_remap(atlas, values_from, np.array(values_to))
+            results.update(compute_jaggedness(new_atlas, region_ids=children))
+
     return results
 
 
@@ -219,13 +234,25 @@ def compute_iou_per_region(
 
     for region_id in region_ids:
         desc = list(region_meta.descendants(region_id))
+        ids_per_level = defaultdict(list)
         for d in desc:
-            children = list(region_meta.descendants(d))
-            mask = np.isin(atlas, children)
-            mask_ref = np.isin(reference, children)
-            if np.sum(mask_ref) > 0:
-                iou = compute_iou(mask, mask_ref, region_ids=[1])
-                results[d] = iou[1] if 1 in iou else None
+            ids_per_level[region_meta.level[d]].append(d)
+
+        values_from = np.unique(atlas)
+        values_to = np.zeros_like(values_from)
+
+        for _, children in ids_per_level.items():
+            for child in children:
+                desc = list(region_meta.descendants(child))
+                values_to = [
+                    child if value_from in desc else value_to
+                    for value_from, value_to in zip(values_from, values_to)
+                ]
+
+            new_atlas = atlas_remap(atlas, values_from, np.array(values_to))
+            new_reference = atlas_remap(atlas, values_from, np.array(values_to))
+            results.update(compute_iou(new_reference, new_atlas, region_ids=children))
+
     return results
 
 
