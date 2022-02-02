@@ -202,7 +202,9 @@ def compute_jaggedness_per_region(
 
             new_atlas = atlas_remap(atlas, values_from, np.array(values_to))
             regions_to_consider = list(np.unique(values_to)).remove(0)
-            results.update(compute_jaggedness(new_atlas, region_ids=regions_to_consider))
+            results.update(
+                compute_jaggedness(new_atlas, region_ids=regions_to_consider)
+            )
 
     return results
 
