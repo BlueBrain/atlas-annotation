@@ -16,9 +16,9 @@ import numpy as np
 from atlannot.evaluation import (
     compute_conditional_entropy,
     compute_iou,
-    compute_iou_per_region,
+    compute_iou_along_tree,
     compute_jaggedness,
-    compute_jaggedness_per_region,
+    compute_jaggedness_along_tree,
     dist_entropy,
     evaluate,
     evaluate_region,
@@ -90,13 +90,13 @@ def test_compute_jaggedness_per_region():
     labels = np.arange(10)
     volume = labels * np.ones((10, 10, 10))
     rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
-    results = compute_jaggedness_per_region([2, 3], volume, rm)
+    results = compute_jaggedness_along_tree([2, 3], volume, rm)
     assert isinstance(results, dict)
     all_expected_descendants = {2, 3, 4, 5}
     assert set(results.keys()) == all_expected_descendants
 
     volume = 2 * np.ones((10, 10, 10))
-    results = compute_jaggedness_per_region([2, 3], volume, rm)
+    results = compute_jaggedness_along_tree([2, 3], volume, rm)
     assert isinstance(results, dict)
     all_expected_descendants = [2]
     assert list(results.keys()) == all_expected_descendants
@@ -106,13 +106,13 @@ def test_compute_iou_per_region():
     labels = np.arange(10)
     volume = labels * np.ones((10, 10, 10))
     rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
-    results = compute_iou_per_region([2, 3], volume, volume, rm)
+    results = compute_iou_along_tree([2, 3], volume, volume, rm)
     assert isinstance(results, dict)
     all_expected_descendants = {2, 3, 4, 5}
     assert set(results.keys()) == all_expected_descendants
 
     volume = 2 * np.ones((10, 10, 10))
-    results = compute_iou_per_region([2, 3], volume, volume, rm)
+    results = compute_iou_along_tree([2, 3], volume, volume, rm)
     assert isinstance(results, dict)
     all_expected_descendants = [2]
     assert list(results.keys()) == all_expected_descendants

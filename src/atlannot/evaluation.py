@@ -160,12 +160,12 @@ def compute_conditional_entropy(
     return conditional_entropy
 
 
-def compute_jaggedness_per_region(
+def compute_jaggedness_along_tree(
     region_ids: list[int],
     atlas: np.ndarray,
     region_meta: RegionMeta,
 ):
-    """Compute Jaggedness for each level of the region ID.
+    """Compute Jaggedness for each label ascendants of the region IDs.
 
     Parameters
     ----------
@@ -209,13 +209,13 @@ def compute_jaggedness_per_region(
     return results
 
 
-def compute_iou_per_region(
+def compute_iou_along_tree(
     region_ids: list[int],
     atlas: np.ndarray,
     reference: np.ndarray,
     region_meta: RegionMeta,
 ):
-    """Compute Jaggedness for each level of the region ID.
+    """Compute IoU for each label ascendants of the region IDs.
 
     Parameters
     ----------
@@ -231,7 +231,7 @@ def compute_iou_per_region(
     Returns
     -------
     results: dict[str, Any]
-        Dictionary containing the results of the jaggedness.
+        Dictionary containing the results of the IoU.
     """
     results = {}
 
@@ -298,7 +298,7 @@ def evaluate_region(
     # Jaggedness
     mask = np.isin(atlas, desc)
     global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
-    per_region_jaggedness = compute_jaggedness_per_region(
+    per_region_jaggedness = compute_jaggedness_along_tree(
         region_ids, atlas, region_meta
     )
 
@@ -310,7 +310,7 @@ def evaluate_region(
     # Intersection Over Union
     mask_ref = np.isin(reference, desc)
     global_iou = compute_iou(mask_ref, mask, region_ids=[1])[1]
-    per_region_iou = compute_iou_per_region(
+    per_region_iou = compute_iou_along_tree(
         region_ids,
         atlas,
         reference,
