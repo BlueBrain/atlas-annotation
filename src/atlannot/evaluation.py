@@ -250,7 +250,7 @@ def compute_iou_per_region(
                 ]
 
             new_atlas = atlas_remap(atlas, values_from, np.array(values_to))
-            new_reference = atlas_remap(atlas, values_from, np.array(values_to))
+            new_reference = atlas_remap(reference, values_from, np.array(values_to))
             results.update(compute_iou(new_reference, new_atlas, region_ids=children))
 
     return results
