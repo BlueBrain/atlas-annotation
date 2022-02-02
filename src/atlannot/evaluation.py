@@ -259,7 +259,9 @@ def compute_iou_per_region(
             regions_to_consider = list(np.unique(new_atlas))
             if 0 in regions_to_consider:
                 regions_to_consider = regions_to_consider.remove(0)
-            results.update(compute_iou(new_reference, new_atlas, region_ids=regions_to_consider))
+            results.update(
+                compute_iou(new_reference, new_atlas, region_ids=regions_to_consider)
+            )
 
     return results
 
