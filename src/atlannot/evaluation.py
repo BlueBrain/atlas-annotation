@@ -57,21 +57,13 @@ def compute_jaggedness(
         Dictionary containing the region id as keys and the mean of the
         jaggedness of that given region id as values.
     """
-    try:
-        metrics = core.compute(volume, coronal_axis_index=axis, regions=region_ids)
-    except Exception:
-        return {}
-
+    metrics = core.compute(volume, coronal_axis_index=axis, regions=region_ids)
     if region_ids is None:
         region_ids = sorted(metrics["perRegion"].keys())
 
     results = {}
     for region_id in region_ids:
-        results[region_id] = (
-            metrics["perRegion"][region_id]["mean"]
-            if region_id in metrics["perRegion"]
-            else None
-        )
+        results[region_id] = metrics["perRegion"][region_id]["mean"]
     return results
 
 
@@ -102,10 +94,8 @@ def compute_iou(
     if region_ids is None:
         region_ids = np.unique(vol_true)
 
-    label_vol_true = np.unique(vol_true)
     for region_id in region_ids:
-        if region_id in label_vol_true:
-            results[region_id] = iou_score(vol_true, vol_pred, k=region_id)[0]
+        results[region_id] = iou_score(vol_true, vol_pred, k=region_id)[0]
 
     return results
 

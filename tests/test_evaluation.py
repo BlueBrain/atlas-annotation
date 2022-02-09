@@ -40,13 +40,6 @@ def test_compute_jaggedness():
     for label in [1, 2, 3]:
         assert label in list(results.keys())
 
-    # If label not present in the volume, then skipped
-    absent_label = [
-        11,
-    ]
-    results = compute_jaggedness(volume, region_ids=absent_label)
-    assert results == {}
-
 
 def test_compute_iou():
     labels = np.arange(10)
@@ -56,13 +49,6 @@ def test_compute_iou():
     for label in labels:
         if label != 0:
             assert label in list(results.keys())
-
-    # If label not present in the volume, then skipped
-    absent_label = [
-        11,
-    ]
-    results = compute_iou(volume, volume, region_ids=absent_label)
-    assert results == {}
 
 
 def test_compute_region_entropy():
