@@ -35,7 +35,10 @@ REGIONS_TO_EVALUATE = {
 
 
 def compute_jaggedness(
-    volume: np.ndarray, region_ids: list[int] | None = None, axis: int = 0
+    volume: np.ndarray,
+    region_ids: list[int] | None = None,
+    axis: int = 0,
+    precomputed_region_ids: list[int] | None = None,
 ) -> dict[int, float]:
     """Compute the jaggedness of given region IDs for the specified volume.
 
@@ -48,6 +51,8 @@ def compute_jaggedness(
         is computed for all the region IDs present in the volume.
     axis
         Axis along which to compute the jaggedness.
+    precomputed_region_ids
+        Optional: Precomputed unique ids present in the volume (from np.unique)
 
     Returns
     -------
@@ -55,22 +60,28 @@ def compute_jaggedness(
         Dictionary containing the region id as keys and the mean of the
         jaggedness of that given region id as values.
     """
-    try:
-        metrics = core.compute(volume, coronal_axis_index=axis, regions=region_ids)
-    except Exception:
-        return {}
+    if precomputed_region_ids is None:
+        all_regions_ids = np.unique(volume)
+    else:
+        all_regions_ids = precomputed_region_ids
 
     if region_ids is None:
-        region_ids = sorted(metrics["perRegion"].keys())
+        region_ids = all_regions_ids
+        region_ids = np.delete(region_ids, np.where(region_ids == 0))
+    else:
+        keep = list(np.isin(region_ids, all_regions_ids, assume_unique=True))
+        region_ids = np.array(region_ids)[keep]
 
-    results = {}
-    for region_id in region_ids:
-        results[region_id] = (
-            metrics["perRegion"][region_id]["mean"]
-            if region_id in metrics["perRegion"]
-            else None
-        )
-    return results
+    metrics = core.compute(
+        volume,
+        coronal_axis_index=axis,
+        regions=list(region_ids),
+        precomputed_all_region_ids=all_regions_ids,
+    )
+
+    return {
+        region_id: metrics["perRegion"][region_id]["mean"] for region_id in region_ids
+    }
 
 
 def compute_iou(
