@@ -154,7 +154,7 @@ def compute_jaggedness_along_tree(
     region_ids: list[int],
     atlas: np.ndarray,
     region_meta: RegionMeta,
-):
+) -> dict[int, float]:
     """Compute Jaggedness for each label ascendants of the region IDs.
 
     Parameters
@@ -204,7 +204,7 @@ def compute_iou_along_tree(
     atlas: np.ndarray,
     reference: np.ndarray,
     region_meta: RegionMeta,
-):
+) -> dict[int, float]:
     """Compute IoU for each label ascendants of the region IDs.
 
     Parameters
