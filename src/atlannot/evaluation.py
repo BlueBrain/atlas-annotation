@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Any
+from typing import Any, Sequence
 
 import numpy as np
 from atlalign.metrics import iou_score
@@ -37,7 +37,7 @@ REGIONS_TO_EVALUATE = {
 
 
 def compute_jaggedness(
-    volume: np.ndarray, region_ids: list[int] | None = None, axis: int = 0
+    volume: np.ndarray, region_ids: Sequence[int] | None = None, axis: int = 0
 ) -> dict[int, float]:
     """Compute the jaggedness of given region IDs for the specified volume.
 
@@ -70,7 +70,7 @@ def compute_jaggedness(
 def compute_iou(
     vol_true: np.ndarray,
     vol_pred: np.ndarray,
-    region_ids: list[int] | None = None,
+    region_ids: Sequence[int] | None = None,
 ) -> dict[int, float]:
     """Compute the intersection over union of given region IDs.
 
@@ -151,7 +151,7 @@ def compute_conditional_entropy(
 
 
 def compute_jaggedness_along_tree(
-    region_ids: list[int],
+    region_ids: Sequence[int],
     atlas: np.ndarray,
     region_meta: RegionMeta,
 ) -> dict[int, float]:
@@ -200,7 +200,7 @@ def compute_jaggedness_along_tree(
 
 
 def compute_iou_along_tree(
-    region_ids: list[int],
+    region_ids: Sequence[int],
     atlas: np.ndarray,
     reference: np.ndarray,
     region_meta: RegionMeta,
@@ -253,7 +253,7 @@ def compute_iou_along_tree(
 
 
 def evaluate_region(
-    region_ids: list[int],
+    region_ids: Sequence[int],
     atlas: np.ndarray,
     reference: np.ndarray,
     region_meta: RegionMeta,
