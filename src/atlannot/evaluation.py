@@ -174,7 +174,7 @@ def compute_jaggedness_along_tree(
     results = {}
 
     for region_id in region_ids:
-        desc = list(region_meta.descendants(region_id))
+        desc = region_meta.descendants(region_id)
         ids_per_level = defaultdict(list)
         for d in desc:
             ids_per_level[region_meta.level[d]].append(d)
@@ -184,7 +184,7 @@ def compute_jaggedness_along_tree(
 
         for _, children in ids_per_level.items():
             for child in children:
-                desc = list(region_meta.descendants(child))
+                desc = region_meta.descendants(child)
                 values_to = [
                     child if value_from in desc else value_to
                     for value_from, value_to in zip(values_from, values_to)
@@ -226,7 +226,7 @@ def compute_iou_along_tree(
     results = {}
 
     for region_id in region_ids:
-        desc = list(region_meta.descendants(region_id))
+        desc = region_meta.descendants(region_id)
         ids_per_level = defaultdict(list)
         for d in desc:
             ids_per_level[region_meta.level[d]].append(d)
@@ -236,7 +236,7 @@ def compute_iou_along_tree(
 
         for _, children in ids_per_level.items():
             for child in children:
-                desc = list(region_meta.descendants(child))
+                desc = region_meta.descendants(child)
                 values_to = [
                     child if value_from in desc else value_to
                     for value_from, value_to in zip(values_from, values_to)
