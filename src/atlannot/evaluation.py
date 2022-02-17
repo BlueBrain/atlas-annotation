@@ -14,13 +14,16 @@
 """Evaluation."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
 from atlalign.metrics import iou_score
 from atlas_alignment_meter import core
 from scipy import stats
+from skimage.measure import marching_cubes, mesh_surface_area
 
+from atlannot.merge.common import atlas_remap
 from atlannot.region_meta import RegionMeta
 
 REGIONS_TO_EVALUATE = {
@@ -252,5 +255,145 @@ def evaluate(
         "brain_entropy": brain_entropy,
         "conditional_entropy": conditional_entropy,
     }
+
+    return results
+
+
+# Smoothing Quality
+def compute_compactness(
+    mask: np.ndarray, level: float = 0.0, spacing: np.ndarray | None = None
+) -> float | None:
+    """Compute compactness of a mask.
+
+    Parameters
+    ----------
+    mask
+        Mask of a region.
+    level
+        Contour value to search for isosurfaces in volume
+    spacing
+        Voxel spacing in spatial dimensions corresponding to numpy array
+        indexing dimensions (M, N, P) as in volume.
+
+    Returns
+    -------
+    float | None
+        If mask contains at least one pixel, the function returns the
+        compactness result. Otherwise, returns None.
+    """
+    if spacing is None:
+        spacing = np.ones(mask.ndim)
+
+    n_pixels = np.sum(mask) * np.prod(spacing)
+
+    if n_pixels.item() == 0:
+        return None
+    else:
+        verts, faces, normals, vals = marching_cubes(mask, level=level, spacing=spacing)
+        area = mesh_surface_area(verts, faces)
+        return area ** mask.ndim / n_pixels.item() ** (mask.ndim - 1)
+
+
+def compute_displacement(
+    mask_before: np.ndarray, mask_after: np.ndarray
+) -> float | None:
+    """Compute displacement between mask before and mask after.
+
+    Displacement is the percentage of pixels of the
+    mask_after outside of the mask_before.
+
+    Parameters
+    ----------
+    mask_before
+        Mask of a region before any changes.
+    mask_after
+        Mask of a region after the change.
+
+    Returns
+    -------
+    float | None
+        If mask_after contains at least one pixel, the function returns the
+        displacement result. Otherwise, returns None.
+    """
+    n_pixels = np.sum(mask_after)
+    if n_pixels == 0:
+        return None
+    else:
+        mask_outside = np.logical_and(mask_after, ~mask_before)
+        return np.sum(mask_outside) / n_pixels
+
+
+def compute_smoothing_quality(
+    atlas_before: np.ndarray,
+    atlas_after: np.ndarray,
+    region_ids: Sequence[int],
+    region_meta: RegionMeta,
+    atlas_ref: np.ndarray | None = None,
+    level: float = 0.0,
+    spacing: tuple[float, float, float] = None,
+) -> dict[str, float]:
+    """Compute smoothing quality of a given region id.
+
+    Parameters
+    ----------
+    atlas_before
+        Atlas before any changes.
+    atlas_after
+        Atlas after any changes.
+    region_ids
+        Region IDs to consider
+    region_meta
+        Region Meta containing all the information concerning the labels.
+    atlas_ref
+        Optional, atlas of reference
+    level
+        Contour value to search for isosurfaces in volume
+    spacing
+        Voxel spacing in spatial dimensions corresponding to numpy array
+        indexing dimensions (M, N, P) as in volume.
+
+    Returns
+    -------
+    float | None
+        If mask contains at least one pixel, the function returns the
+        compactness result. Otherwise, returns None.
+    """
+    values_from = np.unique(atlas_before)
+    desc = region_meta.descendants(region_ids)
+    values_to = [1 if value_from in desc else 0 for value_from in values_from]
+
+    mask_before = atlas_remap(atlas_before, values_from, np.array(values_to))
+    mask_after = atlas_remap(atlas_after, values_from, np.array(values_to))
+
+    if np.sum(mask_after) == 0 or np.sum(mask_after) == 0:
+        raise ValueError(
+            "The region IDs do not exist in either atlas_before or atlas_after"
+        )
+
+    compactness_before = compute_compactness(mask_before, level, spacing)
+    compactness_after = compute_compactness(mask_after, level, spacing)
+    results = {
+        "Compactness before": compactness_before,
+        "Compactness after": compactness_after,
+    }
+
+    if atlas_ref is not None:
+        mask_ref = atlas_remap(atlas_ref, values_from, np.array(values_to))
+        compactness_ref = compute_compactness(mask_ref, level, spacing)
+        results["Compactness reference"] = compactness_ref
+
+    compaction = (compactness_before - compactness_after) / compactness_before
+    displacement = compute_displacement(
+        mask_before.astype(bool), mask_after.astype(bool)
+    )
+    smoothing_quality = compaction - displacement
+
+    results.update(
+        {
+            "Compaction": compaction,
+            "Displacement": displacement,
+            "Smoothing Quality": smoothing_quality,
+        }
+    )
 
     return results

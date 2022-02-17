@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import numpy as np
+import pytest
 
 from atlannot.evaluation import (
+    compute_compactness,
     compute_conditional_entropy,
+    compute_displacement,
     compute_iou,
     compute_jaggedness,
+    compute_smoothing_quality,
     dist_entropy,
     evaluate,
     evaluate_region,
@@ -99,3 +103,70 @@ def test_evaluate():
         assert "iou" in results[name].keys()
     assert "global" in results.keys()
     assert ["brain_entropy", "conditional_entropy"] == list(results["global"].keys())
+
+
+def test_compute_compactness():
+    mask = np.zeros((10, 10, 10))
+    mask[3:6, 3:6, 3:6] = 1
+    compactness = compute_compactness(mask)
+    assert isinstance(compactness, float)
+    assert compactness >= 0
+
+    mask = np.zeros((10, 10, 10))
+    compactness = compute_compactness(mask)
+    assert compactness is None
+
+
+def test_compute_displacement():
+    mask = np.zeros((10, 10, 10))
+    mask[3:6, 3:6, 3:6] = 1
+    displacement_1 = compute_displacement(mask.astype(bool), mask.astype(bool))
+    assert isinstance(displacement_1, float)
+    assert displacement_1 == 0
+
+    mask_after = np.zeros_like(mask)
+    mask_after[7:9, 7:9, 7:9] = 1
+    displacement_2 = compute_displacement(mask.astype(bool), mask_after.astype(bool))
+    assert displacement_2 == 1
+
+    mask_after = np.zeros_like(mask)
+    displacement_3 = compute_displacement(mask.astype(bool), mask_after.astype(bool))
+    assert displacement_3 is None
+
+    mask_after = np.zeros_like(mask)
+    mask_after[4:7, 4:7, 4:7] = 1
+    displacement_2 = compute_displacement(mask.astype(bool), mask_after.astype(bool))
+    assert 0 <= displacement_2 <= 1
+
+
+def test_compute_smoothing_quality():
+    atlas = np.zeros((10, 10, 10))
+    atlas[3:6, 3:6, 3:6] = 2
+
+    rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
+    results = compute_smoothing_quality(atlas, atlas, [2], rm, atlas)
+    assert isinstance(results, dict)
+    expected_keys = {
+        "Compactness before",
+        "Compactness after",
+        "Compactness reference",
+        "Compaction",
+        "Displacement",
+        "Smoothing Quality",
+    }
+    assert expected_keys == set(results.keys())
+    assert (
+        results["Compactness before"]
+        == results["Compactness after"]
+        == results["Compactness reference"]
+    )
+    assert results["Compaction"] == 0
+    assert results["Displacement"] == 0
+    assert results["Smoothing Quality"] == 0
+
+    results = compute_smoothing_quality(atlas, atlas, [2], rm)
+    assert "Compactness reference" not in results.keys()
+
+    atlas = np.zeros((10, 10, 10))
+    with pytest.raises(ValueError):
+        compute_smoothing_quality(atlas, atlas, [2], rm)
