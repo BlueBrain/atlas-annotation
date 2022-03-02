@@ -114,6 +114,8 @@ def iou(
     """
     if region_ids is None:
         region_ids = np.union1d(np.unique(annot_vol_1), np.unique(annot_vol_2))
+    else:
+        region_ids = sorted(set(region_ids))
 
     scores = {}
     for id_ in region_ids:
