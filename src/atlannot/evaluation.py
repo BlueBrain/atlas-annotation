@@ -14,6 +14,8 @@
 """Evaluation."""
 from __future__ import annotations
 
+import logging
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
@@ -22,6 +24,8 @@ from atlas_alignment_meter import core
 from scipy import stats
 
 from atlannot.region_meta import RegionMeta
+
+logger = logging.getLogger(__name__)
 
 REGIONS_TO_EVALUATE = {
     "Somatosensory Cortex": [453],
@@ -85,38 +89,42 @@ def jaggedness(
 
 
 def iou(
-    vol_true: np.ndarray,
-    vol_pred: np.ndarray,
-    region_ids: list[int] | None = None,
+    annot_vol_1: np.ndarray,
+    annot_vol_2: np.ndarray,
+    region_ids: Sequence[int] | None = None,
 ) -> dict[int, float]:
     """Compute the intersection over union of given region IDs.
 
     Parameters
     ----------
-    vol_true
-        Input volume considered as ground truth.
-    vol_pred
-        Input volume considered as prediction.
+    annot_vol_1
+        The first annotation volume.
+    annot_vol_2
+        The second annotation volume.
     region_ids
-        List of region IDs to compute the intersection over union.
-        If None, the IoU is computed for all the region IDs present in the volume.
+        A sequence of region IDs to compute the intersection over union.
+        If None, the IoU is computed for all the region IDs present in at least
+        one of the volumes.
 
     Returns
     -------
     results: dict[int, float]
-        Dictionary containing the region id as keys and the average of the
-        intersection over union of that given region id as values.
+        Dictionary with the region IDs as keys and the intersection over union
+        scores as values.
     """
-    results = {}
-    label_vol_true = np.unique(vol_true)
     if region_ids is None:
-        region_ids = label_vol_true.copy()
+        region_ids = np.union1d(np.unique(annot_vol_1), np.unique(annot_vol_2))
 
-    for region_id in region_ids:
-        if region_id in label_vol_true:
-            results[region_id] = iou_score(vol_true, vol_pred, k=region_id)[0]
+    scores = {}
+    for id_ in region_ids:
+        # The check we disable would check if the shapes of the volumes match
+        # and that the region ID is present in both annotation volumes. This
+        # can be expensive, so we disable it. If a region ID is not in any of
+        # the volumes then the IoU will be NaN.
+        score, _ = iou_score(annot_vol_1, annot_vol_2, k=id_, disable_check=True)
+        scores[id_] = score
 
-    return results
+    return scores
 
 
 def dist_entropy(

@@ -55,12 +55,10 @@ def test_compute_iou():
         if label != 0:
             assert label in list(results.keys())
 
-    # If label not present in the volume, then skipped
-    absent_label = [
-        11,
-    ]
-    results = iou(volume, volume, region_ids=absent_label)
-    assert results == {}
+    # If label not present in any of the volumes, then the result is NaN
+    scores = iou(volume, volume, region_ids=[11])
+    assert scores.keys() == {11}
+    assert np.isnan(scores[11])
 
 
 def test_compute_region_entropy():
