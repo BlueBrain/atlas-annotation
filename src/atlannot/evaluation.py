@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+from collections.abc import Collection
 from typing import Any
 
 import numpy as np
@@ -40,23 +40,26 @@ REGIONS_TO_EVALUATE = {
 
 def jaggedness(
     volume: np.ndarray,
-    region_ids: list[int] | None = None,
     axis: int = 0,
-    precomputed_region_ids: list[int] | None = None,
+    region_ids: Collection[int] | None = None,
+    all_region_ids: Collection[int] | None = None,
 ) -> dict[int, float]:
     """Compute the jaggedness of given region IDs for the specified volume.
 
     Parameters
     ----------
     volume
-        Input volume.
-    region_ids
-        List of region IDs to compute the jaggedness. If None, the jaggedness
-        is computed for all the region IDs present in the volume.
+        An annotation volume.
     axis
         Axis along which to compute the jaggedness.
-    precomputed_region_ids
-        Optional: Precomputed unique ids present in the volume (from np.unique)
+    region_ids
+        A collection of region IDs to compute the jaggedness. If None, the
+        jaggedness is computed for all the region IDs present in the volume.
+    all_region_ids
+        A collection of unique IDs in the volume provided. Can be useful to
+        speed up the computation. It's typically computed using
+        `np.unique(volume)`. If not provided, it will be set to
+        `np.unique(volume)`.
 
     Returns
     -------
@@ -64,34 +67,43 @@ def jaggedness(
         Dictionary containing the region id as keys and the mean of the
         jaggedness of that given region id as values.
     """
-    if precomputed_region_ids is None:
-        all_regions_ids = np.unique(volume)
-    else:
-        all_regions_ids = precomputed_region_ids
+    if all_region_ids is None:
+        all_region_ids = np.unique(volume)
+    all_region_ids = set(all_region_ids)
 
     if region_ids is None:
-        region_ids = all_regions_ids
-        region_ids = np.delete(region_ids, np.where(region_ids == 0))
+        missing = {}
+        region_ids = all_region_ids
     else:
-        keep = list(np.isin(region_ids, all_regions_ids, assume_unique=True))
-        region_ids = np.array(region_ids)[keep]
+        missing = {id_ for id_ in region_ids if id_ not in all_region_ids}
+        region_ids = set(region_ids) - missing
+    region_ids.discard(0)
+
+    # Set the score of region IDs not found in the annotation volume to NaN.
+    # This behaviour is consistent with what happens in the iou function.
+    results = {id_: np.nan for id_ in missing}
+
+    # core.compute breaks if region_ids is empty, so short-circuit.
+    if not region_ids:
+        return results
 
     metrics = core.compute(
         volume,
         coronal_axis_index=axis,
         regions=list(region_ids),
-        precomputed_all_region_ids=all_regions_ids,
+        precomputed_all_region_ids=list(all_region_ids),
     )
 
-    return {
-        region_id: metrics["perRegion"][region_id]["mean"] for region_id in region_ids
-    }
+    for region_id, scores in metrics["perRegion"].items():
+        results[region_id] = scores["mean"]
+
+    return results
 
 
 def iou(
     annot_vol_1: np.ndarray,
     annot_vol_2: np.ndarray,
-    region_ids: Sequence[int] | None = None,
+    region_ids: Collection[int] | None = None,
 ) -> dict[int, float]:
     """Compute the intersection over union of given region IDs.
 

@@ -38,12 +38,10 @@ def test_compute_jaggedness():
     for label in [1, 2, 3]:
         assert label in list(results.keys())
 
-    # If label not present in the volume, then skipped
-    absent_label = [
-        11,
-    ]
-    results = jaggedness(volume, region_ids=absent_label)
-    assert results == {}
+    # If label not present in the volume, then the score is NaN
+    scores = jaggedness(volume, region_ids=[11])
+    assert scores.keys() == {11}
+    assert np.isnan(scores[11])
 
 
 def test_compute_iou():
