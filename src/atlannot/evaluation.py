@@ -34,7 +34,7 @@ REGIONS_TO_EVALUATE = {
 }
 
 
-def compute_jaggedness(
+def jaggedness(
     volume: np.ndarray,
     region_ids: list[int] | None = None,
     axis: int = 0,
@@ -84,7 +84,7 @@ def compute_jaggedness(
     }
 
 
-def compute_iou(
+def iou(
     vol_true: np.ndarray,
     vol_pred: np.ndarray,
     region_ids: list[int] | None = None,
@@ -141,7 +141,7 @@ def dist_entropy(
     return stats.entropy(hist)
 
 
-def compute_conditional_entropy(
+def conditional_entropy(
     nissl: np.ndarray,
     atlas: np.ndarray,
 ) -> float:
@@ -204,8 +204,8 @@ def evaluate_region(
 
     # Jaggedness
     mask = np.isin(atlas, desc)
-    global_jaggedness = compute_jaggedness(mask, region_ids=[1])[1]
-    per_region_jaggedness = compute_jaggedness(atlas, region_ids=desc)
+    global_jaggedness = jaggedness(mask, region_ids=[1])[1]
+    per_region_jaggedness = jaggedness(atlas, region_ids=desc)
 
     results["jaggedness"] = {
         "global": global_jaggedness,
@@ -214,8 +214,8 @@ def evaluate_region(
 
     # Intersection Over Union
     mask_ref = np.isin(reference, desc)
-    global_iou = compute_iou(mask_ref, mask, region_ids=[1])[1]
-    per_region_iou = compute_iou(reference, atlas, region_ids=desc)
+    global_iou = iou(mask_ref, mask, region_ids=[1])[1]
+    per_region_iou = iou(reference, atlas, region_ids=desc)
 
     results["iou"] = {
         "global": global_iou,
@@ -268,10 +268,10 @@ def evaluate(
 
     # Entropies
     brain_entropy = dist_entropy(nissl[atlas != 0])
-    conditional_entropy = compute_conditional_entropy(nissl, atlas)
+    cond_entropy = conditional_entropy(nissl, atlas)
     results["global"] = {
         "brain_entropy": brain_entropy,
-        "conditional_entropy": conditional_entropy,
+        "conditional_entropy": cond_entropy,
     }
 
     return results
