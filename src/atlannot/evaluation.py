@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from collections.abc import Collection, Sequence
+from collections.abc import Collection
 from typing import Any
 
 import numpy as np
@@ -194,7 +194,7 @@ def conditional_entropy(
 
 
 def jaggedness_along_tree(
-    region_ids: Sequence[int],
+    region_ids: Collection[int],
     atlas: np.ndarray,
     region_meta: RegionMeta,
 ) -> dict[int, float]:
@@ -241,7 +241,7 @@ def jaggedness_along_tree(
 
 
 def iou_along_tree(
-    region_ids: Sequence[int],
+    region_ids: Collection[int],
     atlas: np.ndarray,
     reference: np.ndarray,
     region_meta: RegionMeta,
@@ -294,7 +294,7 @@ def iou_along_tree(
 
 
 def evaluate_region(
-    region_ids: Sequence[int],
+    region_ids: Collection[int],
     atlas: np.ndarray,
     reference: np.ndarray,
     region_meta: RegionMeta,
@@ -321,7 +321,7 @@ def evaluate_region(
 
     # Put some metadata about the region
     results = {
-        "region_ids": region_ids,
+        "region_ids": sorted(region_ids),
         "level": [region_meta.level[id_] for id_ in region_ids],
         "descendants": desc,
     }
