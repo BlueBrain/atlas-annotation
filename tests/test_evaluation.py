@@ -14,14 +14,14 @@
 import numpy as np
 
 from atlannot.evaluation import (
-    compute_conditional_entropy,
-    compute_iou,
     compute_iou_along_tree,
-    compute_jaggedness,
     compute_jaggedness_along_tree,
+    conditional_entropy,
     dist_entropy,
     evaluate,
     evaluate_region,
+    iou,
+    jaggedness,
 )
 from atlannot.region_meta import RegionMeta
 
@@ -29,26 +29,36 @@ from atlannot.region_meta import RegionMeta
 def test_compute_jaggedness():
     labels = np.arange(10)
     volume = labels * np.ones((10, 10, 10))
-    results = compute_jaggedness(volume)
+    results = jaggedness(volume)
     assert isinstance(results, dict)
     for label in labels:
         if label != 0:
             assert label in list(results.keys())
 
-    results = compute_jaggedness(volume, region_ids=[1, 2, 3])
+    results = jaggedness(volume, region_ids=[1, 2, 3])
     assert isinstance(results, dict)
     for label in [1, 2, 3]:
         assert label in list(results.keys())
+
+    # If label not present in the volume, then the score is NaN
+    scores = jaggedness(volume, region_ids=[11])
+    assert scores.keys() == {11}
+    assert np.isnan(scores[11])
 
 
 def test_compute_iou():
     labels = np.arange(10)
     volume = labels * np.ones((10, 10, 10))
-    results = compute_iou(volume, volume)
+    results = iou(volume, volume)
     assert isinstance(results, dict)
     for label in labels:
         if label != 0:
             assert label in list(results.keys())
+
+    # If label not present in any of the volumes, then the result is NaN
+    scores = iou(volume, volume, region_ids=[11])
+    assert scores.keys() == {11}
+    assert np.isnan(scores[11])
 
 
 def test_compute_region_entropy():
@@ -67,9 +77,9 @@ def test_compute_conditional_entropy():
     labels = np.arange(10)
     atlas = labels * np.ones((10, 10, 10))
     nissl = np.random.random((10, 10, 10))
-    conditional_entropy = compute_conditional_entropy(nissl, atlas)
-    assert isinstance(conditional_entropy, float)
-    assert conditional_entropy > 0
+    cond_entr = conditional_entropy(nissl, atlas)
+    assert isinstance(cond_entr, float)
+    assert cond_entr > 0
 
 
 def test_compute_jaggedness_per_region():
