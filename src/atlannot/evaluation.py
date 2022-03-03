@@ -193,7 +193,7 @@ def conditional_entropy(
     return conditional_entropy
 
 
-def compute_jaggedness_along_tree(
+def jaggedness_along_tree(
     region_ids: Sequence[int],
     atlas: np.ndarray,
     region_meta: RegionMeta,
@@ -240,7 +240,7 @@ def compute_jaggedness_along_tree(
     return results
 
 
-def compute_iou_along_tree(
+def iou_along_tree(
     region_ids: Sequence[int],
     atlas: np.ndarray,
     reference: np.ndarray,
@@ -329,9 +329,7 @@ def evaluate_region(
     # Jaggedness
     mask = np.isin(atlas, desc)
     global_jaggedness = jaggedness(mask, region_ids=[1])[1]
-    per_region_jaggedness = compute_jaggedness_along_tree(
-        region_ids, atlas, region_meta
-    )
+    per_region_jaggedness = jaggedness_along_tree(region_ids, atlas, region_meta)
 
     results["jaggedness"] = {
         "global": global_jaggedness,
@@ -341,7 +339,7 @@ def evaluate_region(
     # Intersection Over Union
     mask_ref = np.isin(reference, desc)
     global_iou = iou(mask_ref, mask, region_ids=[1])[1]
-    per_region_iou = compute_iou_along_tree(
+    per_region_iou = iou_along_tree(
         region_ids,
         atlas,
         reference,
