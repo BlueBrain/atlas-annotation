@@ -102,6 +102,43 @@ def jaggedness(
     return results
 
 
+def new_jaggedness(
+    annot_vol: np.ndarray,
+    region_id: int,
+    region_meta: RegionMeta,
+    axis: int = 0,
+) -> float:
+    if not region_meta.is_leaf(region_id):
+        descendants = region_meta.descendants(region_id)
+        annot_vol = np.isin(annot_vol, descendants).astype(int) * region_id
+
+    scores = core.compute(
+        annot_vol,
+        coronal_axis_index=axis,
+        regions=[region_id],
+        precomputed_all_region_ids=[region_id],
+    )
+    score = scores["perRegion"][region_id]["mean"]
+    if score is None:
+        return np.nan
+    else:
+        return score
+
+
+def new_iou(
+    annot_vol_1: np.ndarray,
+    annot_vol_2: np.ndarray,
+    region_id: int,
+    region_meta: RegionMeta,
+) -> float:
+    if not region_meta.is_leaf(region_id):
+        descendants = region_meta.descendants(region_id)
+        annot_vol_1 = np.isin(annot_vol_1, descendants).astype(int) * region_id
+        annot_vol_2 = np.isin(annot_vol_2, descendants).astype(int) * region_id
+
+    return iou_score(annot_vol_1, annot_vol_2, k=region_id, disable_check=True)
+
+
 def iou(
     annot_vol_1: np.ndarray,
     annot_vol_2: np.ndarray,
