@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pathlib
+
 import numpy as np
 
 from atlannot.evaluation import (
@@ -19,46 +21,63 @@ from atlannot.evaluation import (
     evaluate,
     evaluate_region,
     iou,
-    iou_along_tree,
     jaggedness,
-    jaggedness_along_tree,
 )
 from atlannot.region_meta import RegionMeta
 
+REGION_META_PATH = pathlib.Path(__file__).parent / "data" / "structure_graph_mini.json"
+
 
 def test_compute_jaggedness():
-    labels = np.arange(10)
-    volume = labels * np.ones((10, 10, 10))
-    results = jaggedness(volume)
-    assert isinstance(results, dict)
-    for label in labels:
-        if label != 0:
-            assert label in list(results.keys())
+    child_id = 3
+    parent_id = 1
+    region_meta = RegionMeta.load_json(REGION_META_PATH)
+    volume = np.zeros((10, 10, 10)).astype(np.int)
+    volume[1:5, 1:5, 1:5] = parent_id
+    volume[4:8, 4:8, 4:8] = parent_id
+    score = jaggedness(volume, region_id=parent_id, region_meta=region_meta)
+    assert isinstance(score, float)
+    assert not np.isnan(score)
 
-    results = jaggedness(volume, region_ids=[1, 2, 3])
-    assert isinstance(results, dict)
-    for label in [1, 2, 3]:
-        assert label in list(results.keys())
+    # Check that if parent does not exist, but parent do, computation is still
+    # going through thanks to the mask
+    volume = np.zeros((10, 10, 10)).astype(np.int)
+    volume[1:5, 1:5, 1:5] = child_id
+    volume[4:8, 4:8, 4:8] = child_id
+    score = jaggedness(volume, region_id=parent_id, region_meta=region_meta)
+    assert isinstance(score, float)
+    assert not np.isnan(score)
 
     # If label not present in the volume, then the score is NaN
-    scores = jaggedness(volume, region_ids=[11])
-    assert scores.keys() == {11}
-    assert np.isnan(scores[11])
+    volume = np.ones((10, 10, 10)).astype(np.int)
+    score = jaggedness(volume, region_id=3, region_meta=region_meta)
+    assert isinstance(score, float)
+    assert np.isnan(score)
 
 
 def test_compute_iou():
     labels = np.arange(10)
-    volume = labels * np.ones((10, 10, 10))
-    results = iou(volume, volume)
-    assert isinstance(results, dict)
-    for label in labels:
-        if label != 0:
-            assert label in list(results.keys())
+    volume = labels * np.ones((10, 10, 10)).astype(np.int)
+    region_meta = RegionMeta.load_json(REGION_META_PATH)
+    for region_id in [1, 2, 3]:
+        score = iou(volume, volume, region_id=region_id, region_meta=region_meta)
+        assert isinstance(score, float)
+        assert score == 1.0
 
-    # If label not present in any of the volumes, then the result is NaN
-    scores = iou(volume, volume, region_ids=[11])
-    assert scores.keys() == {11}
-    assert np.isnan(scores[11])
+    # Check that if parent does not exist, but parent do, computation is still
+    # going through thanks to the mask
+    child_id = 3
+    parent_id = 1
+    volume = child_id * np.ones((10, 10, 10))
+    score = iou(volume, volume, region_id=parent_id, region_meta=region_meta)
+    assert isinstance(score, float)
+    assert score == 1.0
+
+    # If label not present in the volume, then the score is NaN
+    volume = np.ones((10, 10, 10)).astype(np.int)
+    score = iou(volume, volume, region_id=3, region_meta=region_meta)
+    assert isinstance(score, float)
+    assert np.isnan(score)
 
 
 def test_compute_region_entropy():
@@ -80,38 +99,6 @@ def test_compute_conditional_entropy():
     cond_entr = conditional_entropy(nissl, atlas)
     assert isinstance(cond_entr, float)
     assert cond_entr > 0
-
-
-def test_compute_jaggedness_per_region():
-    labels = np.arange(10)
-    volume = labels * np.ones((10, 10, 10))
-    rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
-    results = jaggedness_along_tree([2, 3], volume, rm)
-    assert isinstance(results, dict)
-    all_expected_descendants = {2, 3, 4, 5}
-    assert set(results.keys()) == all_expected_descendants
-
-    volume = 2 * np.ones((10, 10, 10))
-    results = jaggedness_along_tree([2, 3], volume, rm)
-    assert isinstance(results, dict)
-    all_expected_descendants = [2]
-    assert list(results.keys()) == all_expected_descendants
-
-
-def test_compute_iou_per_region():
-    labels = np.arange(10)
-    volume = labels * np.ones((10, 10, 10))
-    rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
-    results = iou_along_tree([2, 3], volume, volume, rm)
-    assert isinstance(results, dict)
-    all_expected_descendants = {2, 3, 4, 5}
-    assert set(results.keys()) == all_expected_descendants
-
-    volume = 2 * np.ones((10, 10, 10))
-    results = iou_along_tree([2, 3], volume, volume, rm)
-    assert isinstance(results, dict)
-    all_expected_descendants = [2]
-    assert list(results.keys()) == all_expected_descendants
 
 
 def test_evaluate_region():
