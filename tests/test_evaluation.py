@@ -103,12 +103,14 @@ def test_compute_conditional_entropy():
 
 def test_evaluate_region():
     labels = np.arange(10)
-    volume = labels * np.ones((10, 10, 10))
+    volume = labels * np.ones((10, 10, 10)).astype(np.int)
     rm = RegionMeta.load_json("tests/data/structure_graph_mini.json")
     results = evaluate_region([2, 3], volume, volume, rm)
     assert isinstance(results, dict)
     assert "jaggedness" in results.keys()
+    assert ["global", "per_region"] == list(results["jaggedness"].keys())
     assert "iou" in results.keys()
+    assert ["global", "per_region"] == list(results["iou"].keys())
 
 
 def test_evaluate():

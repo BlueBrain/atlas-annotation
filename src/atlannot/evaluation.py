@@ -197,17 +197,29 @@ def evaluate_region(
     # Jaggedness
     mask = np.isin(atlas, desc)
     global_jaggedness = jaggedness(mask, region_id=1, region_meta=region_meta)
+    per_region_jaggedness = {}
+    for region_id in region_ids:
+        per_region_jaggedness[region_id] = jaggedness(
+            atlas, region_id=region_id, region_meta=region_meta
+        )
 
     results["jaggedness"] = {
         "global": global_jaggedness,
+        "per_region": per_region_jaggedness,
     }
 
     # Intersection Over Union
     mask_ref = np.isin(reference, desc)
     global_iou = iou(mask_ref, mask, region_id=1, region_meta=region_meta)
+    per_region_iou = {}
+    for region_id in region_ids:
+        per_region_iou[region_id] = iou(
+            reference, atlas, region_id=region_id, region_meta=region_meta
+        )
 
     results["iou"] = {
         "global": global_iou,
+        "per_region": per_region_iou,
     }
     return results
 
