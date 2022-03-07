@@ -108,7 +108,9 @@ def iou(
         annot_vol_1 = np.isin(annot_vol_1, descendants).astype(int) * region_id
         annot_vol_2 = np.isin(annot_vol_2, descendants).astype(int) * region_id
 
-    return float(iou_score(annot_vol_1, annot_vol_2, k=region_id, disable_check=True)[0])
+    return float(
+        iou_score(annot_vol_1, annot_vol_2, k=region_id, disable_check=True)[0]
+    )
 
 
 def dist_entropy(
