@@ -1,6 +1,6 @@
 # Atlas Annotation
 
-<img src="docs/_images/Atlas-Annotation-banner.jpg"/>
+<img src="docs/images/Atlas-Annotation-banner.jpg"/>
 
 Over the years the Allen Brain institute has constantly improved and updated
 their brain region annotation atlases. Unfortunately the old annotation atlases
