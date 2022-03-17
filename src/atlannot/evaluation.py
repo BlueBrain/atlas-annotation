@@ -39,73 +39,58 @@ REGIONS_TO_EVALUATE = {
 
 
 def jaggedness(
-    volume: np.ndarray,
+    annot_vol: np.ndarray,
+    region_id: int,
+    region_meta: RegionMeta | None = None,
     axis: int = 0,
-    region_ids: Collection[int] | None = None,
-    all_region_ids: Collection[int] | None = None,
-) -> dict[int, float]:
-    """Compute the jaggedness of given region IDs for the specified volume.
+) -> float:
+    """Compute the jaggedness of region ID for the specified annotation volume.
 
     Parameters
     ----------
-    volume
+    annot_vol
         An annotation volume.
+    region_id
+        Region ID to compute the jaggedness.
+    region_meta
+        Region Meta containing all the information concerning the labels.
+        If Region Meta is specified, the hierarchy of the regions is taken
+        into account: all descendants of the specified region id are replaced
+        by the value of the region id before the jaggedness computation.
+        If Region Meta is None, the jaggedness is going to be computed on the
+        volume as is. No resolution of hierarchy is done before the computation.
     axis
         Axis along which to compute the jaggedness.
-    region_ids
-        A collection of region IDs to compute the jaggedness. If None, the
-        jaggedness is computed for all the region IDs present in the volume.
-    all_region_ids
-        A collection of unique IDs in the volume provided. Can be useful to
-        speed up the computation. It's typically computed using
-        `np.unique(volume)`. If not provided, it will be set to
-        `np.unique(volume)`.
 
     Returns
     -------
-    results: dict[int, float]
-        Dictionary containing the region id as keys and the mean of the
-        jaggedness of that given region id as values.
+    score: float
+        The mean of the jaggedness of the given region id.
     """
-    if all_region_ids is None:
-        all_region_ids = np.unique(volume)
-    all_region_ids = set(all_region_ids)
+    if region_meta and not region_meta.is_leaf(region_id):
+        descendants = list(region_meta.descendants(region_id))
+        annot_vol = np.isin(annot_vol, descendants).astype(int) * region_id
 
-    if region_ids is None:
-        missing = {}
-        region_ids = all_region_ids
-    else:
-        missing = {id_ for id_ in region_ids if id_ not in all_region_ids}
-        region_ids = set(region_ids) - missing
-    region_ids.discard(0)
-
-    # Set the score of region IDs not found in the annotation volume to NaN.
-    # This behaviour is consistent with what happens in the iou function.
-    results = {id_: np.nan for id_ in missing}
-
-    # core.compute breaks if region_ids is empty, so short-circuit.
-    if not region_ids:
-        return results
-
-    metrics = core.compute(
-        volume,
+    scores = core.compute(
+        annot_vol,
         coronal_axis_index=axis,
-        regions=list(region_ids),
-        precomputed_all_region_ids=list(all_region_ids),
+        regions=[region_id],
+        precomputed_all_region_ids=[region_id],
     )
-
-    for region_id, scores in metrics["perRegion"].items():
-        results[region_id] = scores["mean"]
-
-    return results
+    score = scores["perRegion"][region_id]["mean"]
+    if score is None:
+        return np.nan
+    else:
+        return score
 
 
 def iou(
     annot_vol_1: np.ndarray,
     annot_vol_2: np.ndarray,
-    region_ids: Collection[int] | None = None,
-) -> dict[int, float]:
-    """Compute the intersection over union of given region IDs.
+    region_id: int,
+    region_meta: RegionMeta | None = None,
+) -> float:
+    """Compute the intersection over union of given region ID.
 
     Parameters
     ----------
@@ -113,32 +98,29 @@ def iou(
         The first annotation volume.
     annot_vol_2
         The second annotation volume.
-    region_ids
-        A sequence of region IDs to compute the intersection over union.
-        If None, the IoU is computed for all the region IDs present in at least
-        one of the volumes.
+    region_id
+        A region ID to compute the intersection over union.
+    region_meta
+        Region Meta containing all the information concerning the labels.
+        If Region Meta is specified, the hierarchy of the regions is taken
+        into account: all descendants of the specified region id are replaced
+        by the value of the region id before the jaggedness computation.
+        If Region Meta is None, the jaggedness is going to be computed on the
+        volume as is. No resolution of hierarchy is done before the computation.
 
     Returns
     -------
-    results: dict[int, float]
-        Dictionary with the region IDs as keys and the intersection over union
-        scores as values.
+    float
+        Intersection Over Union of that given region ID.
     """
-    if region_ids is None:
-        region_ids = np.union1d(np.unique(annot_vol_1), np.unique(annot_vol_2))
-    else:
-        region_ids = sorted(set(region_ids))
+    if region_meta and not region_meta.is_leaf(region_id):
+        descendants = list(region_meta.descendants(region_id))
+        annot_vol_1 = np.isin(annot_vol_1, descendants).astype(int) * region_id
+        annot_vol_2 = np.isin(annot_vol_2, descendants).astype(int) * region_id
 
-    scores = {}
-    for id_ in region_ids:
-        # The check we disable would check if the shapes of the volumes match
-        # and that the region ID is present in both annotation volumes. This
-        # can be expensive, so we disable it. If a region ID is not in any of
-        # the volumes then the IoU will be NaN.
-        score, _ = iou_score(annot_vol_1, annot_vol_2, k=id_, disable_check=True)
-        scores[id_] = score
-
-    return scores
+    return float(
+        iou_score(annot_vol_1, annot_vol_2, k=region_id, disable_check=True)[0]
+    )
 
 
 def dist_entropy(
@@ -178,7 +160,7 @@ def conditional_entropy(
 
     Returns
     -------
-    conditional_entropy: float
+    cond_entropy: float
         Conditional entropy of the densities of Nissl depending on the brain regions.
     """
     n_pixels = (atlas != 0).sum()
@@ -187,12 +169,12 @@ def conditional_entropy(
     for label, count in zip(label_values, count_values):
         all_region_entropy.append(dist_entropy(nissl[atlas == label]) * count)
 
-    conditional_entropy = np.sum(all_region_entropy) / n_pixels
-    return conditional_entropy
+    cond_entropy = np.sum(all_region_entropy) / n_pixels
+    return cond_entropy
 
 
 def evaluate_region(
-    region_ids: list[int],
+    region_ids: Collection[int],
     atlas: np.ndarray,
     reference: np.ndarray,
     region_meta: RegionMeta,
@@ -219,15 +201,19 @@ def evaluate_region(
 
     # Put some metadata about the region
     results = {
-        "region_ids": region_ids,
+        "region_ids": sorted(region_ids),
         "level": [region_meta.level[id_] for id_ in region_ids],
         "descendants": desc,
     }
 
     # Jaggedness
     mask = np.isin(atlas, desc)
-    global_jaggedness = jaggedness(mask, region_ids=[1])[1]
-    per_region_jaggedness = jaggedness(atlas, region_ids=desc)
+    global_jaggedness = jaggedness(mask, region_id=1, region_meta=None)
+    per_region_jaggedness = {}
+    for region_id in region_ids:
+        per_region_jaggedness[region_id] = jaggedness(
+            atlas, region_id=region_id, region_meta=region_meta
+        )
 
     results["jaggedness"] = {
         "global": global_jaggedness,
@@ -236,8 +222,12 @@ def evaluate_region(
 
     # Intersection Over Union
     mask_ref = np.isin(reference, desc)
-    global_iou = iou(mask_ref, mask, region_ids=[1])[1]
-    per_region_iou = iou(reference, atlas, region_ids=desc)
+    global_iou = iou(mask_ref, mask, region_id=1, region_meta=None)
+    per_region_iou = {}
+    for region_id in region_ids:
+        per_region_iou[region_id] = iou(
+            reference, atlas, region_id=region_id, region_meta=region_meta
+        )
 
     results["iou"] = {
         "global": global_iou,
