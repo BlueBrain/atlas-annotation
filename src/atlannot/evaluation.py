@@ -41,7 +41,7 @@ REGIONS_TO_EVALUATE = {
 def jaggedness(
     annot_vol: np.ndarray,
     region_id: int,
-    region_meta: RegionMeta,
+    region_meta: RegionMeta | None = None,
     axis: int = 0,
 ) -> float:
     """Compute the jaggedness of region ID for the specified annotation volume.
@@ -54,6 +54,11 @@ def jaggedness(
         Region ID to compute the jaggedness.
     region_meta
         Region Meta containing all the information concerning the labels.
+        If Region Meta is specified, the hierarchy of the regions is taken
+        into account: all descendants of the specified region id are replaced
+        by the value of the region id before the jaggedness computation.
+        If Region Meta is None, the jaggedness is going to be computed on the
+        volume as is. No resolution of hierarchy is done before the computation.
     axis
         Axis along which to compute the jaggedness.
 
@@ -62,7 +67,7 @@ def jaggedness(
     score: float
         The mean of the jaggedness of the given region id.
     """
-    if not region_meta.is_leaf(region_id):
+    if region_meta and not region_meta.is_leaf(region_id):
         descendants = list(region_meta.descendants(region_id))
         annot_vol = np.isin(annot_vol, descendants).astype(int) * region_id
 
@@ -83,7 +88,7 @@ def iou(
     annot_vol_1: np.ndarray,
     annot_vol_2: np.ndarray,
     region_id: int,
-    region_meta: RegionMeta,
+    region_meta: RegionMeta | None = None,
 ) -> float:
     """Compute the intersection over union of given region ID.
 
@@ -97,13 +102,18 @@ def iou(
         A region ID to compute the intersection over union.
     region_meta
         Region Meta containing all the information concerning the labels.
+        If Region Meta is specified, the hierarchy of the regions is taken
+        into account: all descendants of the specified region id are replaced
+        by the value of the region id before the jaggedness computation.
+        If Region Meta is None, the jaggedness is going to be computed on the
+        volume as is. No resolution of hierarchy is done before the computation.
 
     Returns
     -------
     float
         Intersection Over Union of that given region ID.
     """
-    if not region_meta.is_leaf(region_id):
+    if region_meta and not region_meta.is_leaf(region_id):
         descendants = list(region_meta.descendants(region_id))
         annot_vol_1 = np.isin(annot_vol_1, descendants).astype(int) * region_id
         annot_vol_2 = np.isin(annot_vol_2, descendants).astype(int) * region_id
@@ -198,7 +208,7 @@ def evaluate_region(
 
     # Jaggedness
     mask = np.isin(atlas, desc)
-    global_jaggedness = jaggedness(mask, region_id=1, region_meta=region_meta)
+    global_jaggedness = jaggedness(mask, region_id=1, region_meta=None)
     per_region_jaggedness = {}
     for region_id in region_ids:
         per_region_jaggedness[region_id] = jaggedness(
@@ -212,7 +222,7 @@ def evaluate_region(
 
     # Intersection Over Union
     mask_ref = np.isin(reference, desc)
-    global_iou = iou(mask_ref, mask, region_id=1, region_meta=region_meta)
+    global_iou = iou(mask_ref, mask, region_id=1, region_meta=None)
     per_region_iou = {}
     for region_id in region_ids:
         per_region_iou[region_id] = iou(
