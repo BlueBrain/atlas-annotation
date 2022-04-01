@@ -15,12 +15,14 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from collections.abc import Collection
 from typing import Any
 
 import numpy as np
 from atlalign.metrics import iou_score
 from atlas_alignment_meter import core
+from numpy import ma
 from scipy import stats
 
 from atlannot.region_meta import RegionMeta
@@ -142,25 +144,65 @@ def iou(
 
 
 def entropy(
-    data: np.ndarray,
-    bins: int = 100,
+    arr: np.ndarray | ma.MaskedArray,
+    *,
+    n_bins: int = 256,
+    value_range: tuple[int, int] = None,
 ) -> float:
-    """Compute the entropy of the value distribution of data.
+    """Compute the entropy of the value distribution in an array.
+
+    The entropy is computed over the discrete value distribution of the
+    given data, which is obtained by putting all values into a given number
+    of bins that are uniformly distributed over a given value range. Note that
+    the exact pixel positions and the shape of the data array don't matter,
+    only the value distribution.
+
+    In order to obtain results that are compatible with each other it is
+    important that the entropy is computed using the same bins. This can be
+    ensured by using fixed values for the `n_bins` and `value_range` parameters.
 
     Parameters
     ----------
-    data
-        Data for which to compute the entropy.
-    bins
-        Number of bins used to compute the histogram of the densities.
+    arr
+        The array for which to compute the entropy.
+    n_bins
+        The number of histogram bins. The entropy is computed over the
+        discretized value distribution of the given array. To obtain the
+        discretization, a histogram of all values in the given array is
+        computed using the given number of equally sized bins across the
+        value range specified by the `value_range` parameter.
+    value_range
+        The value range over which to compute the data distribution
+        specified the lower and upper bound. If not provided then the min and
+        max of all array values will be used. In order to obtain compatible
+        results for different arrays or for different masked regions of the
+        same array it is important to make sure that the histograms are
+        computed over exactly the same bins. The bins are uniquely specified
+        by the `n_bins` and `value_range` parameters, therefore, for
+        compatible results it is important to keep these constant.
 
     Returns
     -------
-    float
-        Entropy of the densities of Nissl at a given region value.
+    float:
+        Entropy of the (masked) array.
     """
-    hist, _ = np.histogram(data, bins=bins)
-    return stats.entropy(hist)
+    if ma.isMaskedArray(arr):
+        arr = arr.compressed()
+        if value_range is None:
+            warnings.warn(
+                "Computing entropy on a masked array, but the value range "
+                "was not provided. As a result the bins will be determined "
+                "based on the intensities within the masked region only. "
+                "This will give different bins for different masks.",
+                stacklevel=2,
+            )
+    if value_range is None:
+        value_range = arr.min(), arr.max()
+
+    bins = np.linspace(*value_range, n_bins + 1)
+    hist, _ = np.histogram(arr.ravel(), bins=bins)
+
+    return stats.entropy(hist, base=n_bins)
 
 
 def conditional_entropy(
