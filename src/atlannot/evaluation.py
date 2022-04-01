@@ -223,14 +223,18 @@ def conditional_entropy(
     conditional_entropy: float
         Conditional entropy of the densities of Nissl depending on the brain regions.
     """
-    n_pixels = (atlas != 0).sum()
-    label_values, count_values = np.unique(atlas[atlas != 0], return_counts=True)
-    all_region_entropy = []
-    for label, count in zip(label_values, count_values):
-        all_region_entropy.append(entropy(nissl[atlas == label]) * count)
+    value_range = nissl.min(), nissl.max()
+    weighted_entropies = []
+    n_voxels = 0
+    for label, count in zip(*np.unique(atlas, return_counts=True)):
+        if label == 0:  # skip background
+            continue
+        n_voxels += count
+        nissl_region = ma.masked_where(atlas != label, nissl)
+        entropy_score = entropy(nissl_region, value_range=value_range)
+        weighted_entropies.append(entropy_score * count)
 
-    conditional_entropy = np.sum(all_region_entropy) / n_pixels
-    return conditional_entropy
+    return np.sum(weighted_entropies) / n_voxels
 
 
 def evaluate_region(
