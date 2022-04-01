@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import numpy as np
+import pytest
+from numpy import ma
 
 from atlannot.evaluation import (
     conditional_entropy,
@@ -69,6 +71,33 @@ def test_compute_region_entropy():
     entropy_score = entropy(nissl[volume == 1])
     assert isinstance(entropy_score, float)
     assert entropy_score > 0
+
+
+class TestEntropy:
+    def test_constant_data(self):
+        arr = np.ones((100, 100))
+        assert entropy(arr) == 0
+
+    def test_uniform_data(self):
+        arr = np.random.rand(100, 100)
+        assert entropy(arr) > 0.99
+
+    def test_n_bins_param(self):
+        arr = np.random.randn(10, 10)
+        assert entropy(arr) == entropy(arr, n_bins=256)  # 256 is default value
+        assert entropy(arr, n_bins=100) != entropy(arr, n_bins=200)
+
+    def test_value_range_warning(self):
+        arr = ma.MaskedArray([0, 1], mask=[True, False])
+        with pytest.warns(UserWarning, match="value range was not provided"):
+            entropy(arr)
+
+    def test_data_as_masked_array(self):
+        arr = np.array([0, 0, 0, 1, 1, 1])
+        assert entropy(arr, value_range=(0, 1)) == 0.125
+
+        arr_ma = ma.masked_where(arr == 0, arr)
+        assert entropy(arr_ma, value_range=(0, 1)) == 0
 
 
 def test_compute_conditional_entropy():
