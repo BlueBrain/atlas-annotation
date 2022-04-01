@@ -61,18 +61,6 @@ def test_compute_iou():
     assert np.isnan(scores[11])
 
 
-def test_compute_region_entropy():
-    volume = np.ones((10, 10, 10))
-    entropy_score = entropy(volume)
-    assert isinstance(entropy_score, float)
-    assert entropy_score == 0
-
-    nissl = np.random.random((10, 10, 10))
-    entropy_score = entropy(nissl[volume == 1])
-    assert isinstance(entropy_score, float)
-    assert entropy_score > 0
-
-
 class TestEntropy:
     def test_constant_data(self):
         arr = np.ones((100, 100))
