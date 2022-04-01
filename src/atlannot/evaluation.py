@@ -183,7 +183,7 @@ def entropy(
 
     Returns
     -------
-    float:
+    float
         Entropy of the (masked) array.
     """
     if ma.isMaskedArray(arr):
