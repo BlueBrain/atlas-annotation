@@ -15,7 +15,7 @@ import numpy as np
 
 from atlannot.evaluation import (
     conditional_entropy,
-    dist_entropy,
+    entropy,
     evaluate,
     evaluate_region,
     iou,
@@ -61,14 +61,14 @@ def test_compute_iou():
 
 def test_compute_region_entropy():
     volume = np.ones((10, 10, 10))
-    entropy = dist_entropy(volume)
-    assert isinstance(entropy, float)
-    assert entropy == 0
+    entropy_score = entropy(volume)
+    assert isinstance(entropy_score, float)
+    assert entropy_score == 0
 
     nissl = np.random.random((10, 10, 10))
-    entropy = dist_entropy(nissl[volume == 1])
-    assert isinstance(entropy, float)
-    assert entropy > 0
+    entropy_score = entropy(nissl[volume == 1])
+    assert isinstance(entropy_score, float)
+    assert entropy_score > 0
 
 
 def test_compute_conditional_entropy():

@@ -141,7 +141,7 @@ def iou(
     return scores
 
 
-def dist_entropy(
+def entropy(
     data: np.ndarray,
     bins: int = 100,
 ) -> float:
@@ -185,7 +185,7 @@ def conditional_entropy(
     label_values, count_values = np.unique(atlas[atlas != 0], return_counts=True)
     all_region_entropy = []
     for label, count in zip(label_values, count_values):
-        all_region_entropy.append(dist_entropy(nissl[atlas == label]) * count)
+        all_region_entropy.append(entropy(nissl[atlas == label]) * count)
 
     conditional_entropy = np.sum(all_region_entropy) / n_pixels
     return conditional_entropy
@@ -289,7 +289,7 @@ def evaluate(
         results[name] = evaluate_region(region_ids, atlas, reference, region_meta)
 
     # Entropies
-    brain_entropy = dist_entropy(nissl[atlas != 0])
+    brain_entropy = entropy(nissl[atlas != 0])
     cond_entropy = conditional_entropy(nissl, atlas)
     results["global"] = {
         "brain_entropy": brain_entropy,
