@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import numpy as np
+import pytest
+from numpy import ma
 
 from atlannot.evaluation import (
     conditional_entropy,
-    dist_entropy,
+    entropy,
     evaluate,
     evaluate_region,
     iou,
@@ -59,16 +61,31 @@ def test_compute_iou():
     assert np.isnan(scores[11])
 
 
-def test_compute_region_entropy():
-    volume = np.ones((10, 10, 10))
-    entropy = dist_entropy(volume)
-    assert isinstance(entropy, float)
-    assert entropy == 0
+class TestEntropy:
+    def test_constant_data(self):
+        arr = np.ones((100, 100))
+        assert entropy(arr) == 0
 
-    nissl = np.random.random((10, 10, 10))
-    entropy = dist_entropy(nissl[volume == 1])
-    assert isinstance(entropy, float)
-    assert entropy > 0
+    def test_uniform_data(self):
+        arr = np.random.rand(100, 100)
+        assert entropy(arr) > 0.99
+
+    def test_n_bins_param(self):
+        arr = np.random.randn(10, 10)
+        assert entropy(arr) == entropy(arr, n_bins=256)  # 256 is default value
+        assert entropy(arr, n_bins=100) != entropy(arr, n_bins=200)
+
+    def test_value_range_warning(self):
+        arr = ma.MaskedArray([0, 1], mask=[True, False])
+        with pytest.warns(UserWarning, match="value range was not provided"):
+            entropy(arr)
+
+    def test_data_as_masked_array(self):
+        arr = np.array([0, 0, 0, 1, 1, 1])
+        assert entropy(arr, value_range=(0, 1)) == 0.125
+
+        arr_ma = ma.masked_where(arr == 0, arr)
+        assert entropy(arr_ma, value_range=(0, 1)) == 0
 
 
 def test_compute_conditional_entropy():
