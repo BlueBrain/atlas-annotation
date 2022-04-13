@@ -56,3 +56,14 @@ dvc repro
 
 Since all our tracked data is the output of some stage, this will
 recreate all tracked data.
+
+
+## Info about the data
+To obtain `ccfv2_merged.nrrd` and `ccfv3_merged.nrrd`, please reproduce the following steps:
+
+```shell
+git clone https://bbpgitlab.epfl.ch/dke/users/jonathanlurie/atlas_cell_transplant.git
+cd atlas_cell_transplant/
+git checkout 42bcbb07ba99fea83b54d1c3ffdcfffd313792d1
+python common_ancestor.py --hierarchy ../brain_regions.json --input-annot-volume-a ../annotation_25_2011_full.nrrd --input-annot-volume-b ../annotation_25_2017.nrrd --output-annot-volume-a ccfv2_merged.nrrd --output-annot-volume-b ccfv3_merged.nrrd --output-region-mapping region_mapping.json
+```
