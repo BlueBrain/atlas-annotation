@@ -13,33 +13,40 @@
 # limitations under the License.
 stages:
   download-nissl:
+    desc: Download nissl on Allen Brain Institute website
     cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/ara_nissl/ara_nissl_25.nrrd
     outs:
     - ara_nissl_25.nrrd
   download-avg-brain:
+    desc: Download average brain template on Allen Brain Institute website
     cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_25.nrrd
     outs:
     - average_template_25.nrrd
   download-ccfv2:
+    desc: Download annotation (25um - 2011) on Allen Brain Institute website
     cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/mouse_2011/annotation_25.nrrd
       -O annotation_25_2011.nrrd
     outs:
     - annotation_25_2011.nrrd
   download-ccfv2-fiber:
+    desc: Download annotation fiber (25um - 2011) on Allen Brain Institute website
     cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/mouse_2011/annotationFiber_25.nrrd
       -O annotation_25_2011_fiber.nrrd
     outs:
     - annotation_25_2011_fiber.nrrd
   download-ccfv3:
+    desc: Download annotation (25um - 2017) on Allen Brain Institute website
     cmd: wget http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/annotation/ccf_2017/annotation_25.nrrd
       -O annotation_25_2017.nrrd
     outs:
     - annotation_25_2017.nrrd
   download-brain-regions:
+    desc: Download brain regions hierarchy on Allen Brain Institute website
     cmd: wget http://api.brain-map.org/api/v2/structure_graph_download/1.json -O brain_regions.json
     outs:
     - brain_regions.json
   combine-ccfv2-fiber:
+    desc: Combine annotation 2011 and annotation fiber 2011
     cmd: python combine_fiber.py annotation_25_2011.nrrd annotation_25_2011_fiber.nrrd
       annotation_25_2011_full.nrrd
     deps:
@@ -49,6 +56,7 @@ stages:
     outs:
     - annotation_25_2011_full.nrrd
   atlas-coarse-merge:
+    desc: Merge CCFv2 and CCFv3 annotations (coarse version created by Dimitri Rodarie)
     cmd: python atlas_merge.py coarse annotation_25_2011_full.nrrd annotation_25_2017.nrrd
       brain_regions.json ccfv2_atlas_coarse.nrrd ccfv3_atlas_coarse.nrrd
     deps:
@@ -60,6 +68,7 @@ stages:
     - ccfv2_atlas_coarse.nrrd
     - ccfv3_atlas_coarse.nrrd
   atlas-fine-merge:
+    desc: Merge CCFv2 and CCFv3 annotations (fine version created by Dimitri Rodarie)
     cmd: python atlas_merge.py fine annotation_25_2011_full.nrrd annotation_25_2017.nrrd
       brain_regions.json ccfv2_atlas_fine.nrrd ccfv3_atlas_fine.nrrd
     deps:
