@@ -1,0 +1,4 @@
+outs:
+- md5: 508c28b47e76fe7d91bf0699e7f1bae2
+  size: 5247627
+  path: ccfv2_merged.nrrd
