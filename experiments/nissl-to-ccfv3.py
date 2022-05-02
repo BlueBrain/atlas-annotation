@@ -22,10 +22,10 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from utils import get_results_dir
 
 from atlannot import load_volume
-from atlannot.atlas import register, transform
-
+from atlannot.ants import register, transform
 
 # Initialize the logger
 logger = logging.getLogger("nissl-to-ccfv3")
@@ -63,12 +63,13 @@ def parse_args():
 
 
 def check_and_load(path: pathlib.Path | str) -> np.array:
-    """Loading volume if path exists.
+    """Load volume if path exists.
 
     Parameters
     ----------
     path
         File path.
+
     Returns
     -------
     volume : np.array
@@ -104,7 +105,7 @@ def slice_registration(
         same transformation.
     """
     nii_data = register(fixed, moving, is_atlas=True)
-    warped = transform(moving, nii_data, interpolator='genericLabel')
+    warped = transform(moving, nii_data, interpolator="genericLabel")
 
     if nissl_slice is not None:
         nissl_slice = transform(nissl_slice, nii_data)
@@ -133,7 +134,7 @@ def registration(
     moving_volume
         Moving volume.
     nissl_volume
-        Nissl Volume to register. It has to have same shape as reference_volume
+        Nissl volume to register. It has to have same shape as reference_volume
         and moving_volume and be from the same coordinate system as the moving
         volume.
 
@@ -162,6 +163,9 @@ def registration(
         warped_volume[n_iterations - (i + 1), :, :] = warped
         nissl_warped[n_iterations - (i + 1), :, :] = nissl_slice
 
+        if i % 5 == 0:
+            logger.info(f"{i + 1} / {total_n_iterations} registrations done")
+
     fixed = moving_volume[n_iterations - 1, :, :]
     for i in range(n_iterations - 1, total_n_iterations - 1):
         warped = moving_volume[i + 1, :, :]
@@ -175,11 +179,14 @@ def registration(
         warped_volume[i + 1, :, :] = warped  # 264 -> 527
         nissl_warped[i + 1, :, :] = nissl_slice
 
+        if i % 5 == 0:
+            logger.info(f"{i + 1} / {total_n_iterations} registrations done")
+
     return warped_volume, nissl_warped
 
 
 def main():
-    """Main function."""
+    """Implement main function."""
     args = parse_args()
 
     logger.info("Loading volumes")
@@ -187,14 +194,16 @@ def main():
     ccfv2 = check_and_load(args.ccfv2_path)
     ccfv3 = check_and_load(args.ccfv3_path)
 
-    logger.info("Start Registration...")
+    logger.info("Start registration...")
     warped_atlas, warped_nissl = registration(ccfv3, ccfv2, nissl)
 
-    logger.info("Saving Results...")
-    output_dir = Path("results/nissl-to-ccfv3")
+    logger.info("Saving results...")
+    output_dir = get_results_dir() / "nissl-to-ccfv3"
+    output_dir.mkdir(parents=True)
     np.save(output_dir / "warped_ccfv2", warped_atlas)
     np.save(output_dir / "warped_nissl", warped_nissl)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     sys.exit(main())
