@@ -152,32 +152,33 @@ def registration(
 
     fixed = moving_volume[n_iterations, :, :]
     for i in range(n_iterations):  # 0 -> 263
-        warped = moving_volume[n_iterations - (i + 1), :, :]
-        fixed_ref = reference_volume[n_iterations - (i + 1), :, :]
-        nissl_slice = nissl_volume[n_iterations - (i + 1), :, :]
+        index = n_iterations - (i + 1)
+        warped = moving_volume[index]
+        fixed_ref = reference_volume[index]
+        nissl_slice = nissl_volume[index]
 
         warped, nissl_slice = slice_registration(fixed, warped, nissl_slice)
         warped, nissl_slice = slice_registration(fixed_ref, warped, nissl_slice)
 
         fixed = warped
-        warped_volume[n_iterations - (i + 1), :, :] = warped
-        nissl_warped[n_iterations - (i + 1), :, :] = nissl_slice
+        warped_volume[index] = warped
+        nissl_warped[index] = nissl_slice
 
         if i % 5 == 0:
             logger.info(f"{i + 1} / {total_n_iterations} registrations done")
 
-    fixed = moving_volume[n_iterations - 1, :, :]
+    fixed = moving_volume[n_iterations - 1]
     for i in range(n_iterations - 1, total_n_iterations - 1):
-        warped = moving_volume[i + 1, :, :]
-        fixed_ref = reference_volume[i + 1, :, :]
-        nissl_slice = nissl_volume[i + 1, :, :]
+        warped = moving_volume[i + 1]
+        fixed_ref = reference_volume[i + 1]
+        nissl_slice = nissl_volume[i + 1]
 
         warped, nissl_slice = slice_registration(fixed, warped, nissl_slice)
         warped, nissl_slice = slice_registration(fixed_ref, warped, nissl_slice)
 
         fixed = warped
-        warped_volume[i + 1, :, :] = warped  # 264 -> 527
-        nissl_warped[i + 1, :, :] = nissl_slice
+        warped_volume[i + 1] = warped  # 264 -> 527
+        nissl_warped[i + 1] = nissl_slice
 
         if i % 5 == 0:
             logger.info(f"{i + 1} / {total_n_iterations} registrations done")
