@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from skimage.color import rgb2gray
 from utils import get_results_dir
 
 from atlannot import load_volume
@@ -67,27 +68,53 @@ def check_and_load(path: pathlib.Path | str) -> np.array:
     return volume.astype(np.float32)
 
 
-def slice_registration(
-    fixed: np.array, moving: np.array
-) -> tuple[np.array, np.array | None]:
-    """Compute registration transform between a couple of slices.
+def registration(
+    nissl_volume: np.array, gene_volume: np.array, section_numbers: np.array
+) -> np.array:
+    """Compute registration transform between a couple of volumes.
 
     Parameters
     ----------
-    fixed
-        Fixed slice.
-    moving
-        Moving slice.
+    nissl_volume
+        Nissl volume (fixed volume during registration).
+    gene_volume
+        Gene to register.(moving volume during registration).
+    section_numbers
+        Section numbers of every gene slice in gene volume.
 
     Returns
     -------
-    warped : np.array
+    warped_genes : np.array
         Warped slice.
     """
-    nii_data = register(fixed, moving, is_atlas=False)
-    warped = transform(moving, nii_data)
+    rgb = False
+    if gene_volume.dim == 4:
+        rgb = True
 
-    return warped
+    warped_genes = []
+    for section_number, gene_slice in zip(section_numbers, gene_volume):
+        try:
+            nissl_slice = nissl_volume[section_number]
+        except ValueError:
+            continue
+
+        if rgb:
+            gene_slice_rgb = gene_slice.copy()
+            gene_slice = rgb2gray(gene_slice)
+
+        nii_data = register(nissl_slice, gene_slice, is_atlas=False)
+
+        if rgb:
+            warped = np.zeros_like(gene_slice_rgb)
+            warped[:, :, 0] = transform(gene_slice_rgb[:, :, 0], nii_data)
+            warped[:, :, 1] = transform(gene_slice_rgb[:, :, 1], nii_data)
+            warped[:, :, 2] = transform(gene_slice_rgb[:, :, 2], nii_data)
+        else:
+            warped = transform(gene_slice, nii_data)
+
+        warped_genes.append(warped)
+
+    return np.array(warped_genes)
 
 
 def main():
@@ -103,21 +130,17 @@ def main():
         json_dict = json.load(f)
 
     section_numbers = json_dict["section_numbers"]
+    axis = json_dict["axis"]
+
+    if axis == "sagittal":
+        nissl = np.transpose(nissl, (2, 0, 1))
 
     logger.info("Start registration...")
 
-    warped_genes = []
-    for section_number, gene_slice in zip(section_numbers, genes):
-        try:
-            nissl_slice = nissl[section_number]
-        except ValueError:
-            continue
-        warped_genes.append(slice_registration(nissl_slice, gene_slice))
-
-    warped_genes = np.array(warped_genes)
+    warped_genes = registration(nissl, genes, section_numbers)
 
     logger.info("Saving results...")
-    output_dir = get_results_dir() / "gene-to-nissl"
+    output_dir = get_results_dir() / f"gene-{gene_experiment}-to-nissl"
     output_dir.mkdir(parents=True)
     np.save(output_dir / f"{gene_experiment}_warped_gene", warped_genes)
 
