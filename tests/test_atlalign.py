@@ -49,6 +49,36 @@ class TestIOUScoreSingle:
         # average over all k's
         assert iou_score_single(y_true, y_pred) == pytest.approx(0, rel=0, abs=1e-10)
 
+    def test_symmetric(self):
+        y_true = np.array(
+            [
+                [1, 0, 1],
+                [1, 1, 1],
+                [0, 0, 1],
+            ],
+            dtype=np.int8,
+        )
+        y_pred = np.array(
+            [
+                [1, 0, 0],
+                [1, 0, 1],
+                [0, 1, 1],
+            ],
+            dtype=np.int8,
+        )
+
+        # fixed k
+        assert iou_score_single(y_true, y_pred, 0) == iou_score_single(
+            y_pred, y_true, 0
+        )
+        assert iou_score_single(y_true, y_pred, 1) == iou_score_single(
+            y_pred, y_true, 1
+        )
+
+        # average over all k's - not symmetric since 0's and 1's have different
+        # counts
+        assert iou_score_single(y_true, y_pred) != iou_score_single(y_pred, y_true)
+
 
 class TestIOUScore:
     pass
