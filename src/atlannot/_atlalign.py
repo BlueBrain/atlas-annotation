@@ -75,9 +75,9 @@ def iou_score_single(
 def iou_score(
     y_true: np.ndarray,
     y_pred: np.ndarray,
-    k: int | None = 0,
+    k: int | None = None,
     excluded_labels: list[int] | None = None,
-):
+) -> tuple[float, np.ndarray]:
     """
     Compute IOU score for multiple samples.
 
@@ -103,8 +103,19 @@ def iou_score(
 
     Returns
     -------
-    float
-        The IOU score
+    iou_average : float
+        Average IOU score
+
+    iou_per_sample : np.ndarray
+        Per sample IOU scores.
 
     """
-    pass
+    n = len(y_true)
+    per_sample = [
+        iou_score_single(y_true[i], y_pred[i], k, excluded_labels) for i in range(n)
+    ]
+
+    per_sample = np.array(per_sample)
+    mean = np.nanmean(per_sample)
+
+    return mean, per_sample

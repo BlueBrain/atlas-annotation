@@ -126,4 +126,25 @@ class TestIOUScoreSingle:
 
 
 class TestIOUScore:
-    pass
+    def test_perfect_score_many(self):
+        y_true = np.array(
+            [
+                [
+                    [2, 5, 4],
+                    [2, 2, 1],
+                    [3, 7, 2],
+                ],
+                [
+                    [2, 5, 4],
+                    [2, 2, 1],
+                    [3, 5, 2],
+                ],
+            ],
+            dtype=np.int8,
+        )
+        y_pred = y_true
+
+        mean, per_sample = iou_score(y_true, y_pred)
+
+        assert per_sample.shape == (2,)
+        assert mean == pytest.approx(1, rel=0, abs=1e-10)
