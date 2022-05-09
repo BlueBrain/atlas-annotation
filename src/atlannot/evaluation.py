@@ -20,12 +20,12 @@ from collections.abc import Collection
 from typing import Any
 
 import numpy as np
-from atlalign.metrics import iou_score
 from atlas_alignment_meter import core
 from numpy import ma
 from scipy import stats
 
 from atlannot.region_meta import RegionMeta
+from atlannot._atlalign import iou_score
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ def iou(
         # and that the region ID is present in both annotation volumes. This
         # can be expensive, so we disable it. If a region ID is not in any of
         # the volumes then the IoU will be NaN.
-        score, _ = iou_score(annot_vol_1, annot_vol_2, k=id_, disable_check=True)
+        score, _ = iou_score(annot_vol_1, annot_vol_2, k=id_)
         scores[id_] = score
 
     return scores
