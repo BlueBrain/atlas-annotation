@@ -79,6 +79,27 @@ class TestIOUScoreSingle:
         # counts
         assert iou_score_single(y_true, y_pred) != iou_score_single(y_pred, y_true)
 
+    def test_exact_value(self):
+        y_true = np.array(
+            [
+                [1, 1, 1],
+                [1, 1, 1],
+                [0, 0, 1],
+            ],
+            dtype=np.int8,
+        )
+        y_pred = np.array(
+            [
+                [1, 1, 1],
+                [1, 0, 1],
+                [0, 0, 0],
+            ],
+            dtype=np.int8,
+        )
+        assert iou_score_single(y_true, y_pred, 0) == 0.5
+        assert iou_score_single(y_true, y_pred, 1) == 5 / 7
+        assert iou_score_single(y_true, y_pred) == 0.5 * 2 / 9 + 5 / 7 * 7 / 9
+
 
 class TestIOUScore:
     pass
