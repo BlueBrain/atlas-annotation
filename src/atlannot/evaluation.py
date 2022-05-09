@@ -24,8 +24,8 @@ from atlas_alignment_meter import core
 from numpy import ma
 from scipy import stats
 
-from atlannot.region_meta import RegionMeta
 from atlannot._atlalign import iou_score
+from atlannot.region_meta import RegionMeta
 
 logger = logging.getLogger(__name__)
 

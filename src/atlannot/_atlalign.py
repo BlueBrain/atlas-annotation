@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 import numpy as np
 
 
@@ -10,9 +9,7 @@ def iou_score_single(
     k: int | None = None,
     excluded_labels: list[int] | None = None,
 ) -> float:
-    """
-    Compute intersection over union of a class `k`.
-
+    """Compute intersection over union of a class `k`.
 
     Parameters
     ----------
@@ -78,9 +75,7 @@ def iou_score(
     k: int | None = None,
     excluded_labels: list[int] | None = None,
 ) -> tuple[float, np.ndarray]:
-    """
-    Compute IOU score for multiple samples.
-
+    """Compute IOU score for multiple samples.
 
     Parameters
     ----------
