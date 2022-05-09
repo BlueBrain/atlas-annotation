@@ -100,6 +100,30 @@ class TestIOUScoreSingle:
         assert iou_score_single(y_true, y_pred, 1) == 5 / 7
         assert iou_score_single(y_true, y_pred) == 0.5 * 2 / 9 + 5 / 7 * 7 / 9
 
+    def test_exluded_labels(self):
+        y_true = np.array(
+            [
+                [1, 1, 1],
+                [1, 2, 1],
+                [0, 0, 1],
+            ],
+            dtype=np.int8,
+        )
+        y_pred = np.array(
+            [
+                [1, 1, 1],
+                [1, 2, 2],
+                [0, 0, 0],
+            ],
+            dtype=np.int8,
+        )
+        assert iou_score_single(y_true, y_pred, 0) == 2 / 3
+        assert iou_score_single(y_true, y_pred, 1) == 2 / 3
+        assert (
+            iou_score_single(y_true, y_pred, excluded_labels=[2])
+            == 2 / 3 * 2 / 8 + 2 / 3 * 6 / 8
+        )
+
 
 class TestIOUScore:
     pass
