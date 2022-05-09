@@ -24,7 +24,6 @@ def iou_score_single(
         A class label. If None, then averaging based on label distribution
         in each true image is performed.
 
-
     excluded_labels
         If None then no effect. If a list of ints then the provided labels
         won't be used in the averaging over labels (in case
@@ -89,7 +88,6 @@ def iou_score(
     k
         A class label. If None, then averaging based on label distribution
         in each true image is performed.
-
 
     excluded_labels
         If None then no effect. If a list of ints then the provided labels
