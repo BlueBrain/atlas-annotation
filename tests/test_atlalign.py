@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 
-
 from atlannot._atlalign import iou_score, iou_score_single
 
 
