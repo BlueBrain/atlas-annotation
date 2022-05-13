@@ -156,7 +156,7 @@ def main():
     warped_genes = registration(nissl, genes, section_numbers)
 
     logger.info("Saving results...")
-    output_dir = get_results_dir() / f"gene-to-nissl" / gene_name
+    output_dir = get_results_dir() / "gene-to-nissl" / gene_name
     output_dir.mkdir(parents=True)
     np.save(output_dir / f"{gene_experiment}_warped_gene", warped_genes)
 
