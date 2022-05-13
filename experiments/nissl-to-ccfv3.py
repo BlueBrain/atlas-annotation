@@ -90,11 +90,12 @@ def slice_registration(
     Parameters
     ----------
     fixed
-        Fixed slice of type annotation.
+        Fixed slice of shape (h, w) of type annotation.
     moving
-        Moving slice ot type annotation.
+        Moving slice of shape (h, w) of type annotation.
     nissl_slice
-        If needed, intensity slice in the same coordinate system as moving.
+        If needed, intensity slice of shape (h, w)  in the same coordinate
+        system as moving.
 
     Returns
     -------
@@ -132,7 +133,7 @@ def registration(
     reference_volume
         Reference volume.
     moving_volume
-        Moving volume.
+        Moving volume of the same shape as the moving_volume.
     nissl_volume
         Nissl volume to register. It has to have same shape as reference_volume
         and moving_volume and be from the same coordinate system as the moving
