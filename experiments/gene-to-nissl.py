@@ -135,6 +135,18 @@ def main():
     if axis == "sagittal":
         nissl = np.transpose(nissl, (2, 0, 1))
 
+    if nissl.shape[1:] != genes[1:-1]:
+        raise ValueError(
+            f"It seems the nissl ({nissl.shape}) and genes ({genes.shape}) "
+            "do not have the same shape !"
+        )
+
+    if genes.shape[0] != len(section_numbers):
+        raise ValueError(
+            f"The length of the list of the section numbers ({len(section_numbers)})"
+            f" has to be consistent to the genes shape ({genes.shape[0]})"
+        )
+
     logger.info("Start registration...")
 
     warped_genes = registration(nissl, genes, section_numbers)
