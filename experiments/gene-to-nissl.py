@@ -62,8 +62,8 @@ def check_and_load(path: pathlib.Path | str) -> np.array:
         Loaded volume.
     """
     if not path.exists():
-        logger.error(f"The specified path {path} does not exist.")
-        return 1
+        raise ValueError(f"The specified path {path} does not exist.")
+
     volume = load_volume(path, normalize=False)
     return volume.astype(np.float32)
 
