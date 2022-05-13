@@ -88,7 +88,7 @@ def registration(
         Warped slice.
     """
     rgb = False
-    if gene_volume.dim == 4:
+    if gene_volume.ndim == 4:
         rgb = True
 
     warped_genes = []
