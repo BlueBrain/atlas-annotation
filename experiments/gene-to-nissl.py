@@ -92,10 +92,10 @@ def registration(
         rgb = True
 
     warped_genes = []
-    for section_number, gene_slice in zip(section_numbers, gene_volume):
+    for i, (section_number, gene_slice) in enumerate(zip(section_numbers, gene_volume)):
         try:
-            nissl_slice = nissl_volume[section_number]
-        except ValueError:
+            nissl_slice = nissl_volume[int(section_number)]
+        except IndexError:
             continue
 
         if rgb:
@@ -114,6 +114,9 @@ def registration(
 
         warped_genes.append(warped)
 
+        if (i + 1) % 5 == 0:
+            logger.info(f" {i + 1} / {gene_volume.shape[0]} registrations done")
+
     return np.array(warped_genes)
 
 
@@ -125,6 +128,7 @@ def main():
     nissl = check_and_load(args.nissl_path)
     genes = check_and_load(args.gene_path)
     gene_experiment = args.gene_path.stem
+    gene_name = args.gene_path.parent.stem
 
     with open(args.section_numbers) as f:
         json_dict = json.load(f)
@@ -135,7 +139,7 @@ def main():
     if axis == "sagittal":
         nissl = np.transpose(nissl, (2, 0, 1))
 
-    if nissl.shape[1:] != genes[1:-1]:
+    if nissl.shape[1:] != genes.shape[1:3]:
         raise ValueError(
             f"It seems the nissl ({nissl.shape}) and genes ({genes.shape}) "
             "do not have the same shape !"
@@ -152,9 +156,12 @@ def main():
     warped_genes = registration(nissl, genes, section_numbers)
 
     logger.info("Saving results...")
-    output_dir = get_results_dir() / f"gene-{gene_experiment}-to-nissl"
+    output_dir = get_results_dir() / f"gene-to-nissl" / gene_name
     output_dir.mkdir(parents=True)
     np.save(output_dir / f"{gene_experiment}_warped_gene", warped_genes)
+
+    with open(output_dir / f"{gene_experiment}_section_numbers", "w") as f:
+        json.dumps(json_dict)
 
 
 if __name__ == "__main__":
