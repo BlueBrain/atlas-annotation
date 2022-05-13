@@ -36,7 +36,7 @@ def parse_args():
     """Parse arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--nissl_path",
+        "--nissl-path",
         type=Path,
         default=DATA_FOLDER / "ara_nissl_25.nrrd",
         help="""\
@@ -44,7 +44,7 @@ def parse_args():
         """,
     )
     parser.add_argument(
-        "--ccfv2_path",
+        "--ccfv2-path",
         type=Path,
         default=DATA_FOLDER / "ccfv2_merged.nrrd",
         help="""\
@@ -52,7 +52,7 @@ def parse_args():
         """,
     )
     parser.add_argument(
-        "--ccfv3_path",
+        "--ccfv3-path",
         type=Path,
         default=DATA_FOLDER / "ccfv3_merged.nrrd",
         help="""\

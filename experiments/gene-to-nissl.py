@@ -24,21 +24,21 @@ def parse_args():
     """Parse arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--gene_path",
+        "--gene-path",
         type=Path,
         help="""\
         Path to Gene Expression.
         """,
     )
     parser.add_argument(
-        "--section_numbers",
+        "--section-numbers",
         type=Path,
         help="""\
         Path to json containing section numbers of gene expression.
         """,
     )
     parser.add_argument(
-        "--nissl_path",
+        "--nissl-path",
         type=Path,
         default=DATA_FOLDER / "ara_nissl_25.nrrd",
         help="""\
