@@ -22,7 +22,7 @@ import numpy as np
 from atlannot.utils import remap_labels
 
 
-def register(fixed, moving, **ants_kwargs):
+def register(fixed, moving, is_atlas=False, **ants_kwargs):
     """Perform an intensity-based registration.
 
     Parameters
@@ -32,6 +32,9 @@ def register(fixed, moving, **ants_kwargs):
     moving : np.ndarray
         The moving image that will be registered to the fixed image. Should
         have d-type float32.
+    is_atlas : bool
+        If True, moving and fixed labels are remapping between [0, num_labels].
+        Otherwise, moving and fixed images are kept raw.
     ants_kwargs
         Any additional registration parameters as specified in the
         documentation for `ants.registration`.
@@ -61,6 +64,10 @@ def register(fixed, moving, **ants_kwargs):
         raise ValueError("D-type of fixed image is not float32")
     if moving.dtype != np.float32:
         raise ValueError("D-type of moving image is not float32")
+
+    if is_atlas:
+        images_list, labels_mapping = remap_labels([fixed, moving])
+        fixed, moving = images_list
 
     fixed = ants.from_numpy(fixed)
     moving = ants.from_numpy(moving)
