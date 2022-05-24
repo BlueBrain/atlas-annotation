@@ -19,8 +19,6 @@ import ants
 import nibabel
 import numpy as np
 
-from atlannot.utils import remap_labels
-
 
 def register(fixed, moving, **ants_kwargs):
     """Perform an intensity-based registration.
