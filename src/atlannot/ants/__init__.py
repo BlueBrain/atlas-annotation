@@ -121,7 +121,7 @@ def transform(image, nii_data, **ants_kwargs):
     RuntimeError
         Whenever the internal call of `ants.apply_transforms` fails.
     """
-    if image.dtype != np.float32 or image.dtype != np.uint32:
+    if image.dtype != np.float32 and image.dtype != np.uint32:
         raise ValueError("D-type of input image is not float32/uint32")
 
     # Reconstruct the transform. The `register` function asserts that the
@@ -156,12 +156,6 @@ def transform(image, nii_data, **ants_kwargs):
         warped = warped.numpy()
     else:
         raise RuntimeError("Could not apply the transformation")
-
-    if remapping:
-        warped_temp = np.zeros_like(warped)
-        for before, after in labels_mapping.items():
-            warped_temp[warped == after] = before
-        warped = warped_temp
 
     return warped
 
