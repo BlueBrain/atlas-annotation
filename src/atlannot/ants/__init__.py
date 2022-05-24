@@ -22,7 +22,7 @@ import numpy as np
 from atlannot.utils import remap_labels
 
 
-def register(fixed, moving, is_atlas=False, **ants_kwargs):
+def register(fixed, moving, remapping=False, **ants_kwargs):
     """Perform an intensity-based registration.
 
     Parameters
@@ -32,8 +32,8 @@ def register(fixed, moving, is_atlas=False, **ants_kwargs):
     moving : np.ndarray
         The moving image that will be registered to the fixed image. Should
         have d-type float32.
-    is_atlas : bool
-        If True, moving and fixed labels are remapping between [0, num_labels].
+    remapping : bool
+        If True, moving and fixed labels are remapped between [0, num_labels].
         Otherwise, moving and fixed images are kept raw.
     ants_kwargs
         Any additional registration parameters as specified in the
@@ -65,7 +65,7 @@ def register(fixed, moving, is_atlas=False, **ants_kwargs):
     if moving.dtype != np.float32:
         raise ValueError("D-type of moving image is not float32")
 
-    if is_atlas:
+    if remapping:
         images_list, labels_mapping = remap_labels([fixed, moving])
         fixed, moving = images_list
 
@@ -93,7 +93,7 @@ def register(fixed, moving, is_atlas=False, **ants_kwargs):
     return nii_data
 
 
-def transform(image, nii_data, **ants_kwargs):
+def transform(image, nii_data, remapping=False, **ants_kwargs):
     """Apply a transform to an image.
 
     Parameters
@@ -102,6 +102,9 @@ def transform(image, nii_data, **ants_kwargs):
         The image to transform.
     nii_data : np.ndarray
         The transformation as returned by the `register` function.
+    remapping : bool
+        If True, image labels are remapped between [0, num_labels].
+        Otherwise, image is kept original.
     ants_kwargs
         Additional transformation parameters as specified in the
         documentation for `ants.apply_transforms`. Should not contain
@@ -141,10 +144,7 @@ def transform(image, nii_data, **ants_kwargs):
     # This specifies that for each voxel the data contains a vector
     nii.header.set_intent("vector")
 
-    # This step is necessary when the transform is performed on atlases.
-    # If label values are too big, can be wrongly changed during transform.
-    is_atlas = ants_kwargs.get("interpolator") == "genericLabel"
-    if is_atlas:
+    if remapping:
         images_list, labels_mapping = remap_labels([image])
         image = images_list[0]
 
@@ -171,7 +171,7 @@ def transform(image, nii_data, **ants_kwargs):
     else:
         raise RuntimeError("Could not apply the transformation")
 
-    if is_atlas:
+    if remapping:
         warped_temp = np.zeros_like(warped)
         for before, after in labels_mapping.items():
             warped_temp[warped == after] = before
