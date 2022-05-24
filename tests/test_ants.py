@@ -42,7 +42,7 @@ def test_register(monkeypatch):
     # Wrong fixed image dtype
     fixed = np.random.randn(10, 20).astype(np.float64)
     moving = np.random.randn(10, 20).astype(np.float32)
-    with pytest.raises(ValueError, match="fixed.* float32"):
+    with pytest.raises(ValueError, match="fixed.* float32/uint32"):
         atlannot.ants.register(fixed, moving)
 
     # Wrong moving image dtype

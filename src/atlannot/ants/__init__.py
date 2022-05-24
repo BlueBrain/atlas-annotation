@@ -57,7 +57,7 @@ def register(fixed, moving, **ants_kwargs):
     """
     if fixed.shape != moving.shape:
         raise ValueError("Fixed and moving images have different shapes.")
-    if fixed.dtype != np.float32 and fixed.type != np.uint32:
+    if fixed.dtype != np.float32 and fixed.dtype != np.uint32:
         raise ValueError("D-type of fixed image is not float32/uint32")
     if moving.dtype != np.float32 and moving.dtype != np.uint32:
         raise ValueError("D-type of moving image is not float32/uint32")
