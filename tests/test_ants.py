@@ -68,18 +68,33 @@ def test_register(monkeypatch):
 
 
 def test_transform(monkeypatch):
-    # 2D
+    # 2D - float32
     image = np.random.randn(10, 20).astype(np.float32)
     nii_data = np.random.randn(10, 20, 1, 1, 2)
     atlannot.ants.transform(image, nii_data)
 
-    # 2D - atlas
+    # 2D - uint32
+    image = np.random.randint(1000, size=(10, 20)).astype(np.uint32)
+    nii_data = np.random.randn(10, 20, 1, 1, 2)
+    atlannot.ants.transform(image, nii_data)
+
+    # 2D - atlas float32
     atlas = np.random.randint(5, size=(10, 20)).astype(np.float32)
     nii_data = np.random.randn(10, 20, 1, 1, 2)
     atlannot.ants.transform(atlas, nii_data, interpolator="genericLabel")
 
-    # 3D
+    # 2D - atlas uint32
+    atlas = np.random.randint(5, size=(10, 20)).astype(np.uint32)
+    nii_data = np.random.randn(10, 20, 1, 1, 2)
+    atlannot.ants.transform(atlas, nii_data, interpolator="genericLabel")
+
+    # 3D - float32
     image = np.random.randn(5, 10, 20).astype(np.float32)
+    nii_data = np.random.randn(5, 10, 20, 1, 3)
+    atlannot.ants.transform(image, nii_data)
+
+    # 3D - uint32
+    image = np.random.randint(1000, size=(5, 10, 20)).astype(np.uint32)
     nii_data = np.random.randn(5, 10, 20, 1, 3)
     atlannot.ants.transform(image, nii_data)
 
