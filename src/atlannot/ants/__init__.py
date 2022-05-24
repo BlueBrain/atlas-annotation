@@ -19,22 +19,17 @@ import ants
 import nibabel
 import numpy as np
 
-from atlannot.utils import remap_labels
 
-
-def register(fixed, moving, remapping=False, **ants_kwargs):
+def register(fixed, moving, **ants_kwargs):
     """Perform an intensity-based registration.
 
     Parameters
     ----------
     fixed : np.ndarray
-        The fixed reference image. Should have d-type float32.
+        The fixed reference image. Should have d-type float32 or uint32.
     moving : np.ndarray
         The moving image that will be registered to the fixed image. Should
-        have d-type float32.
-    remapping : bool
-        If True, moving and fixed labels are remapped between [0, num_labels].
-        Otherwise, moving and fixed images are kept raw.
+        have d-type float32 or uint32.
     ants_kwargs
         Any additional registration parameters as specified in the
         documentation for `ants.registration`.
@@ -53,21 +48,17 @@ def register(fixed, moving, remapping=False, **ants_kwargs):
     ------
     ValueError
         If the shapes of the input images don't match or the d-type of
-        input images is not float32.
+        input images is not float32 or uint32.
     RuntimeError
         If the resulting transform produced by ANTsPy doesn't have
         the expected form.
     """
     if fixed.shape != moving.shape:
         raise ValueError("Fixed and moving images have different shapes.")
-    if fixed.dtype != np.float32:
-        raise ValueError("D-type of fixed image is not float32")
-    if moving.dtype != np.float32:
-        raise ValueError("D-type of moving image is not float32")
-
-    if remapping:
-        images_list, labels_mapping = remap_labels([fixed, moving])
-        fixed, moving = images_list
+    if fixed.dtype != np.float32 and fixed.dtype != np.uint32:
+        raise ValueError("D-type of fixed image is not float32/uint32")
+    if moving.dtype != np.float32 and moving.dtype != np.uint32:
+        raise ValueError("D-type of moving image is not float32/uint32")
 
     fixed = ants.from_numpy(fixed)
     moving = ants.from_numpy(moving)
@@ -93,7 +84,7 @@ def register(fixed, moving, remapping=False, **ants_kwargs):
     return nii_data
 
 
-def transform(image, nii_data, remapping=False, **ants_kwargs):
+def transform(image, nii_data, **ants_kwargs):
     """Apply a transform to an image.
 
     Parameters
@@ -102,9 +93,6 @@ def transform(image, nii_data, remapping=False, **ants_kwargs):
         The image to transform.
     nii_data : np.ndarray
         The transformation as returned by the `register` function.
-    remapping : bool
-        If True, image labels are remapped between [0, num_labels].
-        Otherwise, image is kept original.
     ants_kwargs
         Additional transformation parameters as specified in the
         documentation for `ants.apply_transforms`. Should not contain
@@ -131,8 +119,8 @@ def transform(image, nii_data, remapping=False, **ants_kwargs):
     RuntimeError
         Whenever the internal call of `ants.apply_transforms` fails.
     """
-    if image.dtype != np.float32:
-        raise ValueError("D-type of input image is not float32")
+    if image.dtype != np.float32 and image.dtype != np.uint32:
+        raise ValueError("D-type of input image is not float32/uint32")
 
     # Reconstruct the transform. The `register` function asserts that the
     # affine part is always diag(-1, -1, 1, 1).
@@ -143,10 +131,6 @@ def transform(image, nii_data, remapping=False, **ants_kwargs):
     )
     # This specifies that for each voxel the data contains a vector
     nii.header.set_intent("vector")
-
-    if remapping:
-        images_list, labels_mapping = remap_labels([image])
-        image = images_list[0]
 
     image = ants.from_numpy(image)
     with tempfile.TemporaryDirectory() as out_dir:
@@ -170,12 +154,6 @@ def transform(image, nii_data, remapping=False, **ants_kwargs):
         warped = warped.numpy()
     else:
         raise RuntimeError("Could not apply the transformation")
-
-    if remapping:
-        warped_temp = np.zeros_like(warped)
-        for before, after in labels_mapping.items():
-            warped_temp[warped == after] = before
-        warped = warped_temp
 
     return warped
 
