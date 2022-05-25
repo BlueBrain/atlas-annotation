@@ -26,6 +26,13 @@ def test_register(monkeypatch):
     assert isinstance(nii, np.ndarray)
     assert nii.shape == (10, 20, 1, 1, 2)
 
+    # 2D registration - moving and fixed uint8
+    fixed = np.random.randint(100, size=(10, 20)).astype(np.uint8)
+    moving = np.random.randint(100, size=(10, 20)).astype(np.uint8)
+    nii = atlannot.ants.register(fixed, moving)
+    assert isinstance(nii, np.ndarray)
+    assert nii.shape == (10, 20, 1, 1, 2)
+
     # 3D registration
     fixed = np.random.randn(5, 10, 20).astype(np.float32)
     moving = np.random.randn(5, 10, 20).astype(np.float32)
@@ -75,6 +82,11 @@ def test_transform(monkeypatch):
 
     # 2D - uint32
     image = np.random.randint(1000, size=(10, 20)).astype(np.uint32)
+    nii_data = np.random.randn(10, 20, 1, 1, 2)
+    atlannot.ants.transform(image, nii_data)
+
+    # 2D - uint8
+    image = np.random.randint(100, size=(10, 20)).astype(np.uint8)
     nii_data = np.random.randn(10, 20, 1, 1, 2)
     atlannot.ants.transform(image, nii_data)
 

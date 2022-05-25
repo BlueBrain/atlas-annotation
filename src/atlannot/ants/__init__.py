@@ -29,7 +29,7 @@ def register(fixed, moving, **ants_kwargs):
         The fixed reference image. Should have d-type float32 or uint32.
     moving : np.ndarray
         The moving image that will be registered to the fixed image. Should
-        have d-type float32 or uint32.
+        have d-type float32 or uint32 or uint8.
     ants_kwargs
         Any additional registration parameters as specified in the
         documentation for `ants.registration`.
@@ -55,9 +55,17 @@ def register(fixed, moving, **ants_kwargs):
     """
     if fixed.shape != moving.shape:
         raise ValueError("Fixed and moving images have different shapes.")
-    if fixed.dtype != np.float32 and fixed.dtype != np.uint32:
+    if (
+        fixed.dtype != np.float32
+        and fixed.dtype != np.uint32
+        and fixed.dtype != np.uint8
+    ):
         raise ValueError("D-type of fixed image is not float32/uint32")
-    if moving.dtype != np.float32 and moving.dtype != np.uint32:
+    if (
+        moving.dtype != np.float32
+        and moving.dtype != np.uint32
+        and moving.dtype != np.uint8
+    ):
         raise ValueError("D-type of moving image is not float32/uint32")
 
     fixed = ants.from_numpy(fixed)
@@ -119,7 +127,11 @@ def transform(image, nii_data, **ants_kwargs):
     RuntimeError
         Whenever the internal call of `ants.apply_transforms` fails.
     """
-    if image.dtype != np.float32 and image.dtype != np.uint32:
+    if (
+        image.dtype != np.float32
+        and image.dtype != np.uint32
+        and image.dtype != np.uint8
+    ):
         raise ValueError("D-type of input image is not float32/uint32")
 
     # Reconstruct the transform. The `register` function asserts that the
