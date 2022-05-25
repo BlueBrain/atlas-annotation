@@ -44,10 +44,11 @@ def register(fixed, moving, **ants_kwargs):
     Parameters
     ----------
     fixed : np.ndarray
-        The fixed reference image. Should have d-type float32 or uint32.
+        The fixed reference image.
+        The dtype should be one of: float64, float32, uint32, uint8.
     moving : np.ndarray
-        The moving image that will be registered to the fixed image. Should
-        have d-type float32 or uint32 or uint8.
+        The moving image that will be registered to the fixed image.
+        The dtype should be one of: float64, float32, uint32, uint8.
     ants_kwargs
         Any additional registration parameters as specified in the
         documentation for `ants.registration`.

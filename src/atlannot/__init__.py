@@ -109,7 +109,7 @@ def load_volume(volume_path, normalize=True):
             img = load_nrrd(str(volume_path), norm=normalize)
         elif volume_path.suffix == ".npy":
             img = np.load(volume_path)
-            if volume_path:
+            if normalize:
                 img = img.astype(np.float32)
                 img = (img - img.min()) / (img.max() - img.min())
         else:
