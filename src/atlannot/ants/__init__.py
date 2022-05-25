@@ -20,16 +20,35 @@ import nibabel
 import numpy as np
 
 
+def check_dtype_antspy(array: np.ndarray) -> None:
+    """Check whether dtype compatible with ANTsPy.
+
+    Parameters
+    ----------
+    array
+        Any numpy array.
+
+    Raises
+    ------
+    TypeError
+    """
+    dt = array.dtype
+
+    if dt != np.float32 and dt != np.float64 and dt != np.uint8 and dt != np.uint32:
+        raise TypeError(f"Unsupported dtype {dt}")
+
+
 def register(fixed, moving, **ants_kwargs):
     """Perform an intensity-based registration.
 
     Parameters
     ----------
     fixed : np.ndarray
-        The fixed reference image. Should have d-type float32 or uint32.
+        The fixed reference image.
+        The dtype should be one of: float64, float32, uint32, uint8.
     moving : np.ndarray
-        The moving image that will be registered to the fixed image. Should
-        have d-type float32 or uint32.
+        The moving image that will be registered to the fixed image.
+        The dtype should be one of: float64, float32, uint32, uint8.
     ants_kwargs
         Any additional registration parameters as specified in the
         documentation for `ants.registration`.
@@ -53,12 +72,11 @@ def register(fixed, moving, **ants_kwargs):
         If the resulting transform produced by ANTsPy doesn't have
         the expected form.
     """
+    check_dtype_antspy(fixed)
+    check_dtype_antspy(moving)
+
     if fixed.shape != moving.shape:
         raise ValueError("Fixed and moving images have different shapes.")
-    if fixed.dtype != np.float32 and fixed.dtype != np.uint32:
-        raise ValueError("D-type of fixed image is not float32/uint32")
-    if moving.dtype != np.float32 and moving.dtype != np.uint32:
-        raise ValueError("D-type of moving image is not float32/uint32")
 
     fixed = ants.from_numpy(fixed)
     moving = ants.from_numpy(moving)
@@ -119,8 +137,7 @@ def transform(image, nii_data, **ants_kwargs):
     RuntimeError
         Whenever the internal call of `ants.apply_transforms` fails.
     """
-    if image.dtype != np.float32 and image.dtype != np.uint32:
-        raise ValueError("D-type of input image is not float32/uint32")
+    check_dtype_antspy(image)
 
     # Reconstruct the transform. The `register` function asserts that the
     # affine part is always diag(-1, -1, 1, 1).

@@ -26,6 +26,13 @@ def test_register(monkeypatch):
     assert isinstance(nii, np.ndarray)
     assert nii.shape == (10, 20, 1, 1, 2)
 
+    # 2D registration - moving and fixed uint8
+    fixed = np.random.randint(100, size=(10, 20)).astype(np.uint8)
+    moving = np.random.randint(100, size=(10, 20)).astype(np.uint8)
+    nii = atlannot.ants.register(fixed, moving)
+    assert isinstance(nii, np.ndarray)
+    assert nii.shape == (10, 20, 1, 1, 2)
+
     # 3D registration
     fixed = np.random.randn(5, 10, 20).astype(np.float32)
     moving = np.random.randn(5, 10, 20).astype(np.float32)
@@ -40,15 +47,15 @@ def test_register(monkeypatch):
         atlannot.ants.register(fixed, moving)
 
     # Wrong fixed image dtype
-    fixed = np.random.randn(10, 20).astype(np.float64)
+    fixed = np.random.randn(10, 20).astype(np.float16)
     moving = np.random.randn(10, 20).astype(np.float32)
-    with pytest.raises(ValueError, match="fixed.* float32/uint32"):
+    with pytest.raises(TypeError, match="Unsupported dtype"):
         atlannot.ants.register(fixed, moving)
 
     # Wrong moving image dtype
     fixed = np.random.randn(10, 20).astype(np.float32)
-    moving = np.random.randn(10, 20).astype(np.float64)
-    with pytest.raises(ValueError, match="moving.* float32"):
+    moving = np.random.randn(10, 20).astype(np.float16)
+    with pytest.raises(TypeError, match="Unsupported dtype"):
         atlannot.ants.register(fixed, moving)
 
     # Wrong affine part
@@ -78,6 +85,11 @@ def test_transform(monkeypatch):
     nii_data = np.random.randn(10, 20, 1, 1, 2)
     atlannot.ants.transform(image, nii_data)
 
+    # 2D - uint8
+    image = np.random.randint(100, size=(10, 20)).astype(np.uint8)
+    nii_data = np.random.randn(10, 20, 1, 1, 2)
+    atlannot.ants.transform(image, nii_data)
+
     # 2D - atlas float32
     atlas = np.random.randint(5, size=(10, 20)).astype(np.float32)
     nii_data = np.random.randn(10, 20, 1, 1, 2)
@@ -99,9 +111,9 @@ def test_transform(monkeypatch):
     atlannot.ants.transform(image, nii_data)
 
     # Wrong image dtype
-    image = np.random.randn(5, 10, 20).astype(np.float64)
+    image = np.random.randn(5, 10, 20).astype(np.float16)
     nii_data = np.random.randn(5, 10, 20, 3)
-    with pytest.raises(ValueError, match="float32"):
+    with pytest.raises(TypeError, match="Unsupported dtype"):
         atlannot.ants.transform(image, nii_data)
 
     # Error during transform
