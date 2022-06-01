@@ -298,7 +298,6 @@ class TestRemapper:
             dtype=np.uint32,
         )
         remapper = Remapper(volume_0, volume_1)
-
         assert len(remapper) == 2
 
         assert remapper.old2new == {
