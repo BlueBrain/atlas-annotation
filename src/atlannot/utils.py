@@ -477,7 +477,7 @@ class Remapper:
                 raise TypeError("The dtype of the arrays needs to be uint32")
 
         self.storage: list[tuple[np.ndarray, np.ndarray, tuple[int, ...]]] = [
-            (*np.unique(volume, return_inverse=True), volume.shape)
+            (*np.unique(volume, return_inverse=True), volume.shape)  # type: ignore
             for volume in volumes
         ]
         unique_overall = set()

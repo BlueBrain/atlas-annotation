@@ -121,7 +121,7 @@ def iou_score(
         iou_score_single(y_true[i], y_pred[i], k, excluded_labels) for i in range(n)
     ]
 
-    per_sample = np.array(per_sample)
-    mean = np.nanmean(per_sample)
+    per_sample_array = np.array(per_sample)
+    mean = np.nanmean(per_sample_array)
 
-    return mean, per_sample
+    return mean, per_sample_array

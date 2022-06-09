@@ -74,7 +74,7 @@ def jaggedness(
     all_region_ids = set(all_region_ids)
 
     if region_ids is None:
-        missing = {}
+        missing: set[int] = set()
         region_ids = all_region_ids
     else:
         missing = {id_ for id_ in region_ids if id_ not in all_region_ids}
