@@ -26,8 +26,8 @@ class TestAlign:
     def test_unfurl_regions(self):
         # Definition of region_meta
         region_meta = RegionMeta()
-        region_meta.parent_id[2] = 1
-        region_meta.parent_id[3] = 1
+        region_meta.parent_id[2] = 1  # type: ignore
+        region_meta.parent_id[3] = 1  # type: ignore
         region_meta.parent_id[1] = region_meta.background_id
         region_meta.level[1] = 1
         region_meta.level[2] = 2
