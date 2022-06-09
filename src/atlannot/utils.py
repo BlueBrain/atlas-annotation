@@ -312,41 +312,6 @@ def edge_laplacian_thin(img, binary=True):
     return result
 
 
-def remap_labels(atlases, seed=None):
-    """Remap atlas labels between (0, number of labels).
-
-    Parameters
-    ----------
-    atlases : Iterable of np.ndarray
-        List of atlases.
-
-    seed : None or int
-        If None, the mapping is done after sorting the list of unique labels.
-        If int, the labels are shuffled before the creation of the mapping
-    Returns
-    -------
-    new_atlases : list of np.ndarray
-        List of remapped atlases.
-
-    mapping : dict of int
-        Dictionary containing the mapping between previous and new labels.
-    """
-    new_atlases = [atl.copy() for atl in atlases]
-    unique_labels = np.unique(np.concatenate([np.unique(atl) for atl in atlases]))
-    if seed is not None:
-        np.random.seed(seed=seed)
-        new_labels = np.arange(len(unique_labels))
-        np.random.shuffle(new_labels)
-        mapping = {v: int(i) for i, v in zip(list(new_labels), unique_labels)}
-    else:
-        mapping = {v: i for i, v in enumerate(sorted(unique_labels))}
-
-    for atl, new_atl in zip(atlases, new_atlases):
-        for value_from, value_to in mapping.items():
-            new_atl[atl == value_from] = value_to
-    return new_atlases, mapping
-
-
 # TRANSFORMATION COMPOSITION
 def write_transform(nii_data, path):
     """Write transform into file.
