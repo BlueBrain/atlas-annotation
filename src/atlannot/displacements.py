@@ -15,8 +15,6 @@
 import numpy as np
 from atldld.base import DisplacementField
 
-from atlannot.version import __version__  # noqa: F401
-
 
 def dfs_to_deltas(dfs):
     """Transform displacement fields to deltas.

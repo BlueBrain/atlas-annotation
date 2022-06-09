@@ -12,3 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Atlas Annotation (atlannot) package."""
+
+from atlannot.version import __version__  # noqa: F401
