@@ -147,7 +147,7 @@ def entropy(
     arr: np.ndarray | ma.MaskedArray,
     *,
     n_bins: int = 256,
-    value_range: tuple[int, int] = None,
+    value_range: tuple[int, int] | None = None,
 ) -> float:
     """Compute the entropy of the value distribution in an array.
 
@@ -264,7 +264,7 @@ def evaluate_region(
     desc = list(region_meta.descendants(region_ids))
 
     # Put some metadata about the region
-    results = {
+    results: dict[str, dict[str, Any] | list[int]] = {
         "region_ids": region_ids,
         "level": [region_meta.level[id_] for id_ in region_ids],
         "descendants": desc,

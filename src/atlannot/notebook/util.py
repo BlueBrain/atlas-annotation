@@ -13,6 +13,7 @@
 # limitations under the License.
 """Notebook utils."""
 import sys
+from typing import Collection
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -137,7 +138,7 @@ def create_legend_handles(imgs, region_meta, color_map):
         List of patches containing the color of the different labels,
         the value of the label and the name of the region.
     """
-    union_set = set()
+    union_set: Collection[int] = set()
     for img in imgs:
         unique_val = np.unique(img)
         union_set = set(union_set).union(set(unique_val))
