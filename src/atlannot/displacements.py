@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Atlas Annotation (atlannot) package."""
-import pathlib
-
 import numpy as np
 from atldld.base import DisplacementField
 
