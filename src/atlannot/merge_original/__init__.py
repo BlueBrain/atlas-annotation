@@ -15,7 +15,3 @@
 
 See https://bbpteam.epfl.ch/project/issues/browse/DEAL-20
 """
-from .coarse import coarse_merge
-from .fine import fine_merge
-
-__all__ = ["coarse_merge", "fine_merge"]
