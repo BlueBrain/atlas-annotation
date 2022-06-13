@@ -20,6 +20,22 @@ jobs:
         run: python -m pip install tox
       - name: Run linting
         run: tox -e lint
+  type:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest commit
+        uses: actions/checkout@v2
+      - name: Set up python
+        uses: actions/setup-python@v2
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: type-${{ runner.os }}-${{ hashFiles('tox.ini') }}
+      - name: Install tox
+        run: python -m pip install tox
+      - name: Run mypy
+        run: tox -e type
   unit-tests:
     runs-on: ${{ matrix.os }}
     strategy:

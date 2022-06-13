@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Implementation of the RegionMeta class."""
+from __future__ import annotations
+
 import json
 import logging
 import numbers
@@ -48,7 +50,7 @@ class RegionMeta:
         self.st_level = {self.background_id: None}
         self.hemisphere_id = {self.background_id: None}
         self.parent_id = {self.background_id: None}
-        self.children_ids = {self.background_id: []}
+        self.children_ids: dict[int, list[int]] = {self.background_id: []}
 
         self.level = {self.background_id: 0}
 
@@ -378,7 +380,7 @@ class RegionMeta:
         if root_id is None:
             root_id = self.root_id
         # Tracks which parent region guide lines should be printed.
-        guides = []
+        guides: list[bool] = []
 
         def handle_region(id_, level=0, is_last=False):
             # Print the region name line

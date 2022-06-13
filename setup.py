@@ -22,7 +22,7 @@ install_requires = [
     "atlas-alignment-meter@git+https://github.com/BlueBrain/atlas-alignment-meter.git",
     "atldld>=0.2.2",
     "matplotlib",
-    "numpy",
+    "numpy>1.20",
     "pynrrd",
 ]
 

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tools to deal with brain hierarchy from the AIBS."""
+from __future__ import annotations
+
 import numpy as np
 
 
@@ -185,7 +187,7 @@ class RegionData:
              Array of distances from a leaf region in the hierarchy tree for
              each region in uniques.
         """
-        children = {}
+        children: dict[str, list[int]] = {}
         order_ = np.zeros(uniques.shape)
         for id_reg, allname in self.id_to_region_dictionary_ALLNAME.items():
             if self.is_leaf[allname]:
