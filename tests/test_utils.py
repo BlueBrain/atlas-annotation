@@ -20,7 +20,6 @@ import numpy as np
 import pytest
 
 import atlannot.utils
-from atlannot import load_volume
 from atlannot.utils import (
     Remapper,
     add_middle_line,
@@ -28,6 +27,7 @@ from atlannot.utils import (
     compose,
     image_convolution,
     load_nrrd,
+    load_volume,
     merge,
     remap_labels,
     saving_results,

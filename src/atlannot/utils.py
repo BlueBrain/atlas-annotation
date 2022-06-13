@@ -27,7 +27,7 @@ import numpy as np
 from scipy import ndimage
 from skimage.metrics import structural_similarity as ssim
 
-from atlannot.atlas import get_misalignment
+from atlannot.atlas.align import get_misalignment
 
 
 # LOADING PART
@@ -454,6 +454,38 @@ def atlas_symmetry_score(atlas, axis=1):
     half_1, half_2 = split_halfs(atlas, axis)
     alignment = 1 - get_misalignment(half_1, half_2)
     return alignment
+
+
+def load_volume(volume_path, normalize=True):
+    """Load volume from the given path.
+
+    Parameters
+    ----------
+    volume_path : str or pathlib.Path
+        Path of file to load
+
+    normalize : bool
+        If True, the numpy is normalized between 0 and 1.
+
+    Returns
+    -------
+    img : np.ndarray or None
+        Loaded path
+    """
+    volume_path = pathlib.Path(volume_path)
+    if volume_path.exists():
+        if volume_path.suffix == ".nrrd":
+            img = load_nrrd(str(volume_path), norm=normalize)
+        elif volume_path.suffix == ".npy":
+            img = np.load(volume_path)
+            if normalize:
+                img = img.astype(np.float32)
+                img = (img - img.min()) / (img.max() - img.min())
+        else:
+            raise ValueError(f"The extension {volume_path.suffix} is not supported")
+    else:
+        img = None
+    return img
 
 
 class Remapper:

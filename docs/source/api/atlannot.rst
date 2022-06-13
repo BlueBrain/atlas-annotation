@@ -19,6 +19,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   atlannot.displacements
    atlannot.evaluation
    atlannot.region_meta
    atlannot.utils

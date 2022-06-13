@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import patches
 
-from ..atlas import get_misalignment
+from ..atlas.align import get_misalignment
 
 
 def print_misalignments(unfurled_atlas_1, unfurled_atlas_2, file=None):
