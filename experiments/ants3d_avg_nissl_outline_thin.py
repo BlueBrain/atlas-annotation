@@ -20,8 +20,8 @@ import numpy as np
 import utils
 
 import atlannot.utils
-from atlannot import load_volume
 from atlannot.ants import register, transform
+from atlannot.utils import load_volume
 
 # Parameters
 description = """\

@@ -19,9 +19,8 @@ import sys
 import numpy as np
 import utils
 
-from atlannot import load_volume
 from atlannot.ants import register, transform
-from atlannot.utils import remap_labels
+from atlannot.utils import Remapper, load_volume
 
 # Parameters
 description = """\
@@ -122,7 +121,7 @@ def main():
     logger.info(f"Finished. The results were saved to {output_dir}")
 
 
-def preprocess_atlases(*atlases, seed=None):
+def preprocess_atlases(*atlases):
     """Preprocess atlases.
 
     Parameters
@@ -135,7 +134,8 @@ def preprocess_atlases(*atlases, seed=None):
     new_atlases : Iterable of np.ndarray
         Preprocessed atlases
     """
-    atlases_pre, _ = remap_labels(atlases, seed=seed)
+    remapper = Remapper(atlases)
+    atlases_pre = [remapper.remap_old_to_new(i) for i in range(len(remapper))]
     return [atlas.astype(np.float32) for atlas in atlases_pre]
 
 

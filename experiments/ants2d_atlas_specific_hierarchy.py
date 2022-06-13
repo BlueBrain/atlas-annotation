@@ -19,10 +19,10 @@ import sys
 import numpy as np
 import utils
 
-from atlannot import load_volume
 from atlannot.ants import register, stack_2d_transforms, transform
-from atlannot.atlas import unfurl_regions
+from atlannot.atlas.align import unfurl_regions
 from atlannot.region_meta import RegionMeta
+from atlannot.utils import load_volume
 
 # Parameters
 description = """\

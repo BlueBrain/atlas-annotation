@@ -19,6 +19,7 @@ import os
 import pathlib
 import tempfile
 import warnings
+from typing import Sequence
 
 import ants
 import nibabel
@@ -462,7 +463,7 @@ class Remapper:
         Different volumes to consider.
     """
 
-    def __init__(self, *volumes: list[np.ndarray]) -> None:
+    def __init__(self, *volumes: Sequence[np.ndarray]) -> None:
         # initial checks
         if not volumes:
             raise ValueError("No volume provided")

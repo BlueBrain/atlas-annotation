@@ -18,7 +18,8 @@ import sys
 
 import nrrd
 
-from atlannot.merge_original import coarse_merge, fine_merge
+from atlannot.merge_original.corse import coarse_merge
+from atlannot.merge_original.fine import fine_merge
 
 
 def parse_args():
