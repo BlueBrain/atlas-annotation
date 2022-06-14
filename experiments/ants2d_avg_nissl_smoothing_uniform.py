@@ -20,8 +20,8 @@ import numpy as np
 import utils
 from scipy import ndimage
 
-from atlannot import load_volume
 from atlannot.ants import register, stack_2d_transforms, transform
+from atlannot.utils import load_volume
 
 # Parameters
 description = """\

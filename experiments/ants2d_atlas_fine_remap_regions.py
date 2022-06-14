@@ -20,9 +20,8 @@ import numpy as np
 import utils
 from tqdm import tqdm
 
-import atlannot.utils
-from atlannot import load_volume
 from atlannot.ants import register, stack_2d_transforms, transform
+from atlannot.utils import Remapper, load_volume
 
 # Parameters
 description = """\
@@ -114,8 +113,9 @@ def preprocess_atlases(*atlases):
     new_atlases : Iterable of np.ndarray
         Preprocessed atlases
     """
-    atlases, _ = atlannot.utils.remap_labels(atlases)
-    return [atlas.astype(np.float32) for atlas in atlases]
+    remapper = Remapper(atlases)
+    atlases_pre = [remapper.remap_old_to_new(i) for i in range(len(remapper))]
+    return [atlas.astype(np.float32) for atlas in atlases_pre]
 
 
 if __name__ == "__main__":

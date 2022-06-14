@@ -19,9 +19,8 @@ import sys
 import numpy as np
 import utils
 
-from atlannot import load_volume
 from atlannot.ants import register, stack_2d_transforms, transform
-from atlannot.utils import add_middle_line
+from atlannot.utils import add_middle_line, load_volume
 
 # Parameters
 description = """\

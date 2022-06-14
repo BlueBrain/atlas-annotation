@@ -19,7 +19,7 @@ import sys
 import numpy as np
 import utils
 
-from atlannot import load_volume
+from atlannot.utils import load_volume
 
 # Parameters
 description = """\

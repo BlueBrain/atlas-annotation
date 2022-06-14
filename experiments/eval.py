@@ -24,9 +24,8 @@ import utils
 from skimage.metrics import structural_similarity as ssim
 from warpme.metrics import iou_score
 
-import atlannot
-from atlannot.atlas import get_misalignment
-from atlannot.utils import atlas_symmetry_score, stain_symmetry_score
+from atlannot.atlas.align import get_misalignment
+from atlannot.utils import atlas_symmetry_score, load_volume, stain_symmetry_score
 
 
 def parse_args():
@@ -83,10 +82,10 @@ def load_volumes():
         Dictionary containing reference volumes.
     """
     volumes = {
-        "avg": atlannot.load_volume(utils.get_avg_brain_path()),
-        "nissl": atlannot.load_volume(utils.get_nissl_path()),
-        "atl v2": atlannot.load_volume(utils.get_v2_atlas_fine_path()),
-        "atl v3": atlannot.load_volume(utils.get_v3_atlas_fine_path()),
+        "avg": load_volume(utils.get_avg_brain_path()),
+        "nissl": load_volume(utils.get_nissl_path()),
+        "atl v2": load_volume(utils.get_v2_atlas_fine_path()),
+        "atl v3": load_volume(utils.get_v3_atlas_fine_path()),
     }
     return volumes
 
@@ -105,8 +104,8 @@ def evaluate(directory, volumes):
     if metrics_path.exists():
         metrics_df = pd.read_csv(metrics_path, index_col=0)
     else:
-        warped = atlannot.load_volume(directory / "warped_nissl.npy")
-        warped_atl = atlannot.load_volume(directory / "warped_atlas.npy")
+        warped = load_volume(directory / "warped_nissl.npy")
+        warped_atl = load_volume(directory / "warped_atlas.npy")
         metrics_df = compute_metrics(
             volumes["avg"], warped, volumes["atl v3"], warped_atl
         )
