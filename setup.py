@@ -54,8 +54,7 @@ extras_require = {
         "tqdm",
     ],
     "metrics": [
-        "atlas-alignment-meter"
-        "@git+https://github.com/BlueBrain/atlas-alignment-meter.git",
+        "atlas-alignment-meter@git+https://github.com/BlueBrain/atlas-alignment-meter.git",  # noqa: E501
     ],
 }
 
