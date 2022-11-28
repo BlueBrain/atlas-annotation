@@ -73,7 +73,8 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install -r requirements-interactive.txt
-          pip install ".[interactive,metrics]"
+          pip install ".[interactive]"
+          pip install git+https://github.com/BlueBrain/atlas-alignment-meter.git
       - name: Run unit tests
         run: pytest --color=yes --durations=5 -v -m "" --cov
   docs:
