@@ -20,7 +20,6 @@ from collections.abc import Collection
 from typing import Any
 
 import numpy as np
-from atlas_alignment_meter import core
 from numpy import ma
 from scipy import stats
 
@@ -38,6 +37,46 @@ REGIONS_TO_EVALUATE = {
     "Cerebullum": [512],
     "Basal Ganglia": [477, 1022, 470, 381],
 }
+
+
+def check_installed() -> bool:
+    """Check whether the atlas_alignment_meter package is installed.
+
+    Returns
+    -------
+    bool
+        Whether the atlas_alignment_meter package is installed
+    """
+    try:
+        import atlas_alignment_meter  # noqa: F401
+    except ImportError:
+        return False
+    else:
+        return True
+
+
+def how_to_install_msg() -> str:
+    """Get installation instructions for atlas_alignment_meter.
+
+    Returns
+    -------
+    str
+        The instructions on how to install atlas_alignment_meter.
+    """
+    return (
+        "To install atlas_alignment_meter package run "
+        '"pip install git+https://github.com/BlueBrain/atlas-alignment-meter.git". '
+        'The annotation package was tested using atlas_alignment_meter version "1.0.0".'
+    )
+
+
+def warn_if_not_installed() -> None:
+    """Issue a UserWarning if atlas_alignment_meter is not installed."""
+    if not check_installed():
+        warnings.warn(
+            f"atlas_alignment_meter is not installed. {how_to_install_msg()}",
+            stacklevel=3,
+        )
 
 
 def jaggedness(
@@ -69,6 +108,8 @@ def jaggedness(
         Dictionary containing the region id as keys and the mean of the
         jaggedness of that given region id as values.
     """
+    from atlas_alignment_meter import core
+
     if all_region_ids is None:
         all_region_ids = np.unique(volume)
     all_region_ids = set(all_region_ids)

@@ -19,7 +19,6 @@ with open("README.md", encoding="utf-8") as fh:
 
 install_requires = [
     "antspyx>=0.2.7",
-    "atlas-alignment-meter@git+https://github.com/BlueBrain/atlas-alignment-meter.git",
     "atldld>=0.2.2",
     "matplotlib",
     "numpy>1.20",
@@ -53,6 +52,9 @@ extras_require = {
         "scipy",
         "toml",
         "tqdm",
+    ],
+    "metrics": [
+        "atlas-alignment-meter@git+https://github.com/BlueBrain/atlas-alignment-meter.git",  # noqa: E501
     ],
 }
 
