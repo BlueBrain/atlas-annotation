@@ -41,6 +41,7 @@ REGIONS_TO_EVALUATE = {
 
 def check_installed() -> bool:
     """Check whether the atlas_alignment_meter package is installed.
+
     Returns
     -------
     bool
@@ -56,6 +57,7 @@ def check_installed() -> bool:
 
 def how_to_install_msg() -> str:
     """Get installation instructions for atlas_alignment_meter.
+
     Returns
     -------
     str
